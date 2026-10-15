@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import socket
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -21,6 +22,86 @@ from scrcpy_link import ControlRelay
 
 class MirrorError(Exception):
     pass
+
+
+STREAM_PROFILES = {
+    "fast": {"max_size": 960, "bit_rate": "4M", "max_fps": 60},
+    "balanced": {"max_size": 1080, "bit_rate": "8M", "max_fps": 60},
+    "weak-wifi": {"max_size": 720, "bit_rate": "2M", "max_fps": 30},
+}
+
+
+class StreamSettings:
+    def __init__(self, profile="fast", max_size=None, bit_rate=None, max_fps=None,
+                 hwdec="auto", encoder=None, stats=False):
+        if profile not in STREAM_PROFILES:
+            raise ValueError("未知画质档位")
+        selected = STREAM_PROFILES[profile]
+        self.profile = profile
+        self.max_size = selected["max_size"] if max_size is None else max_size
+        self.bit_rate = str(selected["bit_rate"] if bit_rate is None else bit_rate).upper()
+        self.max_fps = selected["max_fps"] if max_fps is None else max_fps
+        if not isinstance(self.max_size, int) or not 128 <= self.max_size <= 4096:
+            raise ValueError("最大边长需要在 128–4096 之间")
+        if not isinstance(self.max_fps, int) or not 1 <= self.max_fps <= 120:
+            raise ValueError("帧率需要在 1–120 之间")
+        match = re.fullmatch(r"([1-9][0-9]*)([KM]?)", self.bit_rate)
+        rate = int(match[1]) * {"": 1, "K": 1000, "M": 1000000}[match[2]] if match else 0
+        if not 100000 <= rate <= 50000000:
+            raise ValueError("码率需要在 100K–50M 之间，例如 4M")
+        if hwdec not in ("auto", "disabled", "d3d11va"):
+            raise ValueError("不支持的硬件解码方式")
+        if encoder and not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,159}", encoder):
+            raise ValueError("编码器名称格式无效")
+        self.hwdec, self.encoder, self.stats = hwdec, encoder, bool(stats)
+
+    def video_args(self):
+        args = ["-m", str(self.max_size), "-b", self.bit_rate, "--max-fps", str(self.max_fps),
+                "--video-codec=h264", "--video-buffer=0", "--hwdec=" + self.hwdec]
+        if self.profile != "balanced":
+            args.append("--no-mipmaps")
+        if self.encoder:
+            args += ["--video-encoder", self.encoder]
+        if self.stats:
+            args.append("--print-fps")
+        return args
+
+    def description(self):
+        return f"{self.profile}：最长边 {self.max_size}，码率 {self.bit_rate}，最高 {self.max_fps} fps"
+
+
+def diagnose(adb, address, directory, settings, samples=8):
+    """Measure command round trips, not capture-to-display or input latency."""
+    durations = []
+    failures = 0
+    for _ in range(samples):
+        start = time.perf_counter()
+        result = adb.run("-s", address, "shell", "true", timeout=2)
+        elapsed = (time.perf_counter() - start) * 1000
+        if result.returncode == 0:
+            durations.append(round(elapsed, 2))
+        else:
+            failures += 1
+    ordered = sorted(durations)
+    report = {
+        "measurement": "adb_shell_round_trip_ms_not_end_to_end_video_latency",
+        "profile": settings.profile, "max_size": settings.max_size,
+        "bit_rate": settings.bit_rate, "max_fps": settings.max_fps,
+        "samples": samples, "successes": len(ordered), "failures": failures,
+        "median_ms": round(statistics.median(ordered), 2) if ordered else None,
+        "p95_ms": ordered[max(0, (len(ordered) * 95 + 99) // 100 - 1)] if ordered else None,
+        "samples_ms": durations,
+    }
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    destination = directory / "latency-diagnostics.json"
+    destination.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if ordered:
+        print(f"ADB 命令往返：中位数 {report['median_ms']} ms，P95 {report['p95_ms']} ms，失败 {failures}/{samples}")
+    else:
+        print("所有诊断请求均失败，请检查无线连接。")
+    print("该数值包含命令启动开销，不是画面端到端延迟。诊断结果：", destination)
+    return report
 
 
 def endpoint(value):
@@ -335,11 +416,15 @@ class ScreenBridge:
         self.sleep_target = "dark"
 
     def tick(self, address):
-        power = self.adb.text("-s", address, "shell", "dumpsys", "power", timeout=2)
+        # One read-only shell invocation replaces two ADB process/transport round trips.
+        # The final true preserves a usable power snapshot if display diagnostics fail.
+        snapshot = self.adb.text("-s", address, "shell",
+                                 "dumpsys power; dumpsys SurfaceFlinger --displays; true", timeout=2)
+        power = snapshot
         state = re.search(r"mWakefulness=(\w+)", power)
         if not state:
             return False
-        display = self.adb.text("-s", address, "shell", "dumpsys", "SurfaceFlinger", "--displays", timeout=2)
+        display = snapshot
         panel = re.search(r"powerMode=(\w+)", display)
         panel = panel.group(1) if panel else None
         wake = re.search(r"mLastWakeTime=(\S+)", power)
@@ -348,11 +433,12 @@ class ScreenBridge:
         if state and state.group(1) == "Awake" and time.monotonic() < self.dark_settle_until:
             # vivo may asynchronously turn the panel back on as wake-up finishes.
             # Reapply only during this short wake transition, not throughout use.
-            if self.relay:
-                self.relay.dark_and_reset()
+            if self.relay and panel == "On":
+                self.relay.set_power(False)
         elif state.group(1) == "Awake" and panel in ("On", "Off"):
             self.last_panel = panel
-        if state and state.group(1) == "Awake" and previous_wake and wake != previous_wake:
+        if (state.group(1) == "Awake" and previous_wake and wake and wake != previous_wake
+                and time.monotonic() >= self.dark_settle_until):
             if self.relay and self.relay.reset_video():
                 logging.info("手机已唤醒，原窗口重新建立视频采集")
         if state.group(1) not in ("Asleep", "Dozing"):
@@ -391,7 +477,9 @@ class ScreenBridge:
 
 
 class Monitor:
-    def __init__(self, connector, scrcpy, logdir, screen_off=True):
+    HEALTH_INTERVAL = 5.0
+
+    def __init__(self, connector, scrcpy, logdir, screen_off=True, settings=None):
         self.connector, self.scrcpy = connector, Path(scrcpy)
         self.logdir, self.screen_off = Path(logdir), screen_off
         self.proc = None
@@ -399,6 +487,8 @@ class Monitor:
         self.started = 0
         self.bridge = ScreenBridge(connector.adb)
         self.relay = None
+        self.settings = settings if settings is not None else StreamSettings()
+        self.next_probe = 0.0
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
@@ -421,8 +511,7 @@ class Monitor:
         if logfile.exists() and logfile.stat().st_size > 2_000_000:
             os.replace(logfile, self.logdir / "scrcpy.previous.log")
         args = [str(self.scrcpy), "-s", self.connector.address,
-                "-m", "1080", "-b", "8M", "--no-audio", "--max-fps", "60",
-                "--keep-active", "--print-fps"]
+                *self.settings.video_args(), "--no-audio", "--keep-active"]
         args += ["--port", str(self.relay.forward_port), "--tunnel-port", str(self.relay.port)]
         if self.screen_off:
             args += ["--turn-screen-off"]
@@ -434,7 +523,15 @@ class Monitor:
                                          stdin=subprocess.DEVNULL,
                                          stdout=stream, stderr=subprocess.STDOUT)
         self.started = time.monotonic()
-        logging.info("投屏启动：%s，熄屏=%s", self.connector.address, self.screen_off)
+        self.next_probe = 0.0
+        logging.info("投屏启动：%s，熄屏=%s，%s", self.connector.address, self.screen_off, self.settings.description())
+
+    def connected_address(self, rc, disconnected, now):
+        # Keep full identity verification on reconnect, but do not shell getprop every second.
+        if rc is None and not disconnected and now < self.next_probe:
+            return self.connector.address
+        self.next_probe = now + self.HEALTH_INTERVAL
+        return self.connector.recover_once()
 
     def run(self):
         self.spawn()
@@ -450,7 +547,7 @@ class Monitor:
                     logging.info("投屏窗口已关闭，结束运行")
                     return
                 previous = self.connector.address
-                address = self.connector.recover_once()
+                address = self.connected_address(rc, disconnected, time.monotonic())
                 if not address:
                     if not disconnected:
                         logging.info("连接中断，正在重试；关闭控制台可停止")
@@ -482,11 +579,26 @@ def main(argv=None):
     parser.add_argument("--project-dir", type=Path, default=Path(__file__).resolve().parent.parent)
     parser.add_argument("--tools-dir", type=Path, help="覆盖投屏引擎目录，通常无需设置")
     parser.add_argument("--check", action="store_true", help="检查工具和设备状态，不启动投屏")
+    parser.add_argument("--profile", choices=tuple(STREAM_PROFILES), default="fast",
+                        help="fast=低延迟（默认），balanced=较清晰，weak-wifi=弱网")
+    parser.add_argument("--max-size", type=int, help="自定义最长边，128–4096")
+    parser.add_argument("--bit-rate", help="自定义码率，例如 4M")
+    parser.add_argument("--max-fps", type=int, help="自定义最高帧率，1–120")
+    parser.add_argument("--hwdec", choices=("auto", "disabled", "d3d11va"), default="auto",
+                        help="电脑解码方式；auto 可在硬件解码失败时回退软件")
+    parser.add_argument("--video-encoder", help="指定手机编码器，仅在已确认支持时使用")
+    parser.add_argument("--stats", action="store_true", help="在日志中记录帧率；静态画面低帧率不等于高延迟")
+    parser.add_argument("--diagnose", action="store_true", help="测量 ADB 命令往返，不启动投屏")
     args = parser.parse_args(argv)
     if args.mode == "help":
         parser.print_help()
         print("无参数：熄屏投屏；normal：亮屏投屏；pair：重新配对并投屏；forget：清除地址并重新发现。")
         return 0
+    try:
+        settings = StreamSettings(args.profile, args.max_size, args.bit_rate, args.max_fps,
+                                  args.hwdec, args.video_encoder, args.stats)
+    except ValueError as exc:
+        parser.error(str(exc))
     project = args.project_dir.resolve()
     directory = project / "data"
     directory.mkdir(parents=True, exist_ok=True)
@@ -513,6 +625,12 @@ def main(argv=None):
         cache.clear()
         print("已清除地址和设备记录，正在重新发现。")
     connector = Connector(adb, cache)
+    if args.diagnose:
+        address = connector.discover()
+        if not address:
+            print("未发现已授权的手机，请先连接无线调试，再运行 --diagnose。")
+            return 1
+        return 0 if diagnose(adb, address, directory, settings)["successes"] else 1
     if args.mode == "pair":
         connector.pair()
     else:
@@ -524,7 +642,8 @@ def main(argv=None):
         if not found:
             connector.interactive()
     print("连接成功。关闭投屏窗口即可结束；Ctrl+C 停止等待。")
-    Monitor(connector, scrcpy, directory, screen_off=args.mode != "normal").run()
+    print("投屏档位：", settings.description())
+    Monitor(connector, scrcpy, directory, screen_off=args.mode != "normal", settings=settings).run()
     return 0
 
 

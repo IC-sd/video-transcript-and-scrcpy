@@ -351,8 +351,8 @@ class CoreTests(unittest.TestCase):
 
     def test_waking_phone_resets_capture_without_forcing_panel_off(self):
         bridge = m.ScreenBridge(self.adb, self.relay)
-        self.adb.text = Mock(side_effect=['mWakefulness=Awake\nmLastWakeTime=10', '',
-                                        'mWakefulness=Awake\nmLastWakeTime=20', ''])
+        self.adb.text = Mock(side_effect=['mWakefulness=Awake\nmLastWakeTime=10',
+                                        'mWakefulness=Awake\nmLastWakeTime=20'])
         bridge.tick('192.168.4.9:60000')
         bridge.tick('192.168.4.9:60000')
         self.relay.reset_video.assert_called_once()
@@ -361,8 +361,8 @@ class CoreTests(unittest.TestCase):
     def test_power_button_from_dark_lights_phone_instead_of_forcing_dark(self):
         bridge = m.ScreenBridge(self.adb, self.relay)
         self.adb.text = Mock(side_effect=[
-            'mWakefulness=Awake', 'powerMode=Off',
-            'mWakefulness=Dozing\nmLastSleepReason=power_button\nmLastSleepTime=20', 'powerMode=Doze'])
+            'mWakefulness=Awake\npowerMode=Off',
+            'mWakefulness=Dozing\nmLastSleepReason=power_button\nmLastSleepTime=20\npowerMode=Doze'])
         bridge.tick('192.168.4.9:60000')
         bridge.tick('192.168.4.9:60000')
         self.relay.wake_light_reset.assert_called_once()
@@ -371,8 +371,8 @@ class CoreTests(unittest.TestCase):
     def test_power_button_from_lit_phone_recovers_dark(self):
         bridge = m.ScreenBridge(self.adb, self.relay)
         self.adb.text = Mock(side_effect=[
-            'mWakefulness=Awake', 'powerMode=On',
-            'mWakefulness=Asleep\nmLastSleepReason=power_button\nmLastSleepTime=20', 'powerMode=Off'])
+            'mWakefulness=Awake\npowerMode=On',
+            'mWakefulness=Asleep\nmLastSleepReason=power_button\nmLastSleepTime=20\npowerMode=Off'])
         bridge.tick('192.168.4.9:60000')
         bridge.tick('192.168.4.9:60000')
         self.relay.wake_dark_reset.assert_called_once()
@@ -403,6 +403,119 @@ class CoreTests(unittest.TestCase):
         for data in (bytes([255]), bytes([1, 255, 255, 255, 255])):
             with self.assertRaises(ValueError):
                 packet_size(data)
+
+    def test_fast_profile_halves_configured_bitrate_without_added_video_buffer(self):
+        fast = m.StreamSettings()
+        balanced = m.StreamSettings('balanced')
+        self.assertEqual((fast.max_size, fast.bit_rate, fast.max_fps), (960, '4M', 60))
+        self.assertEqual((balanced.max_size, balanced.bit_rate), (1080, '8M'))
+        self.assertIn('--video-codec=h264', fast.video_args())
+        self.assertIn('--video-buffer=0', fast.video_args())
+        self.assertIn('--hwdec=auto', fast.video_args())
+        self.assertNotIn('--print-fps', fast.video_args())
+
+    def test_weak_network_and_custom_settings_survive_spawn(self):
+        c = self.target()
+        settings = m.StreamSettings('weak-wifi', max_size=800, bit_rate='3m', max_fps=45,
+                                    hwdec='disabled', encoder='c2.vendor.avc.encoder', stats=True)
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name, settings=settings)
+        with patch.object(m.subprocess, 'Popen') as popen:
+            monitor.spawn()
+        args = popen.call_args.args[0]
+        self.assertEqual(args[args.index('-m') + 1], '800')
+        self.assertEqual(args[args.index('-b') + 1], '3M')
+        self.assertEqual(args[args.index('--max-fps') + 1], '45')
+        self.assertIn('--hwdec=disabled', args)
+        self.assertIn('--print-fps', args)
+        self.assertEqual(args[args.index('--video-encoder') + 1], 'c2.vendor.avc.encoder')
+        self.assertIn('--tunnel-port', args)
+        self.assertIn('--turn-screen-off', args)
+
+    def test_stream_settings_reject_invalid_sizes_rates_and_encoders(self):
+        invalid = [dict(max_size=0), dict(max_size=9000), dict(max_fps=0), dict(max_fps=121),
+                   dict(bit_rate='0M'), dict(bit_rate='5M --record=x'), dict(bit_rate='100M'),
+                   dict(encoder='--record=x'), dict(hwdec='unrecognized'), dict(profile='unknown')]
+        for kwargs in invalid:
+            with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
+                m.StreamSettings(**kwargs)
+
+    def test_full_identity_health_check_is_throttled_but_disconnect_is_not(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        with patch.object(c, 'recover_once', return_value=c.address) as probe:
+            for second in range(30):
+                self.assertEqual(monitor.connected_address(None, False, second), c.address)
+            self.assertEqual(probe.call_count, 6)
+            monitor.connected_address(2, False, 29.1)
+            monitor.connected_address(None, True, 29.2)
+            self.assertEqual(probe.call_count, 8)
+
+    def test_screen_state_uses_one_adb_request(self):
+        self.adb.text = Mock(return_value='mWakefulness=Awake\npowerMode=On')
+        m.ScreenBridge(self.adb, self.relay).tick('192.168.4.9:60000')
+        self.adb.text.assert_called_once()
+        args = self.adb.text.call_args.args
+        self.assertEqual(args[:3], ('-s', '192.168.4.9:60000', 'shell'))
+        self.assertIn('dumpsys power', args[3])
+        self.assertIn('dumpsys SurfaceFlinger --displays', args[3])
+
+    def test_dark_settle_does_not_repeatedly_reset_video_encoder(self):
+        bridge = m.ScreenBridge(self.adb, self.relay)
+        bridge.dark_settle_until = 103
+        bridge.last_wake = 'old'
+        self.adb.text = Mock(side_effect=[
+            'mWakefulness=Awake\nmLastWakeTime=new\npowerMode=On',
+            'mWakefulness=Awake\nmLastWakeTime=new\npowerMode=Off',
+        ])
+        with patch.object(m.time, 'monotonic', return_value=101):
+            bridge.tick('192.168.4.9:60000')
+            bridge.tick('192.168.4.9:60000')
+        self.relay.set_power.assert_called_once_with(False)
+        self.relay.reset_video.assert_not_called()
+        self.relay.dark_and_reset.assert_not_called()
+
+    def test_missing_wake_timestamp_does_not_reset_capture(self):
+        bridge = m.ScreenBridge(self.adb, self.relay)
+        bridge.last_wake = 'known'
+        self.adb.text = Mock(return_value='mWakefulness=Awake\npowerMode=On')
+        bridge.tick('192.168.4.9:60000')
+        self.relay.reset_video.assert_not_called()
+
+    def test_diagnostics_exclude_failures_from_percentiles_and_device_details(self):
+        adb = Mock()
+        adb.run.side_effect = [subprocess.CompletedProcess([], code, '', '') for code in [0, 1, 0, 0]]
+        timestamps = [0, .010, 1, 1.2, 2, 2.020, 3, 3.030]
+        with patch.object(m.time, 'perf_counter', side_effect=timestamps):
+            report = m.diagnose(adb, '192.168.4.9:60000', self.temp.name, m.StreamSettings(), samples=4)
+        self.assertEqual((report['successes'], report['failures']), (3, 1))
+        self.assertEqual(report['median_ms'], 20.0)
+        self.assertEqual(report['p95_ms'], 30.0)
+        self.assertEqual(adb.run.call_count, 4)
+        saved = (Path(self.temp.name) / 'latency-diagnostics.json').read_text(encoding='utf-8')
+        self.assertNotIn('192.168.', saved)
+        self.assertNotIn('PHONE-', saved)
+
+    def test_all_failed_diagnostics_do_not_invent_a_latency(self):
+        adb = Mock()
+        adb.run.return_value = subprocess.CompletedProcess([], 124, '', '')
+        report = m.diagnose(adb, '192.168.4.9:60000', self.temp.name, m.StreamSettings(), samples=2)
+        self.assertIsNone(report['median_ms'])
+        self.assertIsNone(report['p95_ms'])
+        self.assertEqual(report['failures'], 2)
+
+    def test_diagnose_does_not_pair_forget_or_start_mirroring(self):
+        tools = Path(self.temp.name) / 'tools'
+        tools.mkdir()
+        (tools / 'adb.exe').touch()
+        (tools / 'scrcpy.exe').touch()
+        with patch.object(m, 'Adb'), patch.object(m, 'Connector') as connector, \
+             patch.object(m, 'Monitor') as monitor, patch.object(m, 'diagnose', return_value={'successes': 8}) as diagnose, \
+             patch.object(m.logging, 'basicConfig'), patch.object(m, 'RotatingFileHandler'):
+            connector.return_value.discover.return_value = '192.168.4.9:60000'
+            self.assertEqual(m.main(['--diagnose', '--project-dir', self.temp.name, '--tools-dir', str(tools)]), 0)
+        diagnose.assert_called_once()
+        connector.return_value.pair.assert_not_called()
+        monitor.assert_not_called()
 
 
 if __name__ == '__main__':
