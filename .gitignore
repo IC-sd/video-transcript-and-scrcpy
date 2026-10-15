@@ -11,3 +11,19 @@ __pycache__/
 node_modules/
 .DS_Store
 Thumbs.db
+
+# Local mirroring runtime and private device state
+projects/scrcpy-mirror/runtime/python/
+projects/scrcpy-mirror/tools/scrcpy/
+projects/scrcpy-mirror/backup/
+projects/scrcpy-mirror/.setup-cache/
+projects/scrcpy-mirror/tests/tmp/
+projects/scrcpy-mirror/data/*
+!projects/scrcpy-mirror/data/README.md
+adbkey*
+*.log
+*.log.*
+*.err
+.env
+.env.*
+.test-artifacts/

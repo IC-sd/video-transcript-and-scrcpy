@@ -1,0 +1,15 @@
+{
+  "architecture": "windows-x86_64",
+  "python": {
+    "version": "3.13.14",
+    "url": "https://www.python.org/ftp/python/3.13.14/python-3.13.14-embed-amd64.zip",
+    "sha256": "90b4e5b9898b72d744650524bff92377c367f44bd5fbd09e3148656c080ad907",
+    "digest_source": "https://www.python.org/ftp/python/3.13.14/python-3.13.14-embed-amd64.zip.sigstore"
+  },
+  "scrcpy": {
+    "version": "5.0.1",
+    "url": "https://github.com/Genymobile/scrcpy/releases/download/v5.0.1/scrcpy-win64-v5.0.1.zip",
+    "sha256": "b12a2c4ee8be317422451fc7dcf8ee20a71b5ea7ef9ad73ddd825a25316227a5",
+    "digest_source": "https://api.github.com/repos/Genymobile/scrcpy/releases/assets/620992965"
+  }
+}

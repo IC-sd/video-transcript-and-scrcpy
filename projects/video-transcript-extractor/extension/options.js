@@ -8,9 +8,7 @@ const DEFAULTS = {
   allParts: false, withTimestamp: true,
 };
 
-function cleanDir(v) {
-  return String(v || '').replace(/[\\:*?"<>|]/g, '').replace(/^[\/\s]+|[\/\s]+$/g, '').trim();
-}
+const cleanDir = (value) => BiliCore.cleanDir(value);
 
 function setMsg(text, cls) {
   const m = $('savedMsg');
@@ -81,12 +79,24 @@ function syncRows(prefix) {
   setRadio('aMode', s.aiMode);
   syncRows('t');
   syncRows('a');
+  const initialAi = s.ai || {};
+  $('aiBaseUrl').value = initialAi.baseUrl || '';
+  $('aiKey').value = initialAi.apiKey || '';
+  $('aiModel').value = initialAi.model || '';
+  let savedSnapshot = collect();
+  let saveQueue = Promise.resolve();
   await refreshPicked();
 
   // 不支持 File System Access 时禁用「固定文件夹」
   if (!window.BiliFsDir.supported) {
     document.querySelectorAll('input[name="tMode"][value="dir"], input[name="aMode"][value="dir"]')
-      .forEach((r) => { r.disabled = true; });
+      .forEach((r) => {
+        if (r.checked) {
+          document.querySelector(`input[name="${r.name}"][value="ask"]`).checked = true;
+        }
+        r.disabled = true;
+      });
+    syncRows('t'); syncRows('a');
     document.querySelectorAll('#tPick, #aPick').forEach((b) => { b.disabled = true; });
     setMsg('当前浏览器不支持文件夹授权，请用「每次询问」方式', 'err');
   }
@@ -98,7 +108,7 @@ function syncRows(prefix) {
     $(id).addEventListener('input', () => { syncRows('t'); syncRows('a'); });
     $(id).addEventListener('change', () => autosave());   // 失焦时落盘
   });
-  ['transcriptSave', 'aiSave', 'allParts', 'withTimestamp'].forEach((id) => {
+  ['transcriptSave', 'aiSave', 'allParts', 'withTimestamp', 'termFixes'].forEach((id) => {
     $(id).addEventListener('change', () => autosave());
   });
 
@@ -178,12 +188,28 @@ function syncRows(prefix) {
     };
   }
 
-  async function autosave() {
-    const settings = collect();
-    await chrome.storage.local.set({ settings });
-    syncRows('t');
-    syncRows('a');
-    setMsg('已保存 ✓');
+  function autosave() {
+    const collected = collect();
+    saveQueue = saveQueue.then(async () => {
+      const current = (await chrome.storage.local.get('settings')).settings || {};
+      const patch = {};
+      for (const [key, value] of Object.entries(collected)) {
+        if (JSON.stringify(value) !== JSON.stringify(savedSnapshot[key])) {
+          if (key === 'ai') {
+            patch.ai = { ...(current.ai || {}) };
+            for (const [field, content] of Object.entries(value)) {
+              if (content !== savedSnapshot.ai[field]) patch.ai[field] = content;
+            }
+          } else patch[key] = value;
+        }
+      }
+      await chrome.storage.local.set({ settings: { ...DEFAULTS, ...current, ...patch } });
+      savedSnapshot = collected;
+      syncRows('t'); syncRows('a');
+      setMsg('已保存 ✓');
+      return true;
+    }).catch((e) => { setMsg('保存失败：' + (e.message || e), 'err'); return false; });
+    return saveQueue;
   }
 
   // ---------- AI 总结配置 ----------
@@ -207,9 +233,10 @@ function syncRows(prefix) {
     if (!chrome.permissions || !chrome.permissions.request) return true;
     let origin;
     try {
+      window.BiliAiSum.endpoint(baseUrl);
       origin = new URL(baseUrl).origin + '/*';
     } catch (e) {
-      return true;
+      throw new Error('接口地址无效，请填写 HTTPS 地址');
     }
     try {
       if (await chrome.permissions.contains({ origins: [origin] })) return true;
@@ -229,16 +256,18 @@ function syncRows(prefix) {
       aiMsg('先填接口地址和模型名', true);
       return;
     }
+    $('aiTest').disabled = true;
     aiMsg('测试中…');
     try {
       if (!(await ensureHost(cfg.baseUrl))) {
         aiMsg('没拿到该域名的访问权限，无法调用', true);
         return;
       }
+      if (!(await autosave())) return;
       const r = await window.BiliAiSum.testConnection(cfg);
       aiMsg('连接正常，模型回复：' + String(r).slice(0, 30));
     } catch (e) {
       aiMsg('失败：' + ((e && e.message) || e), true);
-    }
+    } finally { $('aiTest').disabled = false; }
   });
-})();
+})().catch((e) => setMsg('设置加载失败：' + (e.message || e), 'err'));

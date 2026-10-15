@@ -1,0 +1,12 @@
+{
+  "name": "video-transcript-extractor",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Bilibili and YouTube transcript browser extension",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node scripts/check.cjs",
+    "test:browser": "node tests/browser.cjs",
+    "test:extension": "node tests/extension.cjs"
+  }
+}

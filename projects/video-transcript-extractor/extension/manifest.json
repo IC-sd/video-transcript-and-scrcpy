@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "B站文稿提取器",
-  "version": "1.0.0",
-  "description": "一键提取B站视频字幕，自动生成内容总结，转录与总结可分别设置保存路径与是否保存。",
+  "name": "视频文稿提取器",
+  "version": "1.2.0",
+  "description": "提取 B站 / YouTube 字幕，自动精简语气词、重复对话和无信息确认，保留原始转录，支持 AI 总结。",
   "permissions": [
     "activeTab",
     "scripting",
@@ -31,7 +31,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "B站文稿提取器",
+    "default_title": "视频文稿提取器",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -52,34 +52,46 @@
         "https://www.bilibili.com/list/*",
         "https://www.bilibili.com/bangumi/play/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "lib/core.js",
+        "content.js"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     },
     {
       "matches": [
-        "https://www.youtube.com/watch*",
-        "https://www.youtube.com/shorts/*"
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
       ],
-      "js": ["inject_hook.js"],
+      "js": [
+        "inject_hook.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN",
       "all_frames": false
     },
     {
       "matches": [
-        "https://www.youtube.com/watch*",
-        "https://www.youtube.com/shorts/*"
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "lib/core.js",
+        "content.js"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["result.html"],
-      "matches": ["https://*.bilibili.com/*"]
+      "resources": [
+        "result.html"
+      ],
+      "matches": [
+        "https://*.bilibili.com/*"
+      ]
     }
   ]
 }

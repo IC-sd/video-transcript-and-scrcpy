@@ -1,0 +1,108 @@
+{
+  "engine": "scrcpy 5.0.1",
+  "simulated_tests_passed": 38,
+  "same_process_for_all_transitions": true,
+  "records": [
+    {
+      "wake": "Awake",
+      "panel": "Off",
+      "phase": "initial-dark",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        1,
+        0,
+        10
+      ],
+      "positive_fps": true
+    },
+    {
+      "wake": "Awake",
+      "panel": "On",
+      "phase": "1-phone-on",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        14,
+        12
+      ],
+      "positive_fps": true
+    },
+    {
+      "wake": "Awake",
+      "panel": "Off",
+      "phase": "1-active-off-recovered",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        4,
+        0,
+        9
+      ],
+      "positive_fps": true
+    },
+    {
+      "wake": "Awake",
+      "panel": "On",
+      "phase": "2-phone-on",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        7,
+        4
+      ],
+      "positive_fps": true
+    },
+    {
+      "wake": "Awake",
+      "panel": "Off",
+      "phase": "2-active-off-recovered",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        1,
+        0,
+        9
+      ],
+      "positive_fps": true
+    },
+    {
+      "wake": "Awake",
+      "panel": "On",
+      "phase": "3-phone-on",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        9,
+        2
+      ],
+      "positive_fps": true
+    },
+    {
+      "wake": "Awake",
+      "panel": "Off",
+      "phase": "3-active-off-recovered",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        3,
+        11
+      ],
+      "positive_fps": true
+    },
+    {
+      "wake": "Awake",
+      "panel": "On",
+      "phase": "power-button-from-dark-recovers-phone-on",
+      "pid": 9968,
+      "running": true,
+      "fps": [
+        7,
+        9,
+        2
+      ],
+      "positive_fps": true
+    }
+  ],
+  "note": "ADB-injected POWER events; physical button and desktop input still require user confirmation."
+}

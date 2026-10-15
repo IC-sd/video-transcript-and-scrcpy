@@ -44,7 +44,7 @@
     /这个这个/g, /那个那个/g, /的话/g,
   ];
 
-  const SENT_END = /[。！？!?；;…]$/;
+  const SENT_END = /[。！？!?；;….]$/;
   // 疑问语气收尾 → 句号改问号（保守只列强疑问词，「是吧/对吧」仍按陈述处理）
   const QUESTION_END = /(吗|么|呢|什么|怎么|怎样|为什么|为何|如何|多少|哪里|哪个|谁)$/
   const CONNECT = /(但是|可是|所以|不过|另外|而且|因为|如果|虽然|因此|并且|然后)/;
@@ -220,9 +220,10 @@
     const out = [];
     let buf = '';
     let from = null;
+    let start = 0;
     for (let i = 0; i < tokens.length; i++) {
       const tk = tokens[i];
-      if (from === null) from = (times[tk.start] || {}).from || 0;
+      if (from === null) { from = (times[tk.start] || {}).from || 0; start = tk.start; }
       buf += tk.w;
 
       const cur = times[tk.end - 1] || {};
@@ -238,21 +239,21 @@
 
       if (!nxt
           || SENT_END.test(buf)
-          || (buf.length >= 6 && QUESTION_END.test(buf) && okBreak)
+          || (opts.questionBreak !== false && buf.length >= 6 && /[吗呢]$/.test(buf) && okBreak && !/^[。！？!?]/.test(nxt?.w || ''))
           || (gap >= gapSec && buf.length >= 10 && okBreak)
           || (buf.length >= hard && okBreak)
           || buf.length >= hard * 1.6) {   // 兜底：再长也不能不断
-        out.push({ text: buf, from });
+        out.push({ text: buf, from, start, end: tk.end });
         buf = '';
         from = null;
       } else if (buf.length >= soft && okBreak && beforeConnect) {
         // 只在连接词前断 —— 靠纯长度硬断会断在「你要开始|培养」这种语义中间
-        out.push({ text: buf, from });
+        out.push({ text: buf, from, start, end: tk.end });
         buf = '';
         from = null;
       }
     }
-    if (buf) out.push({ text: buf, from: from === null ? 0 : from });
+    if (buf) out.push({ text: buf, from: from === null ? 0 : from, start, end: text.length });
     return out;
   }
 
@@ -269,7 +270,7 @@
         (m, p1, p2) => (NO_COMMA_BEFORE.test(p1) ? m : p1 + '，' + p2)
       );
     }
-    if (!SENT_END.test(s)) s += QUESTION_END.test(s) ? '？' : '。';
+    if (!SENT_END.test(s)) s += /[\u4e00-\u9fff]/.test(s) ? (QUESTION_END.test(s) ? '？' : '。') : '.';
     return s;
   }
 
@@ -314,14 +315,16 @@
     const times = [];
     for (const it of list) {
       const c = { from: it.from || 0, to: typeof it.to === 'number' ? it.to : (it.from || 0) + 3 };
-      const t = tidySpaces(it.content);
+      const segment = tidySpaces(it.content);
+      const needsSpace = text && segment && /[A-Za-z0-9]$/.test(text) && /^[A-Za-z0-9]/.test(segment);
+      const t = (needsSpace ? ' ' : '') + segment;
       for (let i = 0; i < t.length; i++) times.push(c);
       text += t;
     }
 
     // 同音字/术语纠错（纠错不是改写，keepFillers 模式也生效；词典 = 内置 + 用户自定义）
     if (opts.useTermFix !== false) {
-      const pairs = parseFixes(opts.termFixes).concat(BUILTIN_TERM_FIXES)
+      const pairs = parseFixes(opts.termFixes).concat(opts.keepFillers ? [] : BUILTIN_TERM_FIXES)
         .sort((a, b) => b[0].length - a[0].length);
       if (pairs.length) text = fixTerms(text, times, pairs);
     }
@@ -338,11 +341,12 @@
     // 断句 + 补标点
     let sentences = buildSentences(text, times, opts)
       .map((s) => ({ from: s.from, text: punctuate(s.text) }))
-      .filter((s) => s.text.replace(/[^\u4e00-\u9fa5A-Za-z0-9]/g, '').length >= 4);
+      .filter((s) => opts.keepFillers ? !!s.text.trim() : s.text.replace(/[^\u4e00-\u9fa5A-Za-z0-9]/g, '').length >= 4);
 
     // 相邻相似句去重（口误常表现为把同一句说两遍）
     const seen = [];
     sentences = sentences.filter((s) => {
+      if (opts.keepFillers) return true;
       const g = grams(s.text);
       if (g.size) {
         for (let i = seen.length - 1; i >= Math.max(0, seen.length - 2); i--) {
@@ -362,7 +366,7 @@
     return {
       paragraphs: paras.map((p) => {
         const head = opts.withTime && p[0] ? '[' + fmt(p[0].from) + '] ' : '';
-        return head + p.map((s) => s.text).join('');
+        return head + p.map((s) => s.text).reduce((all, s) => all + (all && /^[A-Za-z0-9]/.test(s) ? ' ' : '') + s, '');
       }),
       sentences: sentences.map((s) => s.text),
       stats: {
@@ -382,5 +386,120 @@
     return set;
   }
 
-  global.BiliPolish = { polish, fmt, dropPhrases, dropFillerWords, dropRepeats };
+  /** Conservative cleanup: fillers and exact repetition, never fuzzy semantic deletion. */
+  function clean(items, opts = {}) {
+    let text = '';
+    const times = [];
+    for (const item of items || []) {
+      const content = tidySpaces(item.content);
+      if (!content) continue;
+      const separator = text && /[A-Za-z0-9.!?]$/.test(text) && /^[A-Za-z0-9]/.test(content) ? ' ' : '';
+      const mapped = separator + content;
+      const timing = { from: Number(item.from) || 0, to: Number(item.to) || Number(item.from) || 0 };
+      text += mapped;
+      for (let i = 0; i < mapped.length; i++) times.push(timing);
+    }
+    const rawChars = text.replace(/\s/g, '').length;
+    const userFixes = parseFixes(opts.termFixes).sort((a, b) => b[0].length - a[0].length);
+    text = fixTerms(text, times, userFixes);
+    let fillerChars = 0, repeatCount = 0, discardedCount = 0;
+    function remove(value, mapping, regex, group = 0, wordSafe = false) {
+      const ranges = [];
+      const tokens = wordSafe && segmenter() ? [...segmenter().segment(value)] : [];
+      for (const match of value.matchAll(regex)) {
+        const offset = group ? match[0].indexOf(match[group], (match[1] || '').length) : 0;
+        const start = match.index + offset, end = start + match[group].length;
+        if (tokens.some((token) => (token.index < start && token.index + token.segment.length > start)
+            || (token.index < end && token.index + token.segment.length > end))) continue;
+        ranges.push([start, end]);
+      }
+      const cleanRanges = normRanges(ranges);
+      fillerChars += cleanRanges.reduce((n, [a, b]) => n + b - a, 0);
+      return spliceOut(value, mapping, cleanRanges);
+    }
+    // Merge verbatim stutters spanning subtitle entries, without altering numbers or negation.
+    for (let round = 0; round < 3; round++) {
+      const ranges = [];
+      for (const match of text.matchAll(/([\u4e00-\u9fff]{4,40})\1/gu)) {
+        ranges.push([match.index + match[1].length, match.index + match[0].length]);
+      }
+      for (const match of text.matchAll(/([\u4e00-\u9fff]{4,60})[，,、]\s*\1/gu)) {
+        ranges.push([match.index + match[1].length, match.index + match[0].length]);
+      }
+      for (const match of text.matchAll(/(这个|那个|就是|然后|所以|但是|我们|你们|我认为|我觉得)[，,、\s]*\1/gu)) {
+        ranges.push([match.index + match[1].length, match.index + match[0].length]);
+      }
+      for (const match of text.matchAll(/([我你这那])\1+/gu)) {
+        ranges.push([match.index + 1, match.index + match[0].length]);
+      }
+      for (const match of text.matchAll(/\b([A-Za-z]{2,})[ \t]+\1\b/giu)) {
+        ranges.push([match.index + match[1].length, match.index + match[0].length]);
+      }
+      const cleanRanges = normRanges(ranges);
+      if (!cleanRanges.length) break;
+      repeatCount += cleanRanges.length;
+      text = spliceOut(text, times, cleanRanges);
+    }
+    const recent = [];
+    const kept = [];
+    for (const sentence of buildSentences(text, times, { ...opts, questionBreak: false, soft: 80, hard: 180 })) {
+      let value = sentence.text;
+      const question = /[?？]/.test(value) || QUESTION_END.test(value.replace(/[。！？!?；;.\s]+$/g, ''));
+      const mapping = times.slice(sentence.start, sentence.end);
+      value = remove(value, mapping, /(^|[，,。！？!?；;]\s*)(大家好|各位好|朋友们好|同学们好|欢迎(?:来到|回到)(?:我的|我们的)?(?:频道|直播间))(?=[，,、\s]*[\p{L}\p{N}])/gu, 2, true);
+      value = remove(value, mapping, /(^|[.!?]\s*)(hello everyone|hi everyone)(?=[,\s]+[A-Za-z])/giu, 2);
+      // These words are removed only at speech boundaries. "如果…的话" and "是不是可行" stay intact.
+      value = remove(value, mapping, /(^|[，,。！？!?；;]\s*)(就是说|我跟你讲|你知道吧|怎么说呢|那个那个|这个这个)[，,、\s]*/gu, 2, true);
+      value = remove(value, mapping, /(^|[，,。！？!?；;]\s*)(这个|那个)(?=[，,、\s])/gu, 2);
+      value = remove(value, mapping, /(^|[\s,，.!?。！？;；])((?:um+|uh+|erm+)(?:\b)[,，\s]*)/giu, 2);
+      value = remove(value, mapping, /(^|[,，]\s*)(you know)(?=[,，.!?\s]|$)/giu, 2);
+      value = remove(value, mapping, /([，,]\s*)((?:对吧|是吧|对不对|好不好|行不行|明白了吗|懂了吗))(?=[。！？!?\s]*$)/gu, 2);
+      value = remove(value, mapping, /(对吧|是吧)(?=[。！？!?\s]*$)/gu);
+      const seg = segmenter();
+      const ranges = [];
+      if (seg) {
+        for (const token of seg.segment(value)) {
+          if (token.isWordLike && FILLER_WORDS.has(token.segment)) ranges.push([token.index, token.index + token.segment.length]);
+        }
+      } else {
+        // Avoid substring removal (e.g. deleting part of a name) when no segmenter is available.
+        for (const match of value.matchAll(/(^|[，,。！？!?；;\s])([嗯呃哦啊]+)(?=[，,。！？!?；;\s]|$)/gu)) {
+          ranges.push([match.index + match[1].length, match.index + match[0].length]);
+        }
+      }
+      fillerChars += ranges.reduce((n, [a, b]) => n + b - a, 0);
+      value = spliceOut(value, mapping, normRanges(ranges));
+      // Conversational tags, not substantive questions about correctness or feasibility.
+      value = remove(value, mapping, /([，,]\s*)((?:对吧|是吧|对不对|好不好|行不行|明白了吗|懂了吗))(?=[。！？!?\s]*$)/gu, 2);
+      value = remove(value, mapping, /(对吧|是吧)(?=[。！？!?\s]*$)/gu);
+      const trim = value.match(/^[\s，,、。！？!?；;.]*/)[0].length;
+      if (trim) { value = value.slice(trim); mapping.splice(0, trim); }
+      value = value.replace(/[，,、\s]+([。！？!?；;.])/g, '$1').trim();
+      value = value.replace(/[，,]{2,}/g, '，');
+      if (!/[\p{L}\p{N}]/u.test(value)) continue;
+      const key = value.toLowerCase().replace(/\s/gu, '').replace(/[.。?!？！;；]+$/gu, '')
+        .replace(/[\p{P}\p{S}]/gu, (c) => /[%％+\-−<>≤≥=.]/u.test(c) ? c : '');
+      const social = /^(?:嗯+|呃+|对吧|是吧|对不对|大家好|各位好|欢迎回来|谢谢大家|感谢观看|我们下期再见|大家(?:听明白了吗|明白了吗|听得到吗|能听到吗|懂了吗)|听明白了吗|明白了吗|听得到吗|能听到吗|懂了吗|helloeveryone|hieveryone)$/iu;
+      if (social.test(key.replace(/\s/g, ''))) { discardedCount++; continue; }
+      // A short factual answer (是/不是/不行/可以) may answer an important question.
+      const duplicate = key.length >= 4 && recent.some((entry) => entry.key === key && sentence.from - entry.from <= 120);
+      if (duplicate) { repeatCount++; continue; }
+      recent.push({ key, from: sentence.from });
+      if (recent.length > 8) recent.shift();
+      const output = question ? value.replace(/[。.!！；;]+$/g, '') + (/[?？]$/.test(value) ? '' : '？') : punctuate(value);
+      kept.push({ from: mapping[0]?.from ?? sentence.from, text: output });
+    }
+    const paragraphs = groupParagraphs(kept, opts.minChars || 180, opts.maxChars || 380).map((group) => {
+      const body = group.map((s) => s.text).reduce((all, s) => all + (all && /^[A-Za-z0-9]/.test(s) ? ' ' : '') + s, '');
+      return (opts.withTime ? '[' + fmt(group[0].from) + '] ' : '') + body;
+    });
+    const outChars = kept.reduce((n, s) => n + s.text.replace(/\s/g, '').length, 0);
+    return { paragraphs, sentences: kept.map((s) => s.text), stats: {
+      rawChars, outChars, removedChars: Math.max(0, rawChars - outChars),
+      fillerChars, repeatCount, discardedCount,
+      sentenceCount: kept.length, paragraphCount: paragraphs.length,
+    } };
+  }
+
+  global.BiliPolish = { polish, clean, fmt, dropPhrases, dropFillerWords, dropRepeats };
 })(typeof window !== 'undefined' ? window : self);

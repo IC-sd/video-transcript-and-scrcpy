@@ -26,14 +26,16 @@
 
   function capture(raw) {
     try {
-      const u = String(raw || '');
-      if (!/youtube\.com\/api\/timedtext/.test(u)) return;
+      const parsed = new URL(raw, location.href);
+      if (parsed.protocol !== 'https:' || !['www.youtube.com', 'm.youtube.com'].includes(parsed.hostname)
+          || parsed.pathname !== '/api/timedtext') return;
+      const u = parsed.href;
       // 去掉 fmt（扩展会自己换成 json3），其余签名/POT 参数原样保留
       const clean = u.replace(/([?&])fmt=[^&]*/, '$1').replace(/&&+/g, '&').replace(/[?&]$/, '');
       if (seen.has(clean)) return;
       seen.add(clean);
       captured.push({ url: clean, at: Date.now() });
-      if (captured.length > 20) captured.shift();
+      if (captured.length > 20) seen.delete(captured.shift().url);
       flushDom();
       window.postMessage({ source: 'bili-tx-hook', type: 'timedtext', url: clean, at: Date.now() }, '*');
     } catch (e) { /* 忽略非字幕请求的异常 */ }
@@ -44,7 +46,7 @@
     window.fetch = function (...args) {
       try {
         const a = args[0];
-        capture(typeof a === 'string' ? a : (a && a.url) || '');
+        capture(typeof a === 'string' || a instanceof URL ? String(a) : (a && a.url) || '');
       } catch (e) { /* ignore */ }
       return origFetch.apply(this, args);
     };

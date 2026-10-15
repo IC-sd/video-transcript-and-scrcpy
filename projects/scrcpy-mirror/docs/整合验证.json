@@ -1,0 +1,7 @@
+{
+  "python": "3.13.14",
+  "isolated_runtime": true,
+  "dependencies_inside_project": true,
+  "regression_tests_passed": 39,
+  "phone_lock_settings_changed": false
+}

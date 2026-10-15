@@ -3,6 +3,11 @@
  * 文件下载放在结果页里做（service worker 里没有 DOM，拿不到 Blob URL）。
  */
 
+importScripts('lib/core.js');
+
+// Content scripts do not need settings; keep API keys in trusted extension contexts.
+chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }).catch(() => {});
+
 const DEFAULT_SETTINGS = {
   // 转录文字
   transcriptSave: false,
@@ -26,21 +31,14 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg && msg.type === 'GET_SETTINGS') {
-    chrome.storage.local.get('settings').then((cur) => {
-      sendResponse({ ...DEFAULT_SETTINGS, ...(cur.settings || {}) });
-    });
-    return true;
-  }
-
   // 字幕文件放在 hdslb.com 这类 CDN 上，页面里直接取会被 CORS 拦；
   // 后台脚本有 host_permissions，不受 CORS 限制，因此由这里代取。
   if (msg && msg.type === 'FETCH_TEXT') {
-    fetch(msg.url, { credentials: 'include', cache: 'no-store' })
-      .then((r) => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.text();
-      })
+    if (sender.id !== chrome.runtime.id || !BiliCore.subtitleUrl(msg.url)) {
+      sendResponse({ ok: false, error: '字幕地址不受支持' });
+      return false;
+    }
+    BiliCore.request(msg.url, { credentials: 'include', cache: 'no-store', redirect: 'error' })
       .then((text) => sendResponse({ ok: true, text }))
       .catch((e) => sendResponse({ ok: false, error: String((e && e.message) || e) }));
     return true;

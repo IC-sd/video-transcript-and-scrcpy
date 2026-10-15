@@ -1,80 +1,51 @@
-# 视频文稿提取器
+# 视频文稿与无线投屏工具箱
 
-浏览器扩展：一键把 **B站 / YouTube** 视频字幕提取成可读文稿，可选接入大模型生成结构化内容总结。
+两个独立项目放在同一个仓库，各自维护代码、使用说明和测试。
 
-![YouTube 中文转录](screenshots/YouTube-小Lin说-转录.png)
+| 项目 | 用途 | 入口 |
+| --- | --- | --- |
+| [视频文稿提取器](projects/video-transcript-extractor/) | B站 / YouTube 字幕提取、精简文稿和 AI 总结 | 加载 `projects/video-transcript-extractor/extension` |
+| [scrcpy 无线投屏](projects/scrcpy-mirror/) | Android 无线配对、投屏、亮熄屏切换和断线恢复 | 初始化依赖后运行 `projects/scrcpy-mirror/启动投屏.bat` |
 
-## 功能
+## 视频文稿提取器 v1.2.0
 
-- **转录文字** —— 提取字幕原文并自动补标点、分段（保留原文用词），带时间锚点
-- **AI 总结** —— 把字幕交给大模型，按内容逻辑重组成分节总结（需自行配置接口）
-- **中文字幕** —— YouTube 任意字幕轨道可机翻为中文；B站原生支持 AI 字幕 / CC
-- **灵活保存** —— 固定文件夹 / 每次询问 / 浏览器下载目录子目录，三种方式独立配置
-- **多语言字幕** —— YouTube 支持多语言字幕轨道（人工字幕优先）
+本地清理语气词、口头禅、重复对话和重复提问，同时保留原始转录供核对；支持分P、时间戳、Markdown 保存及可选 AI 总结。
 
-## 安装
+安装：打开 Chrome / Edge 的扩展管理页，启用开发人员模式，选择「加载解压缩的扩展」，加载上表的 `extension` 文件夹。目录已从仓库根目录迁入 `projects/`，已有用户需更新加载路径，或将新版文件更新到原加载目录后重新加载。
 
-1. 下载本仓库（Code → Download ZIP，解压）
-2. 打开 Edge / Chrome 的扩展管理页（`edge://extensions` 或 `chrome://extensions`）
-3. 打开右上角「开发人员模式」
-4. 点「加载解压缩的扩展」，选择本仓库的 `extension` 文件夹
+详见 [文稿项目说明](projects/video-transcript-extractor/README.md) 和 [精简规则](projects/video-transcript-extractor/docs/cleanup.md)。
 
-## 使用
+## scrcpy 无线投屏
 
-打开 B站或 YouTube 的视频页，点扩展图标：
+保留原有 Python 启动器、控制消息中继、运行入口及回归测试。设备配对信息和日志仅留在本机。
 
-- **只提取转录文字** —— 快速拿字幕原文（自动补标点分段）
-- **提取并生成 AI 总结** —— 提取后调用大模型生成总结
+```powershell
+# 首次使用：下载并校验固定版本依赖
+& .\projects\scrcpy-mirror\setup.ps1
+# 启动；也可双击该文件
+& .\projects\scrcpy-mirror\启动投屏.bat
+```
 
-### YouTube 中文
+已有本地便携目录时，可以不下载：
 
-英文视频勾选「翻译成中文」，扩展会通过 YouTube 的字幕翻译接口生成中文版本。
-对部分视频，YouTube 要求字幕必须先在播放器里加载一次 —— 提取失败时按提示
-点开播放器的 CC 字幕开关，再点一次提取即可。
+```powershell
+& .\projects\scrcpy-mirror\setup.ps1 -LocalSource 'D:\Tools\scrcpy'
+```
 
-## 截图
+源码仓库不存放可重新下载的 Python / scrcpy 二进制，也不存放设备缓存、运行日志、ADB 私钥和历史备份。初始化脚本仅从锁文件中的官方 HTTPS 地址获取依赖并验证 SHA-256。
 
-| 转录文字（B站） | 设置 |
-|---|---|
-| ![转录文字](screenshots/新版-结果页-转录.png) | ![设置](screenshots/精简后-设置页.png) |
+详见 [投屏项目说明](projects/scrcpy-mirror/README.md)。
 
-## 手机上使用（Edge for Android）
+## 检查
 
-Edge for Android 支持扩展，但**只能按 crx 文件安装**（移动端不支持加载解压文件夹）：
+```powershell
+npm --prefix projects/video-transcript-extractor run check
+npm --prefix projects/video-transcript-extractor test
+python -X utf8 -B projects/scrcpy-mirror/tests/test_mirror.py
+```
 
-1. 从本仓库的 [Releases](../../releases) 下载 `.crx` 文件
-2. 手机 Edge → `···` → 设置 → **关于 Microsoft Edge** → 连续点 5 次版本号
-3. 返回设置页，底部出现「**开发人员选项**」→ 点「**Extension install by crx**」→ 选择该文件
+GitHub Actions 分别检查两个项目。浏览器扩展的浏览器集成测试另需 Playwright 和兼容浏览器；投屏的自动测试使用模拟设备，不会连接手机。
 
-**移动端限制**：Android 浏览器没有 File System Access API，所以「固定文件夹」模式不可用
-（扩展会自动禁用它）。请改用「每次询问」或「下载目录子目录」。
-另外扩展的配置与文稿存在**各设备本地**，手机与电脑互不同步，需分别配置。
+## 许可
 
-## AI 总结配置
-
-设置页 →「AI 总结」，填入任意 OpenAI 兼容接口（三样：接口地址 / API Key / 模型名）：
-
-| 服务 | 接口地址 | 模型名 |
-|---|---|---|
-| DeepSeek | `https://api.deepseek.com` | `deepseek-chat` |
-| 通义千问 | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
-| 智谱 | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-plus` |
-| Kimi | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
-| 硅基流动 | `https://api.siliconflow.cn/v1` | `deepseek-ai/DeepSeek-V3` |
-
-不配置也不影响字幕提取 —— 提取和整理全部本地完成，**不联网上传任何内容**。
-
-## 隐私
-
-- 字幕提取与整理全部在本地完成，不经任何第三方服务器
-- AI 总结仅在你主动点击时，把字幕文本发送给你自己配置的模型接口
-- 扩展不收集、不上传任何使用数据
-
-## 免责声明
-
-本项目仅供学习与研究。使用时请遵守 B站、YouTube 的服务条款及相关法律法规，
-字幕内容的版权归原作者所有，请勿用于商业用途。
-
-## License
-
-[MIT](LICENSE)
+自有代码沿用仓库 [MIT 许可](LICENSE)。第三方运行依赖使用各自的上游许可，见 [第三方说明](projects/scrcpy-mirror/THIRD_PARTY.md)。

@@ -1,3 +1,6 @@
+(function () {
+'use strict';
+if (window.__biliTxInjected) return;
 /**
  * content.js —— 在 B站页面里跑，用页面自身的登录态调官方接口取字幕。
  *
@@ -19,9 +22,7 @@ function currentPage() {
 }
 
 async function jsonGet(url) {
-  const r = await fetch(url, { credentials: 'include' });
-  if (!r.ok) throw new Error('请求失败 HTTP ' + r.status);
-  return r.json();
+  return BiliCore.request(url, { credentials: 'include' }, 'json');
 }
 
 /**
@@ -31,9 +32,10 @@ async function jsonGet(url) {
  */
 async function textGet(url) {
   try {
-    const r = await fetch(url, { credentials: 'include' });
-    if (r.ok) return await r.text();
+    if (!BiliCore.subtitleUrl(url)) throw new Error('字幕地址不受支持');
+    return await BiliCore.request(url, { credentials: 'include' });
   } catch (e) { /* 落到后台代取 */ }
+  if (!BiliCore.subtitleUrl(url)) throw new Error('字幕地址不受支持');
   const resp = await chrome.runtime.sendMessage({ type: 'FETCH_TEXT', url });
   if (!resp || !resp.ok) throw new Error((resp && resp.error) || '字幕资源下载失败');
   return resp.text;
@@ -207,7 +209,7 @@ async function extractBilibili(opts) {
     `- BV号: ${bvid}`,
     `- UP主: ${info.owner.name}`,
     `- 时长: ${fmtTime(info.duration)}`,
-    `- 链接: https://www.bilibili.com/video/${bvid}`,
+    `- 链接: https://www.bilibili.com/video/${bvid}${!allP ? '?p=' + parts[0].page : ''}`,
   ];
   if (got.length) meta.push(`- 字幕来源: ${got[0].lan_doc} (${got[0].lan})`);
   meta.push(`- 抓取时间: ${new Date().toLocaleString('zh-CN')}`);
@@ -231,6 +233,9 @@ async function extractBilibili(opts) {
     tracks: got.length ? got[0].tracks : [],
     text: blocks.join('\n\n'),
     items: allItems,
+    parts: got.map((r) => ({ page: r.page, title: r.title, text: r.text, items: r.items })),
+    truncated,
+    withTs,
     markdown: meta.join('\n') + '\n\n---\n\n' + blocks.join('\n\n'),
     missing: miss.map((m) => ({ page: m.page, title: m.title, reason: m.reason })),
     error: got.length ? '' : (miss[0] ? miss[0].reason : '未知原因'),
@@ -316,7 +321,7 @@ function ytScanScripts() {
  * VISIONOS client 给出的地址裸请求就有数据 —— 已实测两种 User-Agent 均可。
  */
 async function ytInnertubePlayer(videoId) {
-  const r = await fetch('https://www.youtube.com/youtubei/v1/player?prettyPrint=false', {
+  const j = await BiliCore.request('https://www.youtube.com/youtubei/v1/player?prettyPrint=false', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -342,12 +347,7 @@ async function ytInnertubePlayer(videoId) {
         },
       },
     }),
-  });
-  if (!r.ok) {
-    const t = await r.text().catch(() => '');
-    throw new Error('innertube HTTP ' + r.status + ' ' + t.slice(0, 100));
-  }
-  const j = await r.json();
+  }, 'json');
   const st = j && j.playabilityStatus && j.playabilityStatus.status;
   if (st && st !== 'OK') {
     throw new Error('视频不可访问: ' + (j.playabilityStatus.reason || st));
@@ -361,16 +361,18 @@ async function ytInnertubePlayer(videoId) {
  * 所以播放器元素优先；但播放器懒加载，所以还要有 script 解析兜底。
  */
 function ytPlayerResponse() {
+  const current = (r) => r && r.videoDetails && r.videoDetails.videoId === ytVideoId();
   const el = document.getElementById('movie_player');
   if (el && typeof el.getPlayerResponse === 'function') {
     try {
       const r = el.getPlayerResponse();
-      if (r && r.videoDetails) return r;
+      if (current(r)) return r;
     } catch (e) { /* 落到下一条 */ }
   }
   const g = window.ytInitialPlayerResponse;
-  if (g && g.videoDetails) return g;
-  return ytScanScripts();
+  if (current(g)) return g;
+  const scanned = ytScanScripts();
+  return current(scanned) ? scanned : null;
 }
 
 /** 取不到时给一句能定位问题的说明 */
@@ -440,6 +442,7 @@ function ytJson3ToText(data, withTs) {
 
 async function extractYouTube(opts) {
   const { withTs = true, prefer = '' } = opts || {};
+  opts = opts || {};
   const vid = ytVideoId();
   if (!vid) throw new Error('当前页面不是 YouTube 视频页');
 
@@ -510,7 +513,9 @@ async function extractYouTube(opts) {
     url += '&tlang=' + tlang;
   }
 
-  const raw = await textGet(url);
+  let raw = '';
+  let requestError = '';
+  try { raw = await textGet(url); } catch (e) { requestError = e.message; }
   let data = null;
   try {
     data = JSON.parse(raw);
@@ -523,11 +528,21 @@ async function extractYouTube(opts) {
     ytTriggerCaptionLoad();
     await new Promise((r) => setTimeout(r, 2500));
     ytSyncHookedFromDom();
-    const cands = ytHookedUrls.filter((x) => /[?&]lang=/.test(x.url));
+    const cands = ytHookedUrls.filter((x) => {
+      try {
+        const u = new URL(x.url);
+        return BiliCore.subtitleUrl(u.href) && u.pathname === '/api/timedtext'
+          && u.searchParams.get('v') === vid
+          && u.searchParams.get('lang') === track.languageCode;
+      } catch (_) { return false; }
+    });
     const pick = cands.length ? cands[cands.length - 1] : null;
     if (pick) {
-      let hu = pick.url;
-      hu = /[?&]fmt=/.test(hu) ? hu.replace(/([?&])fmt=[^&]*/, '$1fmt=json3') : hu + '&fmt=json3';
+      const hookUrl = new URL(pick.url);
+      hookUrl.searchParams.set('fmt', 'json3');
+      if (tlang) hookUrl.searchParams.set('tlang', tlang);
+      else hookUrl.searchParams.delete('tlang');
+      let hu = hookUrl.href;
       try {
         const raw2 = await textGet(hu);
         data = JSON.parse(raw2);
@@ -541,7 +556,7 @@ async function extractYouTube(opts) {
       ...base,
       ok: false,
       error: '字幕文件解析失败（via ' + via + '，' + raw.length + ' B，开头 ' +
-             JSON.stringify(raw.slice(0, 80)) + '）' + (innerNote ? '；' + innerNote : '') +
+             JSON.stringify(raw.slice(0, 80)) + '）' + (innerNote ? '；' + innerNote : '') + (requestError ? '；' + requestError : '') +
              '。自助办法：点开播放器右下角的 CC 字幕开关让字幕显示出来，再点一次提取',
     };
   }
@@ -573,6 +588,7 @@ async function extractYouTube(opts) {
     lan_doc: (tlang ? '中文（机器翻译）' : lanDoc),
     isAi: (track.kind || '') === 'asr',
     translated: !!tlang,
+    withTs,
     tracks: trackList.map((t) => ({
       lan: t.languageCode,
       doc: (t.name && t.name.simpleText) || t.languageCode,
@@ -594,7 +610,7 @@ window.addEventListener('message', (ev) => {
   if (ev.source !== window) return;
   const d = ev.data;
   if (!d || d.source !== 'bili-tx-hook' || d.type !== 'timedtext') return;
-  if (!d.url) return;
+  if (!d.url || !BiliCore.subtitleUrl(d.url)) return;
   if (ytHookedUrls.some((x) => x.url === d.url)) return;
   ytHookedUrls.push({ url: d.url, at: d.at || Date.now() });
   if (ytHookedUrls.length > 30) ytHookedUrls.shift();
@@ -607,7 +623,8 @@ function ytSyncHookedFromDom() {
     const raw = document.documentElement.dataset.biliTxUrls;
     if (!raw) return;
     for (const x of JSON.parse(raw)) {
-      if (x && x.url && !ytHookedUrls.some((y) => y.url === x.url)) ytHookedUrls.push(x);
+      if (x && BiliCore.subtitleUrl(x.url) && !ytHookedUrls.some((y) => y.url === x.url)) ytHookedUrls.push(x);
+      if (ytHookedUrls.length > 30) ytHookedUrls.shift();
     }
   } catch (e) { /* dataset 缺失或格式异常则忽略 */ }
 }
@@ -644,26 +661,34 @@ const ADAPTERS = [
 
 async function extractAll(opts) {
   const url = location.href;
-  const ad = ADAPTERS.find((a) => a.match(url));
+  const ad = ADAPTERS.find((a) => a.name === BiliCore.platform(url));
   if (!ad) throw new Error('当前页面不是支持的视频页（目前支持 B站 与 YouTube）');
-  return await ad.extract(opts);
+  const result = await ad.extract(opts);
+  if (location.href !== url) throw new Error('提取期间视频地址发生变化，请在当前视频重新提取');
+  return result;
 }
 
 // 防止重复注入（manifest 自动注入 + popup 兜底注入可能同时发生），
 // 否则同一个消息会被处理多次、响应错乱。
 if (!window.__biliTxInjected) {
   window.__biliTxInjected = true;
+  let extracting = false;
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg && msg.type === 'PING') {
       sendResponse({ ok: true, bvid: getBvid(), title: document.title });
       return false;
     }
     if (msg && msg.type === 'EXTRACT') {
+      if (extracting) { sendResponse({ ok: false, error: '字幕正在提取，请稍候再试' }); return false; }
+      extracting = true;
       extractAll(msg.opts)
         .then((r) => sendResponse({ ok: true, data: r }))
-        .catch((e) => sendResponse({ ok: false, error: String((e && e.message) || e) }));
+        .catch((e) => sendResponse({ ok: false, error: String((e && e.message) || e) }))
+        .finally(() => { extracting = false; });
       return true; // 异步响应
     }
     return false;
   });
 }
+
+})();

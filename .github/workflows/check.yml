@@ -1,0 +1,25 @@
+name: Project checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  video-transcript:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/video-transcript-extractor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check
+      - run: npm test
+  scrcpy-mirror:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -X utf8 -B projects/scrcpy-mirror/tests/test_mirror.py
