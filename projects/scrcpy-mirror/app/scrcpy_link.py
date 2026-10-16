@@ -6,6 +6,7 @@ an in-flight mouse, keyboard or clipboard message.
 """
 import socket
 import threading
+import time
 
 
 def packet_size(data):
@@ -58,23 +59,42 @@ class ControlRelay:
         self.listener.settimeout(0.5)
         self.closed = threading.Event()
         self.ready = threading.Event()
+        self.disconnected = threading.Event()
+        self.client_closed = threading.Event()
+        self.client_closed_at = 0.0
+        self.disconnect_reason = None
+        self.protocol_error = threading.Event()
         self.lock = threading.Lock()
+        self.lifecycle_lock = threading.Lock()
         self.control = None
         self.sockets = []
         self.threads = []
         self.error = None
         self.video_bytes = 0
+        self.last_video_at = 0.0
         self._thread(self._accept)
 
     def _thread(self, target, *args):
-        thread = threading.Thread(target=target, args=args, daemon=True)
-        self.threads.append(thread)
-        thread.start()
+        thread = threading.Thread(target=target, args=args, daemon=True, name='scrcpy-relay-' + target.__name__)
+        with self.lifecycle_lock:
+            if not self.closed.is_set():
+                self.threads.append(thread)
+                thread.start()
 
     def _socket(self, sock):
         sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        self.sockets.append(sock)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        with self.lifecycle_lock:
+            if self.closed.is_set():
+                sock.close()
+                raise OSError('Relay closed')
+            self.sockets.append(sock)
         return sock
+
+    def _lost(self, reason):
+        if not self.closed.is_set():
+            self.disconnect_reason = reason
+            self.disconnected.set()
 
     def _accept(self):
         video = True
@@ -99,6 +119,11 @@ class ControlRelay:
                     client.close()
                     if backend is not None:
                         backend.close()
+                    # scrcpy probes before Android finishes starting. Refused
+                    # connections/empty dummy bytes are normal at this stage.
+                    # Monitor bounds the initial handshake with its deadline.
+                    if not video:
+                        self._lost('ADB control tunnel connection failed')
                     continue
                 if video:
                     self._thread(self._pump, backend, client, True)
@@ -111,7 +136,7 @@ class ControlRelay:
                     return
         except OSError as exc:
             if not self.closed.is_set():
-                self.error = str(exc)
+                self._lost('Local relay listener failed')
         finally:
             self.listener.close()
 
@@ -120,12 +145,14 @@ class ControlRelay:
             while not self.closed.is_set():
                 data = source.recv(65536)
                 if not data:
+                    self._lost('Video stream ended' if video else 'Control stream ended')
                     break
                 destination.sendall(data)
                 if video:
                     self.video_bytes += len(data)
+                    self.last_video_at = time.monotonic()
         except OSError:
-            pass
+            self._lost('Video transport failed' if video else 'Control transport failed')
         finally:
             try:
                 destination.shutdown(socket.SHUT_WR)
@@ -138,6 +165,8 @@ class ControlRelay:
             while not self.closed.is_set():
                 data = client.recv(65536)
                 if not data:
+                    self.client_closed_at = time.monotonic()
+                    self.client_closed.set()
                     break
                 buffer.extend(data)
                 while (size := packet_size(buffer)) is not None:
@@ -145,9 +174,12 @@ class ControlRelay:
                     del buffer[:size]
                     if not self.send(packet):
                         return
-        except (OSError, ValueError) as exc:
+        except ValueError as exc:
             if not self.closed.is_set():
                 self.error = str(exc)
+                self.protocol_error.set()
+        except OSError:
+            self._lost('Client control transport failed')
 
     def send(self, packet):
         if not self.ready.is_set() or self.closed.is_set():
@@ -157,6 +189,7 @@ class ControlRelay:
                 self.control.sendall(packet)
             return True
         except OSError:
+            self._lost('Control send failed')
             return False
 
     def set_power(self, on):
@@ -184,12 +217,14 @@ class ControlRelay:
     def close(self):
         self.closed.set()
         self.listener.close()
-        for sock in self.sockets:
+        with self.lifecycle_lock:
+            sockets, threads = list(self.sockets), list(self.threads)
+        for sock in sockets:
             try:
                 sock.shutdown(socket.SHUT_RDWR)
             except OSError:
                 pass
             sock.close()
-        for thread in self.threads:
+        for thread in threads:
             if thread is not threading.current_thread():
                 thread.join(timeout=0.5)

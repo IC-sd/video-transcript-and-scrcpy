@@ -24,23 +24,41 @@ class MirrorError(Exception):
     pass
 
 
-STREAM_PROFILES = {
-    "fast": {"max_size": 960, "bit_rate": "4M", "max_fps": 60},
-    "balanced": {"max_size": 1080, "bit_rate": "8M", "max_fps": 60},
-    "weak-wifi": {"max_size": 720, "bit_rate": "2M", "max_fps": 30},
-}
+class InstanceLock:
+    """An OS-owned lock is released even after a crash; no stale PID guessing."""
+    def __init__(self, path):
+        self.path, self.stream, self.acquired = Path(path), None, False
+
+    def __enter__(self):
+        self.stream = self.path.open('a+b')
+        if self.path.stat().st_size == 0:
+            self.stream.write(b'0')
+            self.stream.flush()
+        self.stream.seek(0)
+        try:
+            if os.name == 'nt':
+                import msvcrt
+                msvcrt.locking(self.stream.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.acquired = True
+        except OSError:
+            self.stream.close()
+        return self
+
+    def __exit__(self, *_):
+        if self.acquired:
+            self.stream.close()
+            self.acquired = False
 
 
 class StreamSettings:
-    def __init__(self, profile="fast", max_size=None, bit_rate=None, max_fps=None,
+    def __init__(self, max_size=None, bit_rate=None, max_fps=None,
                  hwdec="auto", encoder=None, stats=False):
-        if profile not in STREAM_PROFILES:
-            raise ValueError("未知画质档位")
-        selected = STREAM_PROFILES[profile]
-        self.profile = profile
-        self.max_size = selected["max_size"] if max_size is None else max_size
-        self.bit_rate = str(selected["bit_rate"] if bit_rate is None else bit_rate).upper()
-        self.max_fps = selected["max_fps"] if max_fps is None else max_fps
+        self.max_size = 1600 if max_size is None else max_size
+        self.bit_rate = str("6M" if bit_rate is None else bit_rate).upper()
+        self.max_fps = 60 if max_fps is None else max_fps
         if not isinstance(self.max_size, int) or not 128 <= self.max_size <= 4096:
             raise ValueError("最大边长需要在 128–4096 之间")
         if not isinstance(self.max_fps, int) or not 1 <= self.max_fps <= 120:
@@ -58,8 +76,6 @@ class StreamSettings:
     def video_args(self):
         args = ["-m", str(self.max_size), "-b", self.bit_rate, "--max-fps", str(self.max_fps),
                 "--video-codec=h264", "--video-buffer=0", "--hwdec=" + self.hwdec]
-        if self.profile != "balanced":
-            args.append("--no-mipmaps")
         if self.encoder:
             args += ["--video-encoder", self.encoder]
         if self.stats:
@@ -67,7 +83,7 @@ class StreamSettings:
         return args
 
     def description(self):
-        return f"{self.profile}：最长边 {self.max_size}，码率 {self.bit_rate}，最高 {self.max_fps} fps"
+        return f"最长边 {self.max_size}，码率 {self.bit_rate}，最高 {self.max_fps} fps"
 
 
 def diagnose(adb, address, directory, settings, samples=8):
@@ -85,7 +101,7 @@ def diagnose(adb, address, directory, settings, samples=8):
     ordered = sorted(durations)
     report = {
         "measurement": "adb_shell_round_trip_ms_not_end_to_end_video_latency",
-        "profile": settings.profile, "max_size": settings.max_size,
+        "max_size": settings.max_size,
         "bit_rate": settings.bit_rate, "max_fps": settings.max_fps,
         "samples": samples, "successes": len(ordered), "failures": failures,
         "median_ms": round(statistics.median(ordered), 2) if ordered else None,
@@ -238,20 +254,28 @@ class Connector:
         saved = cache.load()
         self.address = saved.get("address", "")
         self.identity = saved.get("identity", "")
+        self.transport = ""  # Live ADB selector; never persist an ephemeral mDNS alias.
         self.discovered = []
 
-    def accept(self, address):
-        if not self.adb.ready(address):
+    @property
+    def serial(self):
+        return self.transport or self.address
+
+    def accept(self, address, transport=None):
+        address = endpoint(address)
+        transport = transport or address
+        if transport != address and not re.fullmatch(r"adb-[A-Za-z0-9_-]+\._adb-tls-connect\._tcp\.?", transport):
             return False
-        identity = self.adb.identity(address)
+        if not self.adb.ready(transport):
+            return False
+        identity = self.adb.identity(transport)
         # Do not silently adopt another phone when the original target disappears.
         if not identity or (self.identity and identity != self.identity):
             return False
-        address = endpoint(address)
         if address != self.address or identity != self.identity:
             self.cache.save(address, identity)
             logging.info("已确认设备 %s，地址 %s", identity, address)
-        self.address, self.identity = address, identity
+        self.address, self.identity, self.transport = address, identity, transport
         return True
 
     def connect(self, address):
@@ -263,26 +287,36 @@ class Connector:
         devices = parse_devices(self.adb.text("devices"))
         services = self.adb.services()
         self.discovered = services
-        addresses = [a for a in devices if host_of(a)]
-        # mDNS aliases are valid transports too; resolve their advertised endpoint.
-        addresses += [a for name, a in services
-                      if any(d.startswith(name + ".") for d in devices)]
-        candidates = list(dict.fromkeys(addresses + [a for _, a in services]))
+        advertised = {name.rstrip(".") + "._adb-tls-connect._tcp": a for name, a in services}
+        # A ready mDNS transport can stay usable while an old numeric transport
+        # is offline. Use the actual ready selector instead of reconnecting it.
+        live = [(advertised[d.rstrip(".")], d) for d in devices if d.rstrip(".") in advertised]
+        live += [(a, a) for a in devices if host_of(a)]
+        # A broadcast can expire briefly without invalidating an authenticated
+        # transport. Retain the cached endpoint only as a future fallback.
+        if self.identity and self.address and not preferred_host:
+            live += [(self.address, d) for d in devices if d.rstrip(".") not in advertised
+                     and re.fullmatch(r"adb-[A-Za-z0-9_-]+\._adb-tls-connect\._tcp\.?", d)]
+        candidates = list(dict.fromkeys([a for a, _ in live] + [a for _, a in services]))
         if preferred_host:
             candidates = [a for a in candidates if host_of(a) == preferred_host]
-        if self.address and (not preferred_host or host_of(self.address) == preferred_host):
-            if self.accept(self.address) or self.connect(self.address):
-                return self.address
-            candidates = [a for a in candidates if a != self.address]
         if not self.identity and len(candidates) > 1:
             candidates = [choose(candidates, "发现多台设备，请选择你的手机：")]
+        for address, transport in live:
+            if address in candidates and self.accept(address, transport):
+                return self.address
+        # Fresh advertised ports precede the saved port. With no broadcasts,
+        # the saved endpoint remains a useful fallback without a new prompt.
+        if self.address and (not preferred_host or host_of(self.address) == preferred_host):
+            if self.identity or not candidates:
+                candidates = list(dict.fromkeys(candidates + [self.address]))
         for address in candidates:
             if self.accept(address) or self.connect(address):
                 return address
         return None
 
     def recover_once(self):
-        if self.address and self.accept(self.address):
+        if self.transport and self.accept(self.address, self.transport):
             return self.address
         return self.discover()
 
@@ -349,7 +383,7 @@ class Connector:
             raise MirrorError("配对未成功。请重新打开手机配对弹窗，检查地址和新配对码。")
         print("配对成功，正在寻找主连接地址……")
         # Pairing is an explicit user choice, so this may replace a saved phone.
-        self.identity, self.address = "", ""
+        self.identity, self.address, self.transport = "", "", ""
         host = host_of(pair_address)
         for _ in range(3):
             found = self.discover(preferred_host=host)
@@ -489,6 +523,8 @@ class Monitor:
         self.relay = None
         self.settings = settings if settings is not None else StreamSettings()
         self.next_probe = 0.0
+        self.probe_failures = 0
+        self.session_transport = ""
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
@@ -500,18 +536,20 @@ class Monitor:
                 self.proc.wait(timeout=3)
         if self.relay:
             self.relay.close()
-            self.connector.adb.run("-s", self.connector.address, "forward", "--remove", f"tcp:{self.relay.forward_port}")
+            self.connector.adb.run("-s", self.session_transport, "forward", "--remove", f"tcp:{self.relay.forward_port}")
             self.relay = None
 
     def spawn(self):
         self.stop()
         self.relay = ControlRelay()
-        self.bridge.relay = self.relay
+        self.bridge = ScreenBridge(self.connector.adb, self.relay)
+        self.session_transport = self.connector.serial
         logfile = self.logdir / "scrcpy.log"
         if logfile.exists() and logfile.stat().st_size > 2_000_000:
             os.replace(logfile, self.logdir / "scrcpy.previous.log")
-        args = [str(self.scrcpy), "-s", self.connector.address,
-                *self.settings.video_args(), "--no-audio", "--keep-active"]
+        args = [str(self.scrcpy), "-s", self.session_transport,
+                *self.settings.video_args(), "--no-audio", "--keep-active",
+                "--window-title=无线投屏"]
         args += ["--port", str(self.relay.forward_port), "--tunnel-port", str(self.relay.port)]
         if self.screen_off:
             args += ["--turn-screen-off"]
@@ -524,6 +562,7 @@ class Monitor:
                                          stdout=stream, stderr=subprocess.STDOUT)
         self.started = time.monotonic()
         self.next_probe = 0.0
+        self.probe_failures = 0
         logging.info("投屏启动：%s，熄屏=%s，%s", self.connector.address, self.screen_off, self.settings.description())
 
     def connected_address(self, rc, disconnected, now):
@@ -531,44 +570,63 @@ class Monitor:
         if rc is None and not disconnected and now < self.next_probe:
             return self.connector.address
         self.next_probe = now + self.HEALTH_INTERVAL
-        return self.connector.recover_once()
+        address = self.connector.recover_once()
+        if address:
+            self.probe_failures = 0
+            return address
+        self.probe_failures += 1
+        self.next_probe = now + 1
+        recent_video = (self.relay and self.relay.last_video_at > 0
+                        and now - self.relay.last_video_at < self.HEALTH_INTERVAL)
+        if rc is None and not disconnected and (self.probe_failures < 2 or recent_video):
+            return self.connector.address
+        return None
 
     def run(self):
         self.spawn()
         disconnected = False
-        deadline = None
+        next_notice = 0
         try:
             while True:
                 time.sleep(1)
                 rc = self.proc.poll()
-                if self.relay.error:
-                    raise MirrorError(f"投屏控制通道异常：{self.relay.error}")
                 if rc == 0:
                     logging.info("投屏窗口已关闭，结束运行")
                     return
-                previous = self.connector.address
-                address = self.connected_address(rc, disconnected, time.monotonic())
+                if self.relay.error:
+                    raise MirrorError(f"投屏控制协议异常：{self.relay.error}")
+                now = time.monotonic()
+                # Closing the window shuts its control socket before scrcpy
+                # finishes Android cleanup. Let that normal exit complete.
+                if (rc is None and self.relay.client_closed.is_set()
+                        and now - self.relay.client_closed_at < 3):
+                    continue
+                broken = (self.relay.disconnected.is_set()
+                          or (not self.relay.ready.is_set() and now - self.started > 15))
+                previous = (self.connector.address, self.connector.serial)
+                address = self.connected_address(rc, disconnected or broken, time.monotonic())
                 if not address:
                     if not disconnected:
                         logging.info("连接中断，正在重试；关闭控制台可停止")
-                        deadline = time.monotonic() + 60
+                        next_notice = time.monotonic() + 30
                     disconnected = True
-                    if time.monotonic() >= deadline:
-                        self.stop()
-                        print("自动重连未成功。若手机关闭了无线调试，需先在手机重新开启。")
-                        self.connector.interactive()
-                        deadline = time.monotonic() + 60
+                    if time.monotonic() >= next_notice:
+                        logging.warning("仍在自动等待原手机恢复，请确认 Wi-Fi 和无线调试开启；Ctrl+C 可结束")
+                        next_notice = time.monotonic() + 30
+                    time.sleep(2)
                     continue
-                if time.monotonic() - self.started > 30:
+                if rc is None and not broken and not disconnected and time.monotonic() - self.started > 30:
                     self.restarts = 0
-                if restart_needed(previous, address, disconnected, rc is not None):
+                current = (address, self.connector.serial)
+                if restart_needed(previous, current, disconnected or broken, rc is not None):
+                    logging.info("正在恢复投屏：退出码=%s，通道=%s", rc, self.relay.disconnect_reason or '重新核验连接')
                     self.restarts += 1
-                    if self.restarts > 3:
-                        raise MirrorError(f"投屏连续启动失败，请查看 {self.logdir / 'scrcpy.log'}")
-                    time.sleep(min(self.restarts, 3))
+                    # Repeated short outages must not turn into a permanent
+                    # exit. Back off, bounded to keep cancellation responsive.
+                    time.sleep(min(0.5 * 2 ** min(self.restarts - 1, 5), 15))
                     self.spawn()
                 disconnected = False
-                self.bridge.tick(address)
+                self.bridge.tick(self.connector.serial)
         finally:
             self.stop()
 
@@ -579,8 +637,6 @@ def main(argv=None):
     parser.add_argument("--project-dir", type=Path, default=Path(__file__).resolve().parent.parent)
     parser.add_argument("--tools-dir", type=Path, help="覆盖投屏引擎目录，通常无需设置")
     parser.add_argument("--check", action="store_true", help="检查工具和设备状态，不启动投屏")
-    parser.add_argument("--profile", choices=tuple(STREAM_PROFILES), default="fast",
-                        help="fast=低延迟（默认），balanced=较清晰，weak-wifi=弱网")
     parser.add_argument("--max-size", type=int, help="自定义最长边，128–4096")
     parser.add_argument("--bit-rate", help="自定义码率，例如 4M")
     parser.add_argument("--max-fps", type=int, help="自定义最高帧率，1–120")
@@ -595,7 +651,7 @@ def main(argv=None):
         print("无参数：熄屏投屏；normal：亮屏投屏；pair：重新配对并投屏；forget：清除地址并重新发现。")
         return 0
     try:
-        settings = StreamSettings(args.profile, args.max_size, args.bit_rate, args.max_fps,
+        settings = StreamSettings(args.max_size, args.bit_rate, args.max_fps,
                                   args.hwdec, args.video_encoder, args.stats)
     except ValueError as exc:
         parser.error(str(exc))
@@ -620,30 +676,35 @@ def main(argv=None):
             if result.returncode:
                 return 1
         return 0
-    cache = Cache(directory)
-    if args.mode == "forget":
-        cache.clear()
-        print("已清除地址和设备记录，正在重新发现。")
-    connector = Connector(adb, cache)
     if args.diagnose:
+        connector = Connector(adb, Cache(directory))
         address = connector.discover()
         if not address:
             print("未发现已授权的手机，请先连接无线调试，再运行 --diagnose。")
             return 1
-        return 0 if diagnose(adb, address, directory, settings)["successes"] else 1
-    if args.mode == "pair":
-        connector.pair()
-    else:
-        found = connector.discover()
-        if not found:
-            # Give mDNS a short warm-up before asking the user.
-            time.sleep(2)
+        return 0 if diagnose(adb, connector.serial, directory, settings)["successes"] else 1
+    with InstanceLock(directory / 'mirror.lock') as lock:
+        if not lock.acquired:
+            print("投屏已在运行，请使用现有投屏窗口；恢复连接时无需重复启动。")
+            return 0
+        cache = Cache(directory)
+        if args.mode == "forget":
+            cache.clear()
+            print("已清除地址和设备记录，正在重新发现。")
+        connector = Connector(adb, cache)
+        if args.mode == "pair":
+            connector.pair()
+        else:
             found = connector.discover()
-        if not found:
-            connector.interactive()
-    print("连接成功。关闭投屏窗口即可结束；Ctrl+C 停止等待。")
-    print("投屏档位：", settings.description())
-    Monitor(connector, scrcpy, directory, screen_off=args.mode != "normal", settings=settings).run()
+            if not found:
+                # Give mDNS a short warm-up before asking the user.
+                time.sleep(2)
+                found = connector.discover()
+            if not found:
+                connector.interactive()
+        print("连接成功。关闭投屏窗口即可结束；Ctrl+C 停止等待。")
+        print("投屏设置：", settings.description())
+        Monitor(connector, scrcpy, directory, screen_off=args.mode != "normal", settings=settings).run()
     return 0
 
 

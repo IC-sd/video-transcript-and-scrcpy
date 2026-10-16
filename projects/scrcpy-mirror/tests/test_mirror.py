@@ -1,10 +1,13 @@
 import importlib.util
+import itertools
 import json
 import os
 from pathlib import Path
 import subprocess
 import tempfile
 import sys
+import socket
+import threading
 import unittest
 from unittest.mock import Mock, patch
 
@@ -61,7 +64,9 @@ class CoreTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.cache = m.Cache(self.temp.name)
         self.adb = FakeAdb()
-        self.relay = Mock(error=None, forward_port=12345, port=12346)
+        self.relay = Mock(error=None, forward_port=12345, port=12346, last_video_at=0.0)
+        self.relay.disconnected.is_set.return_value = False
+        self.relay.client_closed.is_set.return_value = False
         self.relay.dark_and_reset.return_value = True
         self.relay.wake_dark_reset.return_value = True
         self.relay.wake_light_reset.return_value = True
@@ -152,6 +157,47 @@ class CoreTests(unittest.TestCase):
         self.adb.states['adb-A._adb-tls-connect._tcp'] = True
         self.adb.connections[address] = 'PHONE-A'
         self.assertEqual(c.discover(), address)
+
+    def test_ready_alias_precedes_stale_cached_port_and_is_used_for_stream(self):
+        c = self.target()
+        old, new, alias = c.address, '192.168.4.9:60000', 'adb-A._adb-tls-connect._tcp'
+        self.adb.records = [('adb-A', new)]
+        self.adb.states[alias], self.adb.ids[alias] = True, 'PHONE-A'
+        self.assertEqual(c.discover(), new)
+        self.assertEqual(c.serial, alias)
+        self.assertNotIn(('connect', old), self.adb.calls)
+        self.assertNotIn(('connect', new), self.adb.calls)
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        with patch.object(m.subprocess, 'Popen') as popen:
+            monitor.spawn()
+        self.assertEqual(popen.call_args.args[0][2], alias)
+        self.assertEqual(self.cache.load()['address'], new)
+        self.assertNotIn(alias, self.cache.path.read_text())
+
+    def test_ready_alias_without_broadcast_still_requires_same_identity(self):
+        c = self.target()
+        alias = 'adb-A._adb-tls-connect._tcp'
+        self.adb.states[alias], self.adb.ids[alias] = True, 'PHONE-B'
+        self.assertIsNone(c.discover())
+        self.assertEqual(c.identity, 'PHONE-A')
+        self.adb.ids[alias] = 'PHONE-A'
+        self.assertEqual(c.discover(), c.address)
+        self.assertEqual(c.serial, alias)
+
+    def test_fresh_broadcast_precedes_dead_numeric_port(self):
+        c = self.target()
+        old, new = c.address, '192.168.4.9:60000'
+        self.adb.records = [('adb-A', new)]
+        self.adb.connections[new] = 'PHONE-A'
+        self.assertEqual(c.discover(), new)
+        self.assertNotIn(('connect', old), self.adb.calls)
+
+    def test_alias_transport_cannot_skip_identity_or_accept_arbitrary_selector(self):
+        c = self.target()
+        for selector in ('-d', 'USB-OTHER', 'adb-A._adb-tls-pairing._tcp', 'adb-A;calc'):
+            self.adb.states[selector], self.adb.ids[selector] = True, 'PHONE-A'
+            self.assertFalse(c.accept(c.address, selector))
+        self.assertEqual(c.transport, '')
 
     def test_no_identity_cannot_be_accepted(self):
         c = self.target()
@@ -258,6 +304,54 @@ class CoreTests(unittest.TestCase):
             monitor.run()
         self.assertEqual(popen.call_count, 1)
 
+    def test_window_close_waits_for_cleanup_instead_of_restarting(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        proc = Mock()
+        proc.poll.side_effect = [None, 0, 0]
+        self.relay.disconnected.is_set.return_value = True
+        self.relay.client_closed.is_set.return_value = True
+        self.relay.client_closed_at = 10
+        with patch.object(m.subprocess, 'Popen', return_value=proc) as popen, \
+             patch.object(c, 'recover_once') as recover, patch.object(m.time, 'sleep'), \
+             patch.object(m.time, 'monotonic', return_value=11):
+            monitor.run()
+        self.assertEqual(popen.call_count, 1)
+        recover.assert_not_called()
+
+    def test_instance_lock_blocks_duplicate_and_can_be_reacquired(self):
+        path = Path(self.temp.name) / 'mirror.lock'
+        with m.InstanceLock(path) as first:
+            self.assertTrue(first.acquired)
+            with m.InstanceLock(path) as second:
+                self.assertFalse(second.acquired)
+        with m.InstanceLock(path) as third:
+            self.assertTrue(third.acquired)
+
+    def test_crashed_process_does_not_leave_stale_instance_lock(self):
+        path = Path(self.temp.name) / 'mirror.lock'
+        code = ("import os,sys; sys.path.insert(0,sys.argv[1]); from mirror import InstanceLock; "
+                "lock=InstanceLock(sys.argv[2]); lock.__enter__(); assert lock.acquired; os._exit(0)")
+        result = subprocess.run([sys.executable, '-X', 'utf8', '-B', '-c', code, str(SOURCE.parent), str(path)],
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with m.InstanceLock(path) as lock:
+            self.assertTrue(lock.acquired)
+
+    def test_duplicate_start_does_not_launch_or_forget_running_phone(self):
+        tools = Path(self.temp.name) / 'tools'
+        tools.mkdir()
+        (tools / 'adb.exe').touch()
+        (tools / 'scrcpy.exe').touch()
+        data = Path(self.temp.name) / 'data'
+        data.mkdir()
+        m.Cache(data).save('192.168.4.9:41000', 'PHONE-A')
+        with m.InstanceLock(data / 'mirror.lock'), patch.object(m, 'Monitor') as monitor, \
+             patch.object(m, 'Adb'), patch.object(m.logging, 'basicConfig'), patch.object(m, 'RotatingFileHandler'):
+            self.assertEqual(m.main(['forget', '--project-dir', self.temp.name, '--tools-dir', str(tools)]), 0)
+        monitor.assert_not_called()
+        self.assertEqual(m.Cache(data).load()['identity'], 'PHONE-A')
+
     def test_monitor_restarts_alive_stale_window_after_same_address_recovery(self):
         c = self.target()
         monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name, False)
@@ -265,8 +359,8 @@ class CoreTests(unittest.TestCase):
         old_proc.poll.return_value = None
         new_proc.poll.return_value = 0
         with patch.object(m.subprocess, 'Popen', side_effect=[old_proc, new_proc]) as popen, \
-             patch.object(c, 'recover_once', side_effect=[None, c.address]), \
-             patch.object(m.time, 'sleep'):
+             patch.object(c, 'recover_once', side_effect=[None, None, c.address]), \
+             patch.object(m.time, 'sleep'), patch.object(m.time, 'monotonic', side_effect=itertools.count()):
             monitor.run()
         self.assertEqual(popen.call_count, 2)
         old_proc.terminate.assert_called_once()
@@ -287,16 +381,64 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(popen.call_args.args[0][2], new)
         old_proc.terminate.assert_called_once()
 
-    def test_monitor_stops_after_three_failed_restarts(self):
+    def test_monitor_keeps_recovering_after_three_failed_restarts_with_bounded_backoff(self):
         c = self.target()
         monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name, False)
-        proc = Mock()
-        proc.poll.return_value = 1
-        with patch.object(m.subprocess, 'Popen', return_value=proc) as popen, \
+        failed, closed = Mock(), Mock()
+        failed.poll.return_value, closed.poll.return_value = 2, 0
+        with patch.object(m.subprocess, 'Popen', side_effect=[failed] * 8 + [closed]) as popen, \
              patch.object(c, 'recover_once', return_value=c.address), \
-             patch.object(m.time, 'sleep'), self.assertRaises(m.MirrorError):
+             patch.object(m.time, 'sleep') as sleep, patch.object(m.time, 'monotonic', return_value=0):
             monitor.run()
-        self.assertEqual(popen.call_count, 4)
+        self.assertEqual(popen.call_count, 9)
+        self.assertTrue(all(0 < call.args[0] <= 15 for call in sleep.call_args_list))
+        self.assertIn(unittest.mock.call(15), sleep.call_args_list)
+
+    def test_monitor_transport_failure_restarts_alive_window(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        old, new = Mock(), Mock()
+        old.poll.return_value, new.poll.return_value = None, 0
+        self.relay.disconnected.is_set.return_value = True
+        with patch.object(m.subprocess, 'Popen', side_effect=[old, new]) as popen, \
+             patch.object(c, 'recover_once', return_value=c.address), patch.object(m.time, 'sleep'):
+            monitor.run()
+        self.assertEqual(popen.call_count, 2)
+        old.terminate.assert_called_once()
+
+    def test_startup_without_control_handshake_is_retried_after_deadline(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        old, new = Mock(), Mock()
+        old.poll.return_value, new.poll.return_value = None, 0
+        self.relay.ready.is_set.return_value = False
+        with patch.object(m.subprocess, 'Popen', side_effect=[old, new]) as popen, \
+             patch.object(c, 'recover_once', return_value=c.address), patch.object(m.time, 'sleep'), \
+             patch.object(m.time, 'monotonic', side_effect=itertools.count(0, 20)):
+            monitor.run()
+        self.assertEqual(popen.call_count, 2)
+
+    def test_monitor_waits_beyond_one_minute_without_manual_prompt(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        old, new = Mock(), Mock()
+        old.poll.return_value, new.poll.return_value = 2, 0
+        with patch.object(m.subprocess, 'Popen', side_effect=[old, new]) as popen, \
+             patch.object(c, 'recover_once', side_effect=[None] * 80 + [c.address]), \
+             patch.object(c, 'interactive', side_effect=AssertionError('must recover automatically')), \
+             patch.object(m.time, 'sleep'), patch.object(m.time, 'monotonic', side_effect=itertools.count()):
+            monitor.run()
+        self.assertEqual(popen.call_count, 2)
+
+    def test_forward_cleanup_uses_original_session_after_port_change(self):
+        c = self.target()
+        old = c.address
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        with patch.object(m.subprocess, 'Popen'):
+            monitor.spawn()
+        c.address, c.transport = '192.168.4.9:62000', 'adb-A._adb-tls-connect._tcp'
+        monitor.stop()
+        self.assertIn(('-s', old, 'forward', '--remove', 'tcp:12345'), self.adb.calls)
 
     def test_spawn_uses_selected_device_absolute_adb_and_screen_mode(self):
         c = self.target()
@@ -404,19 +546,18 @@ class CoreTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 packet_size(data)
 
-    def test_fast_profile_halves_configured_bitrate_without_added_video_buffer(self):
-        fast = m.StreamSettings()
-        balanced = m.StreamSettings('balanced')
-        self.assertEqual((fast.max_size, fast.bit_rate, fast.max_fps), (960, '4M', 60))
-        self.assertEqual((balanced.max_size, balanced.bit_rate), (1080, '8M'))
-        self.assertIn('--video-codec=h264', fast.video_args())
-        self.assertIn('--video-buffer=0', fast.video_args())
-        self.assertIn('--hwdec=auto', fast.video_args())
-        self.assertNotIn('--print-fps', fast.video_args())
+    def test_single_default_preserves_detail_without_added_video_buffer(self):
+        settings = m.StreamSettings()
+        self.assertEqual((settings.max_size, settings.bit_rate, settings.max_fps), (1600, '6M', 60))
+        self.assertIn('--video-codec=h264', settings.video_args())
+        self.assertIn('--video-buffer=0', settings.video_args())
+        self.assertIn('--hwdec=auto', settings.video_args())
+        self.assertNotIn('--print-fps', settings.video_args())
+        self.assertNotIn('--no-mipmaps', settings.video_args())
 
-    def test_weak_network_and_custom_settings_survive_spawn(self):
+    def test_maintenance_custom_settings_survive_spawn(self):
         c = self.target()
-        settings = m.StreamSettings('weak-wifi', max_size=800, bit_rate='3m', max_fps=45,
+        settings = m.StreamSettings(max_size=800, bit_rate='3m', max_fps=45,
                                     hwdec='disabled', encoder='c2.vendor.avc.encoder', stats=True)
         monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name, settings=settings)
         with patch.object(m.subprocess, 'Popen') as popen:
@@ -434,7 +575,7 @@ class CoreTests(unittest.TestCase):
     def test_stream_settings_reject_invalid_sizes_rates_and_encoders(self):
         invalid = [dict(max_size=0), dict(max_size=9000), dict(max_fps=0), dict(max_fps=121),
                    dict(bit_rate='0M'), dict(bit_rate='5M --record=x'), dict(bit_rate='100M'),
-                   dict(encoder='--record=x'), dict(hwdec='unrecognized'), dict(profile='unknown')]
+                   dict(encoder='--record=x'), dict(hwdec='unrecognized')]
         for kwargs in invalid:
             with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
                 m.StreamSettings(**kwargs)
@@ -449,6 +590,24 @@ class CoreTests(unittest.TestCase):
             monitor.connected_address(2, False, 29.1)
             monitor.connected_address(None, True, 29.2)
             self.assertEqual(probe.call_count, 8)
+
+    def test_one_health_probe_failure_keeps_window_but_two_idle_failures_recover(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        monitor.relay = self.relay
+        with patch.object(c, 'recover_once', return_value=None):
+            self.assertEqual(monitor.connected_address(None, False, 10), c.address)
+            self.assertIsNone(monitor.connected_address(None, False, 11))
+
+    def test_current_video_prevents_metadata_probe_from_restarting_healthy_window(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        monitor.relay = self.relay
+        self.relay.last_video_at = 10
+        with patch.object(c, 'recover_once', return_value=None):
+            self.assertEqual(monitor.connected_address(None, False, 11), c.address)
+            self.assertEqual(monitor.connected_address(None, False, 12), c.address)
+            self.assertIsNone(monitor.connected_address(None, True, 13))
 
     def test_screen_state_uses_one_adb_request(self):
         self.adb.text = Mock(return_value='mWakefulness=Awake\npowerMode=On')
@@ -516,6 +675,121 @@ class CoreTests(unittest.TestCase):
         diagnose.assert_called_once()
         connector.return_value.pair.assert_not_called()
         monitor.assert_not_called()
+
+
+class RelayStartupTests(unittest.TestCase):
+    def test_empty_startup_probe_is_retried_without_poisoning_live_connection(self):
+        from scrcpy_link import ControlRelay
+        relay = ControlRelay()
+        self.addCleanup(relay.close)
+        server = socket.socket()
+        self.addCleanup(server.close)
+        server.bind(('127.0.0.1', relay.forward_port))
+        server.listen(2)
+        server.settimeout(3)
+        probe = socket.create_connection(('127.0.0.1', relay.port), timeout=3)
+        self.addCleanup(probe.close)
+        first, _ = server.accept()
+        first.close()  # ADB forward exists; Android's server is not ready yet.
+        self.assertEqual(probe.recv(1), b'')
+        client = socket.create_connection(('127.0.0.1', relay.port), timeout=3)
+        self.addCleanup(client.close)
+        backend, _ = server.accept()
+        self.addCleanup(backend.close)
+        backend.sendall(b'\x00frame')
+        self.assertEqual(client.recv(1), b'\x00')
+        self.assertEqual(client.recv(5), b'frame')
+        self.assertFalse(relay.disconnected.is_set())
+        self.assertIsNone(relay.error)
+
+
+class RelaySocketTests(unittest.TestCase):
+    """Exercise real loopback streams: mocks cannot expose dropped bytes/EOF."""
+
+    def setUp(self):
+        from scrcpy_link import ControlRelay
+        self.relay = ControlRelay()
+        self.addCleanup(self.relay.close)
+        self.server = socket.socket()
+        self.server.bind(('127.0.0.1', self.relay.forward_port))
+        self.server.listen(2)
+        self.server.settimeout(3)
+        self.addCleanup(self.server.close)
+        self.video_client = socket.create_connection(('127.0.0.1', self.relay.port), timeout=3)
+        self.addCleanup(self.video_client.close)
+        self.video_server, _ = self.server.accept()
+        self.addCleanup(self.video_server.close)
+        self.video_server.sendall(b'\x00')
+        self.assertEqual(self.video_client.recv(1), b'\x00')
+        self.control_client = socket.create_connection(('127.0.0.1', self.relay.port), timeout=3)
+        self.addCleanup(self.control_client.close)
+        self.control_server, _ = self.server.accept()
+        self.control_server.settimeout(3)
+        self.addCleanup(self.control_server.close)
+        self.assertTrue(self.relay.ready.wait(3))
+
+    def receive(self, sock, size):
+        body = bytearray()
+        while len(body) < size:
+            chunk = sock.recv(size - len(body))
+            self.assertTrue(chunk, 'unexpected EOF')
+            body.extend(chunk)
+        return bytes(body)
+
+    def test_video_is_forwarded_byte_for_byte_without_application_queue(self):
+        payload = bytes(range(256)) * 12288  # 3 MiB, including every byte value.
+        errors = []
+        def send():
+            try:
+                self.video_server.sendall(payload)
+            except OSError as exc:
+                errors.append(exc)
+        sender = threading.Thread(target=send, daemon=True)
+        sender.start()
+        self.assertEqual(self.receive(self.video_client, len(payload)), payload)
+        sender.join(3)
+        self.assertFalse(sender.is_alive())
+        self.assertEqual(errors, [])
+        self.assertGreater(self.relay.last_video_at, 0)
+        self.assertFalse(self.relay.disconnected.is_set())
+
+    def test_idle_static_video_is_not_treated_as_a_disconnect(self):
+        self.assertFalse(self.relay.disconnected.wait(.05))
+        self.assertTrue(self.relay.send(bytes((17,))))
+        self.assertEqual(self.receive(self.control_server, 1), bytes((17,)))
+        self.assertFalse(self.relay.disconnected.is_set())
+
+    def test_video_eof_immediately_signals_monitor(self):
+        self.video_server.shutdown(socket.SHUT_WR)
+        self.assertTrue(self.relay.disconnected.wait(3))
+        self.assertIsNone(self.relay.error)
+        self.assertEqual(self.relay.disconnect_reason, 'Video stream ended')
+
+    def test_control_eof_is_recoverable_instead_of_fatal(self):
+        self.control_server.shutdown(socket.SHUT_WR)
+        self.assertTrue(self.relay.disconnected.wait(3))
+        self.assertIsNone(self.relay.error)
+
+    def test_partial_clipboard_and_recovery_commands_never_interleave_bytes(self):
+        clipboard = bytes([9]) + bytes(8) + bytes([0]) + (6).to_bytes(4, 'big') + b'secret'
+        self.control_client.sendall(clipboard[:9])
+        self.assertTrue(self.relay.reset_video())
+        self.assertEqual(self.receive(self.control_server, 1), bytes((17,)))
+        self.control_client.sendall(clipboard[9:])
+        self.assertEqual(self.receive(self.control_server, len(clipboard)), clipboard)
+        self.control_server.sendall(b'ack')
+        self.assertEqual(self.receive(self.control_client, 3), b'ack')
+
+    def test_malformed_control_packet_still_fails_explicitly(self):
+        self.control_client.sendall(bytes((255,)))
+        self.assertTrue(self.relay.protocol_error.wait(3))
+        self.assertIn('Unsupported', self.relay.error)
+
+    def test_intentional_close_releases_all_relay_threads(self):
+        self.relay.close()
+        self.assertTrue(self.relay.closed.is_set())
+        self.assertTrue(all(not thread.is_alive() for thread in self.relay.threads))
+        self.assertFalse(self.relay.disconnected.is_set())
 
 
 if __name__ == '__main__':
