@@ -64,7 +64,7 @@ class CoreTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.cache = m.Cache(self.temp.name)
         self.adb = FakeAdb()
-        self.relay = Mock(error=None, forward_port=12345, port=12346, last_video_at=0.0)
+        self.relay = Mock(error=None, forward_port=12345, port=12346, last_video_at=0.0, end_origin=None)
         self.relay.disconnected.is_set.return_value = False
         self.relay.client_closed.is_set.return_value = False
         self.relay.dark_and_reset.return_value = True
@@ -308,16 +308,76 @@ class CoreTests(unittest.TestCase):
         c = self.target()
         monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
         proc = Mock()
-        proc.poll.side_effect = [None, 0, 0]
+        proc.poll.side_effect = [None, 0]
+        proc.wait.return_value = 0
         self.relay.disconnected.is_set.return_value = True
         self.relay.client_closed.is_set.return_value = True
         self.relay.client_closed_at = 10
         with patch.object(m.subprocess, 'Popen', return_value=proc) as popen, \
              patch.object(c, 'recover_once') as recover, patch.object(m.time, 'sleep'), \
-             patch.object(m.time, 'monotonic', return_value=11):
+             patch.object(m.time, 'monotonic', return_value=100):
             monitor.run()
         self.assertEqual(popen.call_count, 1)
         recover.assert_not_called()
+        proc.wait.assert_called_once_with(timeout=monitor.EXIT_TIMEOUT)
+        proc.terminate.assert_not_called()
+
+    def test_client_close_timeout_stops_instead_of_reopening(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        proc = Mock()
+        proc.poll.return_value = None
+        proc.wait.side_effect = [subprocess.TimeoutExpired('scrcpy', monitor.EXIT_TIMEOUT), 0]
+        self.relay.client_closed.is_set.return_value = True
+        self.relay.end_origin = 'client'
+        with patch.object(m.subprocess, 'Popen', return_value=proc) as popen, \
+             patch.object(c, 'recover_once') as recover, patch.object(m.time, 'sleep'):
+            monitor.run()
+        self.assertEqual(popen.call_count, 1)
+        recover.assert_not_called()
+        proc.terminate.assert_called_once()
+
+    def test_remote_close_timeout_still_recovers(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        old, new = Mock(), Mock()
+        old.poll.return_value, new.poll.return_value = None, 0
+        old.wait.side_effect = [subprocess.TimeoutExpired('scrcpy', monitor.EXIT_TIMEOUT), 0]
+        self.relay.disconnected.is_set.return_value = True
+        self.relay.end_origin = 'remote'
+        with patch.object(m.subprocess, 'Popen', side_effect=[old, new]) as popen, \
+             patch.object(c, 'recover_once', return_value=c.address), patch.object(m.time, 'sleep'):
+            monitor.run()
+        self.assertEqual(popen.call_count, 2)
+
+    def test_window_close_during_failed_discovery_cancels_waiting(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        proc = Mock()
+        proc.poll.return_value = None
+        def discover(*_):
+            proc.poll.return_value = 0
+            return None
+        with patch.object(m.subprocess, 'Popen', return_value=proc) as popen, \
+             patch.object(monitor, 'connected_address', side_effect=discover), patch.object(m.time, 'sleep'):
+            monitor.run()
+        self.assertEqual(popen.call_count, 1)
+
+    def test_window_close_during_reconnect_backoff_cancels_relaunch(self):
+        c = self.target()
+        monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
+        proc = Mock()
+        proc.poll.return_value = None
+        def discover():
+            c.address = '192.168.4.9:62000'
+            return c.address
+        def sleep(seconds):
+            if seconds == .5:
+                proc.poll.return_value = 0
+        with patch.object(m.subprocess, 'Popen', return_value=proc) as popen, \
+             patch.object(c, 'recover_once', side_effect=discover), patch.object(m.time, 'sleep', side_effect=sleep):
+            monitor.run()
+        self.assertEqual(popen.call_count, 1)
 
     def test_instance_lock_blocks_duplicate_and_can_be_reacquired(self):
         path = Path(self.temp.name) / 'mirror.lock'
@@ -399,6 +459,7 @@ class CoreTests(unittest.TestCase):
         monitor = m.Monitor(c, Path(self.temp.name) / 'scrcpy.exe', self.temp.name)
         old, new = Mock(), Mock()
         old.poll.return_value, new.poll.return_value = None, 0
+        old.wait.return_value = 2
         self.relay.disconnected.is_set.return_value = True
         with patch.object(m.subprocess, 'Popen', side_effect=[old, new]) as popen, \
              patch.object(c, 'recover_once', return_value=c.address), patch.object(m.time, 'sleep'):
@@ -769,6 +830,44 @@ class RelaySocketTests(unittest.TestCase):
         self.control_server.shutdown(socket.SHUT_WR)
         self.assertTrue(self.relay.disconnected.wait(3))
         self.assertIsNone(self.relay.error)
+
+    def test_client_fin_is_forwarded_to_android_and_not_classified_as_network_loss(self):
+        self.control_client.shutdown(socket.SHUT_WR)
+        self.assertTrue(self.relay.client_closed.wait(3))
+        self.assertEqual(self.control_server.recv(1), b'')
+        self.assertEqual(self.relay.end_origin, 'client')
+        self.assertFalse(self.relay.disconnected.is_set())
+
+    def test_remote_eof_followed_by_client_cleanup_preserves_remote_origin(self):
+        self.video_server.shutdown(socket.SHUT_WR)
+        self.assertTrue(self.relay.disconnected.wait(3))
+        self.control_client.shutdown(socket.SHUT_WR)
+        self.assertTrue(self.relay.client_closed.wait(3))
+        self.assertEqual(self.relay.end_origin, 'remote')
+
+    def test_client_close_followed_by_android_cleanup_preserves_client_origin(self):
+        self.control_client.shutdown(socket.SHUT_WR)
+        self.assertTrue(self.relay.client_closed.wait(3))
+        self.video_server.shutdown(socket.SHUT_WR)
+        self.assertTrue(self.relay.disconnected.wait(3))
+        self.assertEqual(self.relay.end_origin, 'client')
+
+    def test_local_video_write_error_is_a_client_close_not_remote_loss(self):
+        source, destination = Mock(), Mock()
+        source.recv.return_value = b'frame'
+        destination.sendall.side_effect = ConnectionResetError('local window closed')
+        self.relay._pump(source, destination, True)
+        self.assertTrue(self.relay.client_closed.is_set())
+        self.assertFalse(self.relay.disconnected.is_set())
+        self.assertEqual(self.relay.end_origin, 'client')
+
+    def test_remote_video_read_error_is_a_recoverable_network_loss(self):
+        source, destination = Mock(), Mock()
+        source.recv.side_effect = ConnectionResetError('remote stream closed')
+        self.relay._pump(source, destination, True)
+        self.assertTrue(self.relay.disconnected.is_set())
+        self.assertFalse(self.relay.client_closed.is_set())
+        self.assertEqual(self.relay.end_origin, 'remote')
 
     def test_partial_clipboard_and_recovery_commands_never_interleave_bytes(self):
         clipboard = bytes([9]) + bytes(8) + bytes([0]) + (6).to_bytes(4, 'big') + b'secret'

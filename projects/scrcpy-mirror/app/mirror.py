@@ -512,6 +512,7 @@ class ScreenBridge:
 
 class Monitor:
     HEALTH_INTERVAL = 5.0
+    EXIT_TIMEOUT = 8
 
     def __init__(self, connector, scrcpy, logdir, screen_off=True, settings=None):
         self.connector, self.scrcpy = connector, Path(scrcpy)
@@ -525,6 +526,7 @@ class Monitor:
         self.next_probe = 0.0
         self.probe_failures = 0
         self.session_transport = ""
+        self.resolved_exit = None
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
@@ -563,7 +565,30 @@ class Monitor:
         self.started = time.monotonic()
         self.next_probe = 0.0
         self.probe_failures = 0
+        self.resolved_exit = None
         logging.info("投屏启动：%s，熄屏=%s，%s", self.connector.address, self.screen_off, self.settings.description())
+
+    def exit_status(self):
+        """Let scrcpy report normal close (0) vs disconnection (2) before retrying."""
+        if self.resolved_exit is not None:
+            return self.resolved_exit
+        rc = self.proc.poll()
+        if rc is None and (self.relay.client_closed.is_set() or self.relay.disconnected.is_set()):
+            origin = self.relay.end_origin
+            # Release both halves of the relay so Android and the client can
+            # finish cleanup. A closed socket alone does not select a restart.
+            self.relay.close()
+            try:
+                rc = self.proc.wait(timeout=self.EXIT_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                if origin == 'client':
+                    logging.info("本机窗口已关闭，停止等待退出清理，不再重连")
+                    rc = 0
+                else:
+                    logging.warning("断线后的投屏进程清理超时，将重建连接")
+                    rc = 2
+            self.resolved_exit = rc
+        return rc
 
     def connected_address(self, rc, disconnected, now):
         # Keep full identity verification on reconnect, but do not shell getprop every second.
@@ -589,23 +614,21 @@ class Monitor:
         try:
             while True:
                 time.sleep(1)
-                rc = self.proc.poll()
+                rc = self.exit_status()
                 if rc == 0:
                     logging.info("投屏窗口已关闭，结束运行")
                     return
                 if self.relay.error:
                     raise MirrorError(f"投屏控制协议异常：{self.relay.error}")
                 now = time.monotonic()
-                # Closing the window shuts its control socket before scrcpy
-                # finishes Android cleanup. Let that normal exit complete.
-                if (rc is None and self.relay.client_closed.is_set()
-                        and now - self.relay.client_closed_at < 3):
-                    continue
                 broken = (self.relay.disconnected.is_set()
                           or (not self.relay.ready.is_set() and now - self.started > 15))
                 previous = (self.connector.address, self.connector.serial)
                 address = self.connected_address(rc, disconnected or broken, time.monotonic())
                 if not address:
+                    if self.exit_status() == 0:
+                        logging.info("投屏窗口已关闭，取消自动重连")
+                        return
                     if not disconnected:
                         logging.info("连接中断，正在重试；关闭控制台可停止")
                         next_notice = time.monotonic() + 30
@@ -624,6 +647,11 @@ class Monitor:
                     # Repeated short outages must not turn into a permanent
                     # exit. Back off, bounded to keep cancellation responsive.
                     time.sleep(min(0.5 * 2 ** min(self.restarts - 1, 5), 15))
+                    # Discovery and backoff can take seconds. Honour a close
+                    # made during either before replacing the existing window.
+                    if self.exit_status() == 0:
+                        logging.info("投屏窗口已关闭，取消自动重连")
+                        return
                     self.spawn()
                 disconnected = False
                 self.bridge.tick(self.connector.serial)

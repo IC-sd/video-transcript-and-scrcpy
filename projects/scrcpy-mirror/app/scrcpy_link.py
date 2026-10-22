@@ -62,6 +62,7 @@ class ControlRelay:
         self.disconnected = threading.Event()
         self.client_closed = threading.Event()
         self.client_closed_at = 0.0
+        self.end_origin = None
         self.disconnect_reason = None
         self.protocol_error = threading.Event()
         self.lock = threading.Lock()
@@ -92,9 +93,21 @@ class ControlRelay:
         return sock
 
     def _lost(self, reason):
-        if not self.closed.is_set():
-            self.disconnect_reason = reason
-            self.disconnected.set()
+        with self.lifecycle_lock:
+            if not self.closed.is_set():
+                if self.end_origin is None:
+                    self.end_origin = 'remote'
+                self.disconnect_reason = self.disconnect_reason or reason
+                self.disconnected.set()
+
+    def _client_ended(self):
+        with self.lifecycle_lock:
+            if not self.closed.is_set():
+                if self.end_origin is None:
+                    self.end_origin = 'client'
+                if not self.client_closed.is_set():
+                    self.client_closed_at = time.monotonic()
+                self.client_closed.set()
 
     def _accept(self):
         video = True
@@ -141,18 +154,25 @@ class ControlRelay:
             self.listener.close()
 
     def _pump(self, source, destination, video):
+        stage = 'read'
         try:
             while not self.closed.is_set():
+                stage = 'read'
                 data = source.recv(65536)
                 if not data:
                     self._lost('Video stream ended' if video else 'Control stream ended')
                     break
+                stage = 'write'
                 destination.sendall(data)
                 if video:
                     self.video_bytes += len(data)
                     self.last_video_at = time.monotonic()
         except OSError:
-            self._lost('Video transport failed' if video else 'Control transport failed')
+            if stage == 'read':
+                self._lost('Video transport failed' if video else 'Control transport failed')
+            else:
+                # The local consumer closing its socket is not a Wi-Fi loss.
+                self._client_ended()
         finally:
             try:
                 destination.shutdown(socket.SHUT_WR)
@@ -165,8 +185,7 @@ class ControlRelay:
             while not self.closed.is_set():
                 data = client.recv(65536)
                 if not data:
-                    self.client_closed_at = time.monotonic()
-                    self.client_closed.set()
+                    self._client_ended()
                     break
                 buffer.extend(data)
                 while (size := packet_size(buffer)) is not None:
@@ -179,7 +198,14 @@ class ControlRelay:
                 self.error = str(exc)
                 self.protocol_error.set()
         except OSError:
-            self._lost('Client control transport failed')
+            self._client_ended()
+        finally:
+            # Forward the client's FIN. Otherwise Android may keep the control
+            # session alive while scrcpy is waiting for exit cleanup to finish.
+            try:
+                self.control.shutdown(socket.SHUT_WR)
+            except OSError:
+                pass
 
     def send(self, packet):
         if not self.ready.is_set() or self.closed.is_set():
