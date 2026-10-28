@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="tJS1gV6ScurAnstlRDWubY">
+<head data-page-node-id="QHbP9sN0m2ZUYyQKYbXWh3">
+<meta charset="UTF-8" data-page-node-id="vohX4IXQnFAPKMjSCe2WT1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" data-page-node-id="JBHw3qf9qITtcdryKSESJM">
+<title>中项49过程ITTO - 系统集成项目管理工程师 | 十五至尊图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:"Microsoft YaHei",-apple-system,"PingFang SC",sans-serif;background:#f0f2f5;color:#333;font-size:13px;line-height:1.6}
+.header{background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;padding:18px 24px;text-align:center}
+.header h1{font-size:22px;font-weight:600;margin-bottom:4px;letter-spacing:1px}
+.header p{font-size:12px;opacity:.85}
+.subheader{background:#fff;padding:8px 16px;border-bottom:1px solid #e0e0e0;font-size:12px;color:#666;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 16px}
+.container{max-width:1400px;margin:16px auto;padding:0 16px}
+
+/* 统计栏 */
+.stats-bar{display:flex;gap:16px;justify-content:center;padding:12px;background:#fff;border-radius:8px;margin-bottom:16px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stat-item{text-align:center;padding:6px 16px;border-radius:6px;font-size:12px}
+.s-startup{background:#e8f6f3;color:#0e6655}.s-planning{background:#ebf5fb;color:#186179}.s-execution{background:#fef9e7;color:#856404}.s-monitoring{background:#fdedec;color:#a93226}.s-closing{background:#f5eef8;color:#5b2c6f}
+.stat-num{font-size:20px;font-weight:700;display:block}.stat-label{font-size:11px;opacity:.8}
+
+/* 矩阵表格 */
+.matrix-wrap{overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.matrix-table{width:auto;min-width:1100px;border-collapse:collapse;font-size:12.5px}
+.matrix-table th{color:#fff;padding:10px 12px;text-align:center;font-weight:500;border:1px solid rgba(255,255,255,.3);white-space:nowrap;position:sticky;top:0;z-index:10}
+.th-area{background:#34495e;width:148px;min-width:148px}
+.th-startup{background:#117a65;width:128px}.th-plan{background:#21618c;width:280px}
+.th-exec{background:#9a7d0a;width:180px}.th-monit{background:#922b21;width:220px}.th-close{background:#6c3483;width:138px}
+.matrix-table td{padding:8px 10px;border:1px solid #dde2e8;vertical-align:top;line-height:1.85;min-height:40px}
+.td-area{background:#f0f3f7;font-weight:600;color:#2c3e50;text-align:left;padding-left:14px;position:sticky;left:0;z-index:5}
+
+/* 过程标签 */
+.pt{display:inline-block;padding:3px 9px;margin:2px 2px;border-radius:4px;cursor:pointer;font-size:11.5px;
+  border:1px solid transparent;transition:all .15s;white-space:nowrap}
+.pt:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.ps{background:#e8f6f3;color:#0e6655;border-color:#a3d9cc}.ps:hover{background:#d0efdf;color:#0b5345}
+.pp{background:#ebf5fb;color:#186179;border-color:#a9cce3}.pp:hover{background:#d4eaf7;color:#0e6380}
+.pe{background:#fef9e7;color:#856404;border-color:#f0d68c}.pe:hover{background:#fcf3cf;color:#7d6608}
+.pm{background:#fdedec;color:#a93226;border-color:#f5b7b1}.pm:hover{background:#fadbd8;color:#922b21}
+.pc{background:#f5eef8;color:#5b2c6f;border-color:#d7bde2}.pc:hover{background:#ebdef0;color:#4a235a}
+
+/* 弹窗 */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:1000;
+  justify-content:center;align-items:flex-start;padding:30px 10px;overflow-y:auto}
+.modal-overlay.on{display:flex}
+.modal-box{background:#fff;border-radius:10px;width:1560px;max-width:98%;box-shadow:0 10px 45px rgba(0,0,0,.3);
+  animation:mIn .22s ease}
+@keyframes mIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.m-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:2px solid #eee}
+.m-title{font-size:17px;font-weight:600;color:#1a5276;display:flex;align-items:center;gap:10px}
+.m-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;color:#fff}
+.m-close{width:32px;height:32px;border:none;background:#f5f5f5;border-radius:50%;cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;color:#888;transition:all .15s}
+.m-close:hover{background:#e74c3c;color:#fff}
+.m-body{padding:0;overflow-x:auto}
+.it{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.it th{background:#34495e;color:#fff;padding:9px 8px;text-align:center;font-weight:600;
+  border:1px solid #2c3e50;font-size:12.5px}
+.it th:nth-child(1){width:12%}
+.it th:nth-child(2){width:20%}
+.it th:nth-child(3){width:15%}
+.it th:nth-child(4){width:18%}
+.it th:nth-child(5){width:18%}
+.it th:nth-child(6){width:17%}
+.it td{padding:9px 8px;border:1px solid #dde2e8;vertical-align:top;line-height:1.7;background:#fff;font-size:11.5px}
+.it td:first-child{background:#f0f3f7;font-weight:600;color:#1a5276}
+.it ul{margin:0;padding-left:0;list-style:none}
+.it li{margin:0 0 8px;padding:0;line-height:1.5}
+.it li:last-child{margin-bottom:0}
+.it .sub{display:block;margin:0 0 0 12px;line-height:1.28}
+.it .todo{color:#a0a6ad;font-style:italic}
+.hd{background:#fff3cd;padding:1px 4px;border-radius:3px;font-weight:500;font-size:11.5px}
+.de{background:#f8f9fa;border:1px solid #dee2e6;border-radius:5px;padding:8px 12px;margin-top:4px;font-size:11.5px}
+.de-t{font-weight:600;color:#c0392b;margin-bottom:4px;font-size:12px}
+.f-h{color:#c0392b;font-size:13px;letter-spacing:1px}
+.f-star{color:#e0a800;font-weight:400}
+.f-note{color:#888;font-size:11.5px}
+.f-src{margin-top:5px;padding:5px 9px;background:#f4f6f8;border-left:3px solid #bdc3c7;border-radius:0 4px 4px 0;
+  color:#7f8c8d;font-size:11px;line-height:1.6}
+.it .kw{color:#c0392b;font-weight:600}
+.m-foot{padding:10px 20px;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;
+  background:#fafbfc;border-radius:0 0 10px 10px}
+.nb{display:flex;gap:6px}
+.nb button{padding:5px 14px;border:1px solid #ddd;background:#fff;border-radius:5px;cursor:pointer;font-size:12px;transition:all .15s}
+.nb button:hover:not(:disabled){background:#3498db;color:#fff;border-color:#3498db}
+.nb button:disabled{opacity:.4;cursor:not-allowed}
+.m-count{font-size:11.5px;color:#888}
+.kbd{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:calc(16px + env(safe-area-inset-left,0px));background:rgba(0,0,0,.72);color:#fff;
+  padding:6px 12px;border-radius:6px;font-size:11px;z-index:999;pointer-events:none}
+/* 顶部按钮组（副标题栏内，随页面滚动，不悬浮） */
+.topbtns{display:inline-flex;gap:8px;align-items:center;flex:none}
+.topbtns button{line-height:1.2;flex:none}
+.pt,.gl-btn,.theme-btn,.nb button,.m-close{touch-action:manipulation}
+.gl-btn:active,.theme-btn:active,.nb button:active,.m-close:active{filter:brightness(.88)}
+.gl-btn{padding:8px 18px;border:none;border-radius:22px;
+  background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+  box-shadow:0 3px 12px rgba(26,82,118,.4);transition:all .15s;font-family:inherit}
+.theme-btn{padding:8px 16px;border:none;border-radius:22px;
+  background:linear-gradient(135deg,#3a4656,#5d6b7d);color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+  box-shadow:0 3px 12px rgba(0,0,0,.35);transition:all .15s;font-family:inherit}
+.theme-btn:hover,.gl-btn:hover{transform:translateY(-2px)}
+.gl-wrap{padding:18px 24px;max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);overflow-y:auto}
+.gl-sec{margin-bottom:20px}
+.gl-sec-t{font-size:14.5px;font-weight:700;color:#1a5276;padding:8px 12px;border-radius:6px;margin-bottom:10px;
+  background:#ebf5fb;border-left:4px solid #2980b9}
+.gl-sec-t.gold{color:#7d6608;background:#fef9e7;border-left-color:#b7950b}
+.gl-sec-t.red{color:#922b21;background:#fdedec;border-left-color:#cb4335}
+.gl-card{background:#fff;border:1px solid #e0e5ea;border-radius:8px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.gl-card h4{font-size:13px;color:#2c3e50;margin-bottom:8px}
+.gl-card h4 .tag{display:inline-block;font-size:11px;font-weight:500;padding:1px 8px;border-radius:10px;margin-left:8px;vertical-align:1px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:6px 0}
+.cnode{display:inline-block;padding:4px 10px;border-radius:5px;font-size:12px;font-weight:500;line-height:1.5}
+.cn-out{background:#fef9e7;color:#7d6608;border:1px solid #f0d68c}
+.cn-mon{background:#fdedec;color:#922b21;border:1px solid #f5b7b1}
+.cn-doc{background:#ebf5fb;color:#186179;border:1px solid #a9cce3;border-style:dashed;font-weight:600}
+.cn-cl{background:#f5eef8;color:#5b2c6f;border:1px solid #d7bde2}
+.carr{color:#95a5a6;font-weight:700;font-size:14px}
+.gl-card p{font-size:12.5px;color:#555;margin:4px 0;line-height:1.8}
+.gl-card p b{color:#c0392b;font-weight:600}
+.gl-ul{margin:4px 0 0;padding-left:0;list-style:none}
+.gl-ul li{font-size:12.5px;color:#555;padding:3px 0 3px 16px;position:relative;line-height:1.7}
+.gl-ul li:before{content:"◆";position:absolute;left:2px;top:3px;font-size:9px;color:#2980b9}
+.gl-ul li b{color:#c0392b;font-weight:600}
+/* 案例必背内容样式 */
+.gl-card h5{font-size:12.5px;color:#1a5276;margin:12px 0 4px;font-weight:700}
+.gl-card h5:first-child{margin-top:0}
+.gl-st{font-size:12.3px;font-weight:700;color:#7d6608;margin:10px 0 3px}
+.gl-card table{width:100%;border-collapse:collapse;margin:6px 0 8px;font-size:11.8px;background:#fff}
+.gl-card th{background:#eaf2f8;color:#1a5276;font-weight:600;padding:5px 9px;border:1px solid #d3dce6;text-align:left}
+.gl-card td{padding:5px 9px;border:1px solid #dfe5ec;color:#454f59;vertical-align:top;line-height:1.65}
+.gl-card td b{color:#1a5276}
+.mk-y{color:#1e8449;font-weight:700}.mk-n{color:#c0392b;font-weight:700}
+.gl-flow{font-size:12px;background:#f4f8fb;border:1px dashed #a9cce3;border-radius:5px;padding:6px 10px;margin:6px 0;color:#186179;line-height:1.75}
+/* ===== 深色模式 ===== */
+body.dark{background:#14181f;color:#cfd8e3}
+body.dark .header{background:linear-gradient(135deg,#0d2537,#174e6e)}
+body.dark .subheader{background:#1b222d;color:#9fb0c0;border-bottom-color:#2a3442}
+body.dark .stats-bar{background:#1b222d;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+body.dark .stat-item[style]{background:#242e3c!important;color:#cfd8e3!important}
+body.dark .s-startup{background:#0f2e28;color:#5fd3b3}
+body.dark .s-planning{background:#12293e;color:#6db3e8}
+body.dark .s-execution{background:#2e2812;color:#e0c25f}
+body.dark .s-monitoring{background:#33191a;color:#ef9a9a}
+body.dark .s-closing{background:#291b33;color:#c9a6dc}
+body.dark .matrix-wrap{background:#1b222d;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+body.dark .matrix-table td{border-color:#2a3442}
+body.dark .td-area{background:#222b38;color:#d5deea}
+body.dark .ps{background:#0f2e28;color:#5fd3b3;border-color:#1d5c4b}
+body.dark .ps:hover{background:#14443a;color:#8ce8c9}
+body.dark .pp{background:#12293e;color:#7cb9e8;border-color:#1f4e73}
+body.dark .pp:hover{background:#173a57;color:#a3d0f0}
+body.dark .pe{background:#2e2812;color:#e3c567;border-color:#6b5a1e}
+body.dark .pe:hover{background:#403619;color:#f0d98c}
+body.dark .pm{background:#331a1b;color:#ef9a9a;border-color:#6e3033}
+body.dark .pm:hover{background:#452225;color:#f7b8b8}
+body.dark .pc{background:#281b33;color:#c9a6dc;border-color:#53336b}
+body.dark .pc:hover{background:#372548;color:#dfc0ef}
+body.dark .modal-overlay{background:rgba(0,0,0,.7)}
+body.dark .modal-box{background:#1b222d;box-shadow:0 10px 45px rgba(0,0,0,.6)}
+body.dark .m-head{border-bottom-color:#2a3442}
+body.dark .m-title{color:#7cb9e8}
+body.dark .m-close{background:#242e3c;color:#9fb0c0}
+body.dark .m-close:hover{background:#e74c3c;color:#fff}
+body.dark .m-foot{background:#161c25;border-top-color:#2a3442}
+body.dark .nb button{background:#242e3c;border-color:#3a4656;color:#cfd8e3}
+body.dark .nb button:hover:not(:disabled){background:#3498db;color:#fff;border-color:#3498db}
+body.dark .m-count{color:#8899aa}
+body.dark .it td{background:#1b222d;border-color:#2a3442;color:#cfd8e3}
+body.dark .it td:first-child{background:#222b38;color:#7cb9e8}
+body.dark .it .todo{color:#5d6b7d}
+body.dark .hd{background:#3a3117;color:#e3c567}
+body.dark .de{background:#222b38;border-color:#3a4656;color:#cfd8e3}
+body.dark .de-t{color:#ef8a7a}
+body.dark .f-src{background:#222b38;border-left-color:#4a5768;color:#93a5b8}
+body.dark .it .kw{color:#ef8a7a}
+body.dark .f-note{color:#7d8fa3}
+body.dark .gl-card{background:#1f2836;border-color:#2f3b4c;box-shadow:none}
+body.dark .gl-card h4{color:#d5deea}
+body.dark .gl-sec-t{background:#12293e;color:#7cb9e8}
+body.dark .gl-sec-t.gold{background:#2e2812;color:#e3c567}
+body.dark .gl-sec-t.red{background:#331a1b;color:#ef9a9a}
+body.dark .gl-card p{color:#aebccb}
+body.dark .gl-ul li{color:#aebccb}
+body.dark .cn-out{background:#2e2812;color:#e3c567;border-color:#6b5a1e}
+body.dark .cn-mon{background:#331a1b;color:#ef9a9a;border-color:#6e3033}
+body.dark .cn-doc{background:#12293e;color:#7cb9e8;border-color:#1f4e73}
+body.dark .cn-cl{background:#281b33;color:#c9a6dc;border-color:#53336b}
+body.dark .carr{color:#5d6b7d}
+body.dark .gl-card h5{color:#8ec4ef}
+body.dark .gl-st{color:#e3c567}
+body.dark .gl-card table{background:#1b222d}
+body.dark .gl-card th{background:#20313f;color:#8ec4ef;border-color:#33414f}
+body.dark .gl-card td{color:#aebccb;border-color:#2a3442;background:#1b222d}
+body.dark .gl-card td b{color:#8ec4ef}
+body.dark .mk-y{color:#7ddba3}
+body.dark .mk-n{color:#ef8a7a}
+body.dark .gl-flow{background:#12293e;border-color:#1f4e73;color:#a3d0f0}
+@media (max-width:768px){.gl-card table{font-size:10.8px}.gl-card th,.gl-card td{padding:4px 6px}}
+/* 移动端适配 */
+@media (max-width:768px){
+  body{font-size:12.5px}
+  .header{padding:14px 12px}
+  .header h1{font-size:17px;letter-spacing:0}
+  .header p{font-size:11px}
+  .subheader{padding:8px 10px;font-size:11px}
+  .container{margin:10px auto;padding:0 8px}
+  .stats-bar{gap:6px;padding:8px;margin-bottom:10px}
+  .stat-item{padding:4px 8px;font-size:11px;flex:1 1 30%}
+  .stat-num{font-size:15px}
+  .stat-label{font-size:10px}
+  .matrix-table{font-size:11px;min-width:980px}
+  .matrix-table td{padding:6px}
+  .pt{font-size:10.5px;padding:6px 9px;margin:3px 2px}
+  .th-area{width:92px;min-width:92px}
+  .modal-overlay{padding:10px 6px}
+  .modal-box{width:100%;max-width:100%}
+  .m-head{padding:10px 12px}
+  .m-title{font-size:14px;gap:6px;flex-wrap:wrap}
+  .m-badge{font-size:10px;padding:2px 6px}
+  .m-close{width:36px;height:36px;font-size:17px;flex:none}
+  .m-body{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .it{min-width:820px}
+  .it th{padding:7px 5px;font-size:11px}
+  .it td{padding:7px 6px;font-size:10.8px}
+  .it .sub{margin-left:9px}
+  .m-foot{padding:8px 12px}
+  .nb button{padding:9px 14px;font-size:11.5px}
+  .topbtns{gap:6px}
+  .topbtns .gl-btn,.topbtns .theme-btn{padding:8px 11px;font-size:12px}
+  .kbd{display:none}
+}
+@media (hover:none){
+  .pt:hover{transform:none;box-shadow:none}
+  .pt:active{filter:brightness(.9)}
+}
+@media print{.modal-overlay,.kbd,.stats-bar,.subheader{display:none}.matrix-table th{position:static}
+.td-area{position:static}body{background:#fff}}
+
+/* 可逐层展开的ITTO知识说明 */
+#mo .modal-box{width:1760px;display:flex;flex-direction:column;max-height:calc(100vh - 60px);max-height:calc(100dvh - 60px);overflow:hidden}
+#mo .m-head,#mo .m-foot{flex:none}
+#mo .m-body{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+#mo .it th{position:sticky;top:0;z-index:2}
+#mo .it th:nth-child(1){width:9%}
+#mo .it th:nth-child(2){width:17%}
+#mo .it th:nth-child(3){width:12%}
+#mo .it th:nth-child(4){width:22%}
+#mo .it th:nth-child(5){width:21%}
+#mo .it th:nth-child(6){width:19%}
+.detail-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 14px;padding:8px 16px;background:#f4f8fb;border-bottom:1px solid #dce5ed;color:#52677b;font-size:11px;flex:none}
+.detail-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.detail-actions button{font:inherit;cursor:pointer;color:#1a5276;background:#fff;border:1px solid #bfd0df;border-radius:5px;padding:5px 9px;touch-action:manipulation}
+.detail-actions button:hover{background:#e7f2fa}
+.detail-actions button:focus-visible,.term-detail>summary:focus-visible{outline:2px solid #2980b9;outline-offset:2px}
+.detail-count{font-variant-numeric:tabular-nums;color:#758697;margin-right:4px;white-space:nowrap}
+.it .term-line{margin:0 0 7px}
+.it .term-line:last-child{margin-bottom:0}
+.it .term-line.subline{margin-left:10px;margin-bottom:3px}
+.term-detail{min-width:0}
+.term-detail>summary{display:flex;align-items:baseline;gap:4px;cursor:pointer;list-style:none;border-radius:4px;padding:2px 3px;line-height:1.6;overflow-wrap:anywhere}
+.term-detail>summary::-webkit-details-marker{display:none}
+.term-detail>summary:before{content:'▸';color:#4780a8;flex:none;font-size:11px;width:9px}
+.term-detail[open]>summary:before{content:'▾'}
+.term-detail>summary:hover{background:#edf5fb}
+.term-detail[open]>summary{background:#eaf3fa;color:#175c8d}
+.term-title{min-width:0;flex:1}
+.term-hint{color:#62839d;border:1px solid #d6e4ee;border-radius:8px;font-size:10px;padding:0 5px;white-space:nowrap;flex:none}
+.term-body{margin:4px 0 7px 12px;padding:8px 9px;border-left:2px solid #94b9d5;border-radius:0 5px 5px 0;background:#f5f8fb;font-weight:400;color:#3d5366;line-height:1.75;overflow-wrap:anywhere}
+.term-body p{margin:0 0 6px}
+.term-body p:last-child{margin-bottom:0}
+.term-section{color:#58748a;font-size:10.5px;margin:6px 0 3px;font-weight:600}
+.it .term-children{padding:0;margin:0;list-style:none}
+.it .term-children>li{margin:3px 0;padding:0}
+.term-plain{display:block;padding:2px 0 2px 10px;position:relative}
+.term-plain:before{content:'·';position:absolute;left:0;color:#6d8da7}
+body.dark .detail-toolbar{background:#172838;border-color:#2c4052;color:#a3b5c6}
+body.dark .detail-actions button{background:#233548;border-color:#3a536a;color:#c6e1f5}
+body.dark .detail-actions button:hover{background:#2c455c}
+body.dark .detail-count{color:#9caec0}
+body.dark .term-detail>summary:before{color:#85b9df}
+body.dark .term-detail>summary:hover{background:#243749}
+body.dark .term-detail[open]>summary{background:#263f54;color:#a8d7fa}
+body.dark .term-hint{border-color:#3a5065;color:#94b9d4}
+body.dark .term-body{background:#172838;color:#bfd0df;border-left-color:#3f6a8a}
+body.dark .term-section{color:#90afc6}
+@media(max-width:768px){
+ #mo .modal-box{max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px)}
+ #mo .it{min-width:1120px}
+ .detail-toolbar{padding:6px 10px;gap:4px;font-size:10.5px}
+ .detail-actions button{padding:6px 8px}
+ .detail-count{font-size:10px}
+ .term-body{padding:6px;margin-left:7px}
+}
+@media print{.detail-toolbar{display:none}}
+
+
+#mo .m-foot{gap:8px 14px;flex-wrap:wrap}
+#mo .detail-actions{font-size:11px}
+.study-modal .modal-box{width:1120px;display:flex;flex-direction:column;max-height:calc(100vh - 60px);max-height:calc(100dvh - 60px);overflow:hidden}
+.study-modal .m-head{flex:none}
+.study-modal .gl-wrap{padding:0 20px 16px;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain}
+.study-nav{position:sticky;top:0;z-index:3;display:flex;gap:6px;overflow:auto;white-space:nowrap;padding:12px 0;background:#fff;border-bottom:1px solid #dce4ec;margin-bottom:14px;scrollbar-width:thin}
+.study-nav button{font:inherit;font-size:12px;border:1px solid #d3dfe9;background:#f3f7fa;color:#315e7c;border-radius:5px;padding:6px 10px;cursor:pointer;flex:none;touch-action:manipulation}
+.study-nav button:hover,.study-nav button:focus-visible{background:#e3f0fa;border-color:#6a9fc5}
+.study-section{scroll-margin-top:60px;padding:16px;margin-bottom:14px}
+.study-section h4{display:flex;align-items:center;gap:9px;font-size:15px;border-bottom:1px solid #e4eaf0;padding-bottom:10px;margin-bottom:12px}
+.study-section h4>span{font-size:11px;color:#4682ad;letter-spacing:1px}
+.study-section h5{font-size:12.5px;margin-top:14px}
+.study-section p,.study-section .gl-ul li{font-size:12px;line-height:1.85}
+.study-section p{margin:7px 0}
+.study-table-wrap{overflow-x:auto;margin:7px 0 11px}
+.study-section table{margin:0;font-size:12px;min-width:480px;table-layout:auto}
+.study-section th,.study-section td{padding:8px 10px;line-height:1.75}
+.study-section th{white-space:nowrap}
+.study-section td:first-child{min-width:110px;font-weight:600}
+.study-process{display:inline;border:0;padding:0;background:none;color:#236d9f;font:inherit;text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:#b4cbdc;text-underline-offset:3px;line-height:1.85;touch-action:manipulation}
+.study-process:hover{color:#b04430;text-decoration-color:currentColor}
+.study-stats{display:flex;gap:8px;margin:2px 0 14px}
+.study-stats>span{display:flex;align-items:center;justify-content:space-between;gap:15px;flex:1;padding:9px 12px;background:#eef5fa;border:1px solid #d9e6f0;border-radius:6px;color:#36617e;font-size:12px}
+.study-stats b{font-size:19px;color:#1a5276}
+.study-chain{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:8px 0 12px;line-height:1.8}
+.study-chain>span:not(.study-arrow){padding:4px 8px;background:#eef5fa;color:#245e85;border:1px solid #dae6ef;border-radius:4px;font-size:11.5px}
+.study-arrow{color:#7695ad;font-size:12px}
+body.dark .study-nav{background:#1b222d;border-color:#334253}
+body.dark .study-nav button{background:#233448;border-color:#3b5066;color:#bfd9ed}
+body.dark .study-nav button:hover,body.dark .study-nav button:focus-visible{background:#2b485f;border-color:#6395b8}
+body.dark .study-section h4{border-color:#334253}
+body.dark .study-section h4>span{color:#8ab7d7}
+body.dark .study-section p b,body.dark .study-section .gl-ul li b{color:#efab8f}
+body.dark .study-process{color:#91c6ed;text-decoration-color:#496b85}
+body.dark .study-process:hover{color:#efb197}
+body.dark .study-stats>span{background:#1c3244;border-color:#345069;color:#b8d2e6}
+body.dark .study-stats b{color:#91c6ed}
+body.dark .study-chain>span:not(.study-arrow){background:#193348;border-color:#345069;color:#bdd9ee}
+@media(max-width:768px){
+ .study-modal .modal-box{max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px)}
+ .study-modal .gl-wrap{padding:0 10px 10px}
+ .study-nav{padding:9px 0;gap:5px;margin-bottom:10px}
+ .study-nav button{padding:6px 9px;font-size:11px}
+ .study-section{padding:10px;margin-bottom:10px}
+ .study-section h4{font-size:14px}
+ .study-section table{font-size:11px}
+ .study-section th,.study-section td{padding:6px 8px}
+ .study-stats{gap:4px}
+ .study-stats>span{display:block;text-align:center;padding:7px 4px;font-size:10px}
+ .study-stats b{display:block;font-size:17px}
+}
+
+
+.exam-actions{display:flex;gap:6px;margin:0 0 10px}
+.exam-actions button{font:inherit;font-size:11px;padding:5px 9px;border:1px solid #bfd0df;background:#f2f7fb;color:#285f85;border-radius:4px;cursor:pointer;touch-action:manipulation}
+.exam-question{margin:6px 0;border:1px solid #dbe5ee;border-radius:5px;overflow:hidden}
+.exam-question>summary{padding:9px 12px;cursor:pointer;font-weight:600;font-size:12px;color:#315e7c;line-height:1.7;background:#f5f9fc}
+.exam-question[open]>summary{background:#eaf3fa}
+.exam-answer{padding:9px 14px;background:#fff;font-size:12px;line-height:1.85;color:#424f5a}
+.exam-answer p{margin:0}
+.exam-list{margin:0;padding-left:21px}
+.exam-list li{margin:3px 0;padding-left:2px;font-size:12px;line-height:1.8}
+body.dark .exam-actions button{background:#23394c;color:#b9d9ef;border-color:#3a5870}
+body.dark .exam-question{border-color:#344b60}
+body.dark .exam-question>summary{background:#203345;color:#bfd9ed}
+body.dark .exam-question[open]>summary{background:#28465d}
+body.dark .exam-answer{background:#182835;color:#c2cfdb}
+@media(max-width:768px){.exam-question>summary{padding:8px 10px;font-size:11.5px}.exam-answer{padding:8px 10px}.exam-list li{font-size:11.5px}}
+
+
+/* 页面标题与表格工具栏 */
+.header{padding:0;text-align:left}
+.header-inner{max-width:1440px;margin:0 auto;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.header h1{font-size:20px;font-weight:600;line-height:1.5;letter-spacing:0;margin:0;min-width:0}
+.title-divider{color:rgba(255,255,255,.5);font-weight:400}
+.title-detail{white-space:nowrap;color:#dcecf7;font-size:17px;font-weight:500}
+.header .theme-btn{flex:none;padding:7px 11px;font-size:12px;line-height:1.4;border:1px solid rgba(255,255,255,.24);border-radius:6px;background:rgba(255,255,255,.1);box-shadow:none;font-weight:500}
+.header .theme-btn:hover{transform:none;background:rgba(255,255,255,.18)}
+.container{max-width:1440px;margin:0 auto;padding:0 20px 20px}
+.matrix-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0 12px;min-width:0}
+.stats-bar{display:flex;justify-content:flex-start;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0;margin:0;padding:0;border-radius:0;box-shadow:none;background:transparent}
+.stat-item{display:inline-flex;align-items:center;gap:7px;flex:none;text-align:left;padding:5px 9px;border-radius:5px;line-height:1.35}
+.stat-num{display:inline;font-size:14px;font-weight:700;line-height:1.35}
+.stat-label{font-size:11.5px;opacity:.9}
+.s-total{background:#e7ecf1;color:#415368}
+.matrix-toolbar .topbtns{display:flex;align-items:center;gap:8px;flex:none}
+.matrix-toolbar .gl-btn{font-size:12px;line-height:1.5;padding:7px 13px;border-radius:6px;box-shadow:none;white-space:nowrap}
+.matrix-toolbar .gl-btn:hover{transform:none;filter:brightness(1.08)}
+.matrix-wrap{min-width:0}
+.matrix-table{width:100%}
+body.dark .stats-bar{background:transparent;box-shadow:none}
+body.dark .s-total{background:#242e3c;color:#c4d0de}
+@media(max-width:900px){
+ .header-inner{padding:15px 16px;gap:12px}
+ .header h1{font-size:18px}
+ .title-detail{font-size:15px}
+ .container{padding:0 16px 16px}
+ .stat-item{padding:4px 7px;gap:5px}
+ .stat-label{font-size:11px}
+ .stat-num{font-size:13px}
+ .matrix-toolbar .gl-btn{padding:7px 10px;font-size:11.5px}
+}
+@media(max-width:640px){
+ .header-inner{padding:13px 10px;align-items:flex-start;gap:10px}
+ .header h1{font-size:15px;line-height:1.6}
+ .title-divider{display:none}
+ .title-detail{display:block;font-size:13px}
+ .header .theme-btn{margin-top:2px;padding:6px 8px;font-size:11px}
+ .container{padding:0 8px 12px}
+ .matrix-toolbar{flex-direction:column;align-items:stretch;padding:10px 0;gap:9px}
+ .matrix-toolbar .topbtns{order:1;gap:8px}
+ .matrix-toolbar .topbtns .gl-btn{flex:1;padding:8px 10px;font-size:12px;text-align:center}
+ .stats-bar{order:2;max-width:100%;overflow-x:auto;padding:0 0 2px;gap:5px;scrollbar-width:thin}
+ .stat-item{padding:4px 7px;gap:5px}
+ .stat-label{font-size:10.5px}
+ .stat-num{font-size:12px}
+}
+@media print{.header .theme-btn,.matrix-toolbar{display:none}.header-inner{padding:10px 0}.container{padding:0}}
+
+
+.flow-members{margin:0 0 12px;border:1px solid #dce6ef;border-radius:5px;background:#f7fafc}
+.flow-members>summary{cursor:pointer;padding:7px 10px;font-size:11.5px;font-weight:600;color:#315e7c}
+.flow-member-links{display:flex;flex-wrap:wrap;gap:7px 14px;padding:3px 12px 10px}
+.flow-branch{display:flex;align-items:center;gap:8px;margin:9px 0;flex-wrap:wrap;font-size:11.5px}
+.flow-branch-label{padding:5px 8px;border:1px solid #cbddea;border-radius:4px;background:#eef5fa;color:#245e85;flex:none}
+.flow-branch-targets{display:flex;align-items:center;flex-wrap:wrap;gap:6px 13px;min-width:0}
+.area-process-route{margin:8px 0 14px;border:1px solid #dae5ee;border-radius:5px;overflow:hidden;background:#f8fafc}
+.route-title{padding:7px 10px;font-size:11.5px;font-weight:600;color:#315e7c;border-bottom:1px solid #e1e9f0}
+.route-row{display:flex;align-items:flex-start;gap:10px;padding:7px 10px;border-bottom:1px solid #e8eef3}
+.route-row:last-child{border-bottom:0}
+.route-group{flex:none;min-width:34px;font-size:10.5px;line-height:1.9;color:#668298}
+.route-processes{display:flex;flex-wrap:wrap;gap:4px 14px;min-width:0;font-size:11.5px}
+.route-processes .study-process{font-size:11.5px}
+body.dark .flow-members,body.dark .area-process-route{background:#192b3a;border-color:#354e63}
+body.dark .flow-members>summary,body.dark .route-title{color:#bad5e9}
+body.dark .flow-branch-label{background:#203c50;color:#bad5e9;border-color:#3c5c74}
+body.dark .route-title,body.dark .route-row{border-color:#304557}
+body.dark .route-group{color:#9bb4c8}
+@media(max-width:640px){.route-row{gap:7px;padding:7px 8px}.route-processes{gap:4px 10px}.flow-branch{gap:6px}.flow-branch-targets{padding-left:4px}.flow-members>summary{padding:8px}}
+
+
+#mo .m-head{gap:12px}
+.process-heading{display:flex;flex:1;flex-wrap:wrap;align-items:center;gap:8px 16px;min-width:0}
+.study-back{padding:6px 10px;border:1px solid #c8dbe9;border-radius:5px;background:#edf5fb;color:#236d9f;cursor:pointer;white-space:nowrap;font:inherit;font-size:12px}
+.study-back[hidden]{display:none}
+.study-back:hover{background:#dcecf8}
+.study-back:focus-visible,.study-process:focus-visible{outline:2px solid #3498db;outline-offset:3px}
+#mo .m-close{flex:none}
+.study-process{font-weight:inherit}
+body.dark .study-back{background:#20394c;color:#b9d8ef;border-color:#3b5b74}
+body.dark .study-back:hover{background:#2a4a62}
+@media(max-width:640px){.process-heading{flex-direction:column;align-items:flex-start;gap:7px}#mo .m-title{flex-wrap:wrap;gap:5px 8px}#mo .m-close{align-self:flex-start}}
+
+
+.study-concepts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:8px;margin-top:12px}
+.study-concepts>.term-detail{border:1px solid #d7e3ed;border-radius:5px;min-width:0}
+.study-concepts>.term-detail[open]{grid-column:1/-1}
+.study-concepts>.term-detail>summary{padding:7px 9px;font-size:12px;font-weight:600}
+.study-concepts .term-body{font-size:11.5px;line-height:1.7}
+.study-concepts .term-body p{font-size:inherit}
+.study-modal .term-children{list-style:none;padding:0;margin:0}
+.study-modal .term-children>li{list-style:none;margin:0 0 3px;padding:0}
+body.dark .study-concepts>.term-detail{border-color:#354e63}
+@media(max-width:640px){.study-concepts{grid-template-columns:minmax(0,1fr)}}
+
+
+.pt{font-family:inherit;line-height:inherit;text-align:left}
+.pt:focus-visible,.frequency-members>summary:focus-visible{outline:2px solid #3498db;outline-offset:3px}
+.frequency-members>summary{cursor:pointer;color:#236d9f;font-weight:600}
+.frequency-members>div{padding:7px 0 2px;line-height:1.9}
+body.dark .frequency-members>summary{color:#91c6ed}
+.matrix-table th:first-child{left:0;z-index:12}
+@media(prefers-reduced-motion:reduce){.modal-box{animation:none}.pt,.m-close{transition:none}.pt:hover{transform:none}}
+
+.it .term-group{min-width:0}
+.it .term-visible-children{list-style:none;margin:4px 0 7px 8px;padding:0 0 0 10px;border-left:2px solid #b3cfe1}
+.it .term-visible-children>li{position:relative;padding:0;margin:0 0 4px}
+.it .term-visible-children>li:before{content:'';position:absolute;left:-10px;top:12px;width:8px;border-top:1px solid #b3cfe1}
+.it .term-entry>.term-group>.term-visible-children{margin-bottom:10px}
+body.dark .it .term-visible-children{border-left-color:#42647c}
+body.dark .it .term-visible-children>li:before{border-top-color:#42647c}
+</style>
+</head>
+<body data-page-node-id="J9k1mpIR2Cs6BHl4NH17Fm">
+
+<header class="header">
+ <div class="header-inner">
+  <h1>系统集成项目管理工程师（中项）<span class="title-divider"> · </span><span class="title-detail">49过程 ITTO</span></h1>
+  <button class="theme-btn" id="themeBtn" onclick="tgTheme()" title="切换深色/浅色 (快捷键 D)" data-page-node-id="eqR3ZC20tfyJXcgeTuFbOt">&#x1F312; 深色</button>
+ </div>
+</header>
+<div class="container" data-page-node-id="OWaZ2FaxuijNWexRHcEe9H">
+ <div class="matrix-toolbar">
+  <div class="stats-bar" aria-label="过程组统计"><div class="stat-item s-startup"><span class="stat-label">启动</span><span class="stat-num">2</span></div><div class="stat-item s-planning"><span class="stat-label">规划</span><span class="stat-num">24</span></div><div class="stat-item s-execution"><span class="stat-label">执行</span><span class="stat-num">10</span></div><div class="stat-item s-monitoring"><span class="stat-label">监控</span><span class="stat-num">12</span></div><div class="stat-item s-closing"><span class="stat-label">收尾</span><span class="stat-num">1</span></div><div class="stat-item s-total"><span class="stat-label">总计</span><span class="stat-num">49</span></div></div>
+  <div class="topbtns"><button class="gl-btn" onclick="glrOpen()" title="49过程ITTO规律总结 (快捷键 R)" style="background:linear-gradient(135deg,#117a65,#16a085);box-shadow:none" data-page-node-id="Jg7YI83JrU7Dd7sUXBixHu">&#x1F9E9; 规律总结</button><button class="gl-btn" onclick="glOpen()" title="案例分析必背知识点 (快捷键 L)" data-page-node-id="5JvQvzfd0e6MblcjIQ7dZH">&#x1F4CB; 案例必背</button></div>
+ </div>
+<div class="matrix-wrap" data-page-node-id="gldjS4YzCqnhZNLFSH3pIc">
+<table class="matrix-table" data-page-node-id="AXZPFXcAFhjyodAHhIqMGD">
+<thead data-page-node-id="pRDneWjCETTRuQ43H5Zbb5">
+<tr data-page-node-id="yqArkxC9W3Qh3jtUCz2Yg4">
+  <th class="th-area" data-page-node-id="ivaSXi12qlgKMTLD8x2gq3">知识领域</th>
+  <th class="th-startup" data-page-node-id="jjKobQ2Wj73v90y52wRrmR">启动过程组<br data-page-node-id="xN6M3tWW84YwWO2e1hYMYC">(2)</th>
+  <th class="th-plan" data-page-node-id="pe2AYlli4B9HiR9kfYshF8">规划过程组<br data-page-node-id="mmXwhGhd3wVgLWOgZ5yM1I">(24)</th>
+  <th class="th-exec" data-page-node-id="X8q4LHL6bje2onHrm8e2kx">执行过程组<br data-page-node-id="FBIJts45J4fohDsvlHx8P5">(10)</th>
+  <th class="th-monit" data-page-node-id="x9FHubNoSBAKdM0bziEBVO">监控过程组<br data-page-node-id="cSJEVSrBajKKvhOLw7GFtz">(12)</th>
+  <th class="th-close" data-page-node-id="PSnoerxx9NJbomtv4PPvgZ">收尾过程组<br data-page-node-id="BFqD8uWie6xpZmrqfJjPC7">(1)</th>
+</tr>
+</thead>
+<tbody data-page-node-id="L8tR8ChbEVINNdJ5ksJ9UP">
+
+<!-- 4.项目整合管理 -->
+<tr data-page-node-id="TvY3WxjpxT8YEUz2ugp2lZ"><td class="td-area" data-page-node-id="ZIjHD4XBZPxOpWLz4TcoOw">4.项目整合管理</td>
+<td data-page-node-id="nxxmxPTEgaM49o1tKS6dCg"><button type="button" class="pt ps" data-i="0" data-page-node-id="scmkU8oF5nyatN7PBMN71e">4.1 制定项目章程</button></td>
+<td data-page-node-id="HVgONurws9iDkM75GcAzvZ"><button type="button" class="pt pp" data-i="1" data-page-node-id="6gWKu8phUShm4e4gXXOhE7">4.2 制定项目管理计划</button></td>
+<td data-page-node-id="YLq1WvozkucKPFkFNt6y5C"><button type="button" class="pt pe" data-i="2" data-page-node-id="yCryd8EDL6HHaQDlELcc9x">4.3 指导与管理项目工作</button><br data-page-node-id="SAkon0dY8Q4tTlBH7Hg2iu"><button type="button" class="pt pe" data-i="3" data-page-node-id="mKFw3Ju6vTLFtzaHRhG9A9">4.4 管理项目知识</button></td>
+<td data-page-node-id="9BzsK3TYVZ90CifPg3h9VE"><button type="button" class="pt pm" data-i="4" data-page-node-id="ok3ceHoNyw5fCic0BU9CIW">4.5 监控项目工作</button><br data-page-node-id="fWMYuUifafSEwR6qW4N4gG"><button type="button" class="pt pm" data-i="5" data-page-node-id="nzIXZXOxYxOvP3qEXxtAw5">4.6 实施整体变更控制</button></td>
+<td data-page-node-id="4ry6eePnbFiC5wvqHLwI5O"><button type="button" class="pt pc" data-i="6" data-page-node-id="pxeVhTUTzuM0nSexGM3v9u">4.7 结束项目或阶段</button></td>
+</tr>
+
+<!-- 5.项目范围管理 -->
+<tr data-page-node-id="2NFnjEQsFUUdZlegHeLnZQ"><td class="td-area" data-page-node-id="veuc3ibBJgTiGUqHeeyAn4">5.项目范围管理</td>
+<td data-page-node-id="asSR6ah9hRjgudfrRSCsRN"></td>
+<td data-page-node-id="TTnOPuvAXfgJXCsAiOBuzU"><button type="button" class="pt pp" data-i="7" data-page-node-id="df5jfc0XIiLSE7j2H1E4jP">5.1 规划范围管理</button><br data-page-node-id="XAFyYEXNzhGgasM8CZ5Gh5"><button type="button" class="pt pp" data-i="8" data-page-node-id="KXqpAzSAmAFI2GLUf87xO8">5.2 收集需求</button><br data-page-node-id="NeHPA3pftlyysGXdj1nKpr"><button type="button" class="pt pp" data-i="9" data-page-node-id="H5MNswlOJFasEQCdJJYjdI">5.3 定义范围</button><br data-page-node-id="QMiIDZGzEVjyDLQzuHbVic"><button type="button" class="pt pp" data-i="10" data-page-node-id="tYi4hcDd6SpvWTiZPAEmWv">5.4 创建WBS</button></td>
+<td data-page-node-id="dyj2EIBFZx87ThHgfRGzdc"></td>
+<td data-page-node-id="Aeun2csmNQT9IlOKosOT2X"><button type="button" class="pt pm" data-i="11" data-page-node-id="GLmtQtFHUGLb2VAjeXRu70">5.5 确认范围</button><br data-page-node-id="wlxGLiqqgpHdFWYeNqiEBF"><button type="button" class="pt pm" data-i="12" data-page-node-id="ZNGSld8BSAuDQeRUK6v2zR">5.6 控制范围</button></td>
+<td data-page-node-id="tI2vSVkrooNtfunVPQkHnb"></td>
+</tr>
+
+<!-- 6.项目进度管理 -->
+<tr data-page-node-id="TxYL7rdGkdaMv30a0Rtow4"><td class="td-area" data-page-node-id="yimjCU1WAbF9X4vzBCscmm">6.项目进度管理</td>
+<td data-page-node-id="Gki190Pcr9alh9tyMQgHxX"></td>
+<td data-page-node-id="UGO0E8ml9zh3aWkTTNGTFQ"><button type="button" class="pt pp" data-i="13" data-page-node-id="lnTfOIpLDww9sC44OthQV7">6.1 规划进度管理</button><br data-page-node-id="6PgtZwQwj8YPV8GKsVyGB9"><button type="button" class="pt pp" data-i="14" data-page-node-id="bKdPwpDlQUw00MMAUkASsJ">6.2 定义活动</button><br data-page-node-id="hhWahHmAIfxWByyumnixk5"><button type="button" class="pt pp" data-i="15" data-page-node-id="BEbw2D0EGGJc1irGGrQOZ0">6.3 排列活动顺序</button><br data-page-node-id="FORmCsN5RhbUYWFpZFKbfL"><button type="button" class="pt pp" data-i="16" data-page-node-id="hJOchYlvsgrwjhmnrpIdod">6.4 估算活动持续时间</button><br data-page-node-id="Oe1F7zdzQGDqvf37tJlX6i"><button type="button" class="pt pp" data-i="17" data-page-node-id="hsyEFSqFYLMXjQ0QK1ixEp">6.5 制定进度计划</button></td>
+<td data-page-node-id="fXTXhNHIhLNbsbzScRELSo"></td>
+<td data-page-node-id="C3Sld2r596pe2BfyEzfvLp"><button type="button" class="pt pm" data-i="18" data-page-node-id="s48iOAF18rxzNGQiJMxCaM">6.6 控制进度</button></td>
+<td data-page-node-id="lGpKw4MBOFFKBjt039X7Hg"></td>
+</tr>
+
+<!-- 7.项目成本管理 -->
+<tr data-page-node-id="uYD4NoIL7C1WKqdwEF9m02"><td class="td-area" data-page-node-id="TjBAOhu2nuJQP4WwH4vSAz">7.项目成本管理</td>
+<td data-page-node-id="aKea1Mbyc9dOHXPuAN76ze"></td>
+<td data-page-node-id="kYwJUuYPtXJciGPIPkvB5B"><button type="button" class="pt pp" data-i="19" data-page-node-id="83DYoI5J1R8T05Hhil6Klb">7.1 规划成本管理</button><br data-page-node-id="JZOnS2PxkFIGjlUEsBTcK5"><button type="button" class="pt pp" data-i="20" data-page-node-id="y6FvLHNTOzkdDFyJ2Z40jy">7.2 估算成本</button><br data-page-node-id="zcHhGdI4tWQovZLovFqb3W"><button type="button" class="pt pp" data-i="21" data-page-node-id="X9xKoiVFfZQH16PYebtnJD">7.3 制定预算</button></td>
+<td data-page-node-id="lSOTTZyo4MuqXW9Mszk5So"></td>
+<td data-page-node-id="eS1EBOS4WuUCiXQR2mxbE3"><button type="button" class="pt pm" data-i="22" data-page-node-id="BgSY5hBbmUuaocPGZXt5X0">7.4 控制成本</button></td>
+<td data-page-node-id="4LYK8npMeYNJQChFru5EiL"></td>
+</tr>
+
+<!-- 8.项目质量管理 -->
+<tr data-page-node-id="FpkVMqH5Isrm2gnJgKmo8m"><td class="td-area" data-page-node-id="3JhylG8t9H5LEvExtbbx7y">8.项目质量管理</td>
+<td data-page-node-id="jbGyNqMzED0sv31gVX6d3q"></td>
+<td data-page-node-id="95X1eIpecfqETfJGJNIgP0"><button type="button" class="pt pp" data-i="23" data-page-node-id="KuNUxSdvjEwxwo0Oby802O">8.1 规划质量管理</button></td>
+<td data-page-node-id="OrNP63oysNP3qO7QTlINdq"><button type="button" class="pt pe" data-i="24" data-page-node-id="X2ytp9CZ6WJKlAa1IbqAyJ">8.2 管理质量</button></td>
+<td data-page-node-id="53FsC1ciZ6LuuXoiooN2nb"><button type="button" class="pt pm" data-i="25" data-page-node-id="RJhOkRghKgQOSbSiA8iNZx">8.3 控制质量</button></td>
+<td data-page-node-id="OPuXDHdEE8JPHLdRlGj818"></td>
+</tr>
+
+<!-- 9.项目资源管理 -->
+<tr data-page-node-id="Nc92yr85RMrQj4Z98uXg6p"><td class="td-area" data-page-node-id="cV4IZdppBzWCPLtZhxFS6L">9.项目资源管理</td>
+<td data-page-node-id="BUn02gkD4RhAwwGFznU8rx"></td>
+<td data-page-node-id="klUyiI8rskejPlf1PPZCYM"><button type="button" class="pt pp" data-i="26" data-page-node-id="Wk4Fi5vEiQj56DDwD08MN5">9.1 规划资源管理</button><br data-page-node-id="TWITtG2q9MueZcYB5MmLfy"><button type="button" class="pt pp" data-i="27" data-page-node-id="Hd63Y7Moq6cvsP3ExhXO8a">9.2 估算活动资源</button></td>
+<td data-page-node-id="THmU6sJCnUwj9DLEi1vV9e"><button type="button" class="pt pe" data-i="28" data-page-node-id="VGHJzMGbQ7vLyjSdrilcN1">9.3 获取资源</button><br data-page-node-id="CkOfA2zMKsWLNurgRFQiwK"><button type="button" class="pt pe" data-i="29" data-page-node-id="fZ3ppS7XqcsrQaWzWSk51j">9.4 建设团队</button><br data-page-node-id="vqJtwzkpETUjwIg9tu2Ezg"><button type="button" class="pt pe" data-i="30" data-page-node-id="e4jqoUqC17n469uXtR0nNT">9.5 管理团队</button></td>
+<td data-page-node-id="bo8GzF8FTyZYF3zQRX6Wyf"><button type="button" class="pt pm" data-i="31" data-page-node-id="x7AB4ssJITgCWW5tVOpoD0">9.6 控制资源</button></td>
+<td data-page-node-id="76xB9WR6fFvN0j3awJDBPp"></td>
+</tr>
+
+<!-- 10.项目沟通管理 -->
+<tr data-page-node-id="qCurcOegizI8pOrqGskU4E"><td class="td-area" data-page-node-id="Oqm793m4XBjtI84oFT7qES">10.项目沟通管理</td>
+<td data-page-node-id="ZzSyOoyTqsnSN4THfM5y70"></td>
+<td data-page-node-id="HQYy2JCJFZLBkOHTB3RGMj"><button type="button" class="pt pp" data-i="32" data-page-node-id="HVR0Cp3kTBeRQfdREn0HsW">10.1 规划沟通管理</button></td>
+<td data-page-node-id="HzC1KA0oODAJFBX1Tc47pi"><button type="button" class="pt pe" data-i="33" data-page-node-id="DbSYFBDLglha9VTDuoLYtG">10.2 管理沟通</button></td>
+<td data-page-node-id="VxWDJS7OgUs6hB4TVCZPuw"><button type="button" class="pt pm" data-i="34" data-page-node-id="pAY6uuKjuGLvWW3sijYucl">10.3 监督沟通</button></td>
+<td data-page-node-id="g4XIVMyppkXBdtegcwn9xJ"></td>
+</tr>
+
+<!-- 11.项目风险管理 -->
+<tr data-page-node-id="PKO8j6pnxOw4GUXDXDH7zh"><td class="td-area" data-page-node-id="PuzNniQdigttCT8f6qDCgw">11.项目风险管理</td>
+<td data-page-node-id="YX212US6ru3TZFf35lo5BZ"></td>
+<td data-page-node-id="Y0PVg1MJ3MpeQoodAmyCEj"><button type="button" class="pt pp" data-i="35" data-page-node-id="Nzaq5cRICD1FhmMYGS9oSS">11.1 规划风险管理</button><br data-page-node-id="K7JUjNU3kN62hIRch1Q5M8"><button type="button" class="pt pp" data-i="36" data-page-node-id="PiA6RX9XqYFFhZvlMYbeeg">11.2 识别风险</button><br data-page-node-id="x0vcuTAT2WsFBrVrwjStfM"><button type="button" class="pt pp" data-i="37" data-page-node-id="EgU23qjFBOXmdmgHEgXhbW">11.3 实施定性风险分析</button><br data-page-node-id="bxw1SyOCzEvCktOkhliBnb"><button type="button" class="pt pp" data-i="38" data-page-node-id="JebacR4lyDR3JKyZCfezaX">11.4 实施定量风险分析</button><br data-page-node-id="FJQX1YeLJwHhhm9LjLQt7C"><button type="button" class="pt pp" data-i="39" data-page-node-id="XZB7rRD7TdWr5PskVZJHik">11.5 规划风险应对</button></td>
+<td data-page-node-id="5qdAn7lhYCCiNvZ4vHlZrA"><button type="button" class="pt pe" data-i="40" data-page-node-id="hgUydXznEFw1HBXlx24CxT">11.6 实施风险应对</button></td>
+<td data-page-node-id="G1gQdhVOMTo34RgXjQ7YWa"><button type="button" class="pt pm" data-i="41" data-page-node-id="upkuBvLP5vASf7bWkOKnfq">11.7 监督风险</button></td>
+<td data-page-node-id="4vaGiYDUib4naL8Ft6m25Q"></td>
+</tr>
+
+<!-- 12.项目采购管理 -->
+<tr data-page-node-id="nQp9wjni2mH8Ge6f90wL7Y"><td class="td-area" data-page-node-id="J9CQpRIfxmCaSFMVeSxlZY">12.项目采购管理</td>
+<td data-page-node-id="ohG3zkqpGTpKM8qlE8bTBf"></td>
+<td data-page-node-id="5vMvtfHDuYFTS0OE5FD2mj"><button type="button" class="pt pp" data-i="42" data-page-node-id="0JG5b6oH33A6I95oNmIkTR">12.1 规划采购管理</button></td>
+<td data-page-node-id="SmFYgK0sn0EnEGH85a5bkB"><button type="button" class="pt pe" data-i="43" data-page-node-id="xXURzfZrOAmySXMDDuRgnL">12.2 实施采购</button></td>
+<td data-page-node-id="fisj58g5Dq7XPkwTvdiMt6"><button type="button" class="pt pm" data-i="44" data-page-node-id="0SrOh5bDnvNfcEjWWvXrKW">12.3 控制采购</button></td>
+<td data-page-node-id="urKbDm2i4ejLTtIpmcu63U"></td>
+</tr>
+
+<!-- 13.项目干系人管理 -->
+<tr data-page-node-id="1ci1nvxjc4fmFFS2uKnjrS"><td class="td-area" data-page-node-id="KUPDYlEuiKwMuVzAYN1MFt">13.项目干系人管理</td>
+<td data-page-node-id="XQqZCV9aaCloy8D4Kidzru"><button type="button" class="pt ps" data-i="45" data-page-node-id="Ba5b5aVfjwvIj4sGh2UB9r">13.1 识别干系人</button></td>
+<td data-page-node-id="pq57FTTyZ1xi7DB3EIsPh1"><button type="button" class="pt pp" data-i="46" data-page-node-id="PFitoCLaFIL55yPpi11N0a">13.2 规划干系人参与</button></td>
+<td data-page-node-id="mbVOJXoAkfA1AgoSzfZi72"><button type="button" class="pt pe" data-i="47" data-page-node-id="UsJcYYy9Qqy5SlA38dgMwD">13.3 管理干系人参与</button></td>
+<td data-page-node-id="25SIaR2Ps5cqr6jeijdrWK"><button type="button" class="pt pm" data-i="48" data-page-node-id="6JYMVCHW0kuInpo6ab5WtQ">13.4 监督干系人参与</button></td>
+<td data-page-node-id="A5iZGnbQYgDPvxLgJIGUL3"></td>
+</tr>
+
+</tbody>
+</table>
+</div><!-- /matrix-wrap -->
+</div><!-- /container -->
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="mo" data-page-node-id="OzUsy2PB8vDcU991IsDHOB">
+<div class="modal-box" data-page-node-id="bewIyAWps9OWeOh4hHpmw0">
+  <div class="m-head" data-page-node-id="kpvQiLN4sdrHRlM1tGTW8I">
+    <div class="process-heading"><button type="button" class="study-back" id="studyBack" onclick="returnToStudy()" hidden></button><div class="m-title" id="mt" data-page-node-id="rcGKeMwL01FKK44xDlh1BH"></div></div>
+    <button class="m-close" onclick="cl()" title="关闭 (Esc)" data-page-node-id="S6k231FqbzyzwaO2Q7phu8">&#x2715;</button>
+  </div>
+
+  <div class="m-body" data-page-node-id="5WgkEN8xkZp6dLxjpWcbKC"><table class="it" id="it" data-page-node-id="G8HGx923vVzw1DfsZdUdwI"></table></div>
+  <div class="m-foot" data-page-node-id="gEasRYsqagOrBapPsww5Fr">
+    <div class="nb" data-page-node-id="5UEBf0SwW3x7h2po7dV0eG"><button id="bP" onclick="nv(-1)" data-page-node-id="yD8EnDfZ0o0KvH3vgsSw19">&#x2190; 上一个</button><button id="bN" onclick="nv(1)" data-page-node-id="6jwvVpOP5jajZvNLJiWpHU">下一个 &#x2192;</button></div>
+    <div class="detail-actions"><span class="detail-count" id="detailCount" aria-live="polite"></span><button type="button" data-toggle-column="input" onclick="toggleColumn('input')" aria-expanded="false" aria-controls="it">展开输入</button><button type="button" data-toggle-column="tools" onclick="toggleColumn('tools')" aria-expanded="false" aria-controls="it">展开工具</button><button type="button" data-toggle-column="output" onclick="toggleColumn('output')" aria-expanded="false" aria-controls="it">展开输出</button></div>
+    <div class="m-count" id="mc" data-page-node-id="R6MgLPQ4sFMGOx4FzCTsBp"></div>
+  </div>
+</div>
+</div>
+
+<div class="modal-overlay study-modal" id="gl"><div class="modal-box"><div class="m-head"><div class="m-title">案例必背 · 案例分析考前背诵</div><button class="m-close" onclick="glClose()" title="关闭 (Esc)">✕</button></div><div class="gl-wrap"><nav class="study-nav" aria-label="案例必背 · 案例分析考前背诵目录"><button type="button" onclick="studyJump('gl','case-memory')">考前默写</button><button type="button" onclick="studyJump('gl','case-risk')">风险管理</button><button type="button" onclick="studyJump('gl','case-configuration')">配置管理</button><button type="button" onclick="studyJump('gl','case-communication')">沟通与干系人</button><button type="button" onclick="studyJump('gl','case-integration')">整合与变更</button><button type="button" onclick="studyJump('gl','case-quality')">质量管理</button><button type="button" onclick="studyJump('gl','case-procurement')">采购与合同</button><button type="button" onclick="studyJump('gl','case-resource')">资源与团队</button><button type="button" onclick="studyJump('gl','case-scope')">范围与需求</button><button type="button" onclick="studyJump('gl','case-schedule')">计算与进度</button><button type="button" onclick="studyJump('gl','case-supervision')">监理</button><button type="button" onclick="studyJump('gl','case-document')">信息与文档</button><button type="button" onclick="studyJump('gl','case-initiation')">立项与组织</button><button type="button" onclick="studyJump('gl','case-closing')">验收与收尾</button><button type="button" onclick="studyJump('gl','case-answer')">答题写法</button></nav><section class="gl-card study-section" id="case-memory"><h4><span>01</span>考前默写</h4><div class="exam-actions"><button type="button" onclick="examAnswers('gl',true)">显示答案</button><button type="button" onclick="examAnswers('gl',false)">收起答案</button></div><details class="exam-question"><summary>变更管理工作程序是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>提出变更申请</li><li>变更初审</li><li>变更方案论证</li><li>审查批准</li><li>发出通知并实施</li><li>实施监控</li><li>效果评估</li><li>变更收尾</li></ol></div></details><details class="exam-question"><summary>变更管理的五项原则是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>基准管理</li><li>变更控制流程化</li><li>明确组织分工</li><li>评估变更的可能影响</li><li>妥善保存变更产生的相关文档</li></ol></div></details><details class="exam-question"><summary>评审变更方案，要回答哪五类问题？</summary><div class="exam-answer"><ol class="exam-list"><li>变更是否必要</li><li>对项目有何影响</li><li>变更范围是否考虑周全</li><li>实施方案是否可行</li><li>工作量估计是否合理</li></ol></div></details><details class="exam-question"><summary>4.1 制定项目章程的四项输入是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>立项管理文件</li><li>协议</li><li>事业环境因素</li><li>组织过程资产</li></ol></div></details><details class="exam-question"><summary>项目章程应记哪些内容？</summary><div class="exam-answer"><ol class="exam-list"><li>项目目的；可测量的项目目标和成功标准</li><li>高层级需求；项目描述、边界和主要可交付成果</li><li>整体项目风险；总体里程碑进度计划</li><li>预先批准的财务资源；关键干系人名单</li><li>项目审批要求；项目退出标准</li><li>委派的项目经理及其职责职权；发起人或批准者的姓名和职权</li></ol></div></details><details class="exam-question"><summary>项目范围说明书的四项内容是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>产品范围描述</li><li>可交付成果</li><li>验收标准</li><li>项目的除外责任</li></ol></div></details><details class="exam-question"><summary>范围基准由哪三部分组成？</summary><div class="exam-answer"><ol class="exam-list"><li>项目范围说明书</li><li>WBS</li><li>WBS词典</li></ol></div></details><details class="exam-question"><summary>需求跟踪矩阵连接哪些对象？</summary><div class="exam-answer"><ol class="exam-list"><li>需求及其来源、业务或项目目标</li><li>对应的可交付成果或WBS组件</li><li>设计、开发、测试及验收</li><li>需求的责任、优先级、状态等跟踪属性</li></ol></div></details><details class="exam-question"><summary>威胁与机会分别有哪些应对策略？</summary><div class="exam-answer"><ol class="exam-list"><li>威胁：上报、规避、转移、减轻、接受</li><li>机会：上报、开拓、分享、提高、接受</li></ol></div></details><details class="exam-question"><summary>整体项目风险的应对策略是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>规避</li><li>开拓</li><li>转移或分享</li><li>减轻或提高</li><li>接受</li></ol></div></details><details class="exam-question"><summary>首次开展11.2 识别风险时，风险登记册的核心内容是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>已识别风险清单</li><li>潜在风险责任人</li><li>潜在风险应对措施</li></ol></div></details><details class="exam-question"><summary>风险管理计划与风险登记册如何区分？</summary><div class="exam-answer"><ol class="exam-list"><li>风险管理计划：风险管理的方法、职责、资金、时间、类别、概率影响定义、报告及跟踪安排。</li><li>风险登记册：逐条记录单个项目风险及其分析、应对和跟踪信息。</li></ol></div></details><details class="exam-question"><summary>质量管理计划应明确什么？</summary><div class="exam-answer"><ol class="exam-list"><li>采用的质量标准和质量目标</li><li>质量角色与职责</li><li>规划的质量管理和质量控制活动</li><li>项目使用的质量工具和测量方法</li><li>检查、问题处理和持续改进安排</li></ol></div></details><details class="exam-question"><summary>质量成本分为哪四类？</summary><div class="exam-answer"><ol class="exam-list"><li>预防成本</li><li>评价成本</li><li>内部失败成本</li><li>外部失败成本</li></ol></div></details><details class="exam-question"><summary>团队建设的五个阶段是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>形成</li><li>震荡</li><li>规范</li><li>成熟</li><li>解散</li></ol></div></details><details class="exam-question"><summary>冲突发展的五个阶段是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>潜伏</li><li>感知</li><li>感受</li><li>呈现</li><li>结束</li></ol></div></details><details class="exam-question"><summary>五种冲突处理方式是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>撤退/回避</li><li>缓和/包容</li><li>妥协/调解</li><li>强迫/命令</li><li>合作/解决问题</li></ol></div></details><details class="exam-question"><summary>RACI四个字母表示什么？</summary><div class="exam-answer"><ol class="exam-list"><li>R：执行负责</li><li>A：最终负责/批准</li><li>C：咨询</li><li>I：知情</li><li>每项工作只能有一个A，可以有多位R。</li></ol></div></details><details class="exam-question"><summary>配置管理的六类活动是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>制定配置管理计划</li><li>配置项识别</li><li>配置控制</li><li>配置状态报告</li><li>配置审计</li><li>回顾与改进</li></ol></div></details><details class="exam-question"><summary>三类配置库、三种状态和两类审计是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>配置库：开发库、受控库、产品库</li><li>状态：草稿、正式、修改</li><li>审计：功能配置审计、物理配置审计</li></ol></div></details><details class="exam-question"><summary>项目文档有哪三类、四个质量等级？</summary><div class="exam-answer"><ol class="exam-list"><li>三类：开发文档、产品文档、管理文档</li><li>四级：最低限度文档、内部文档、工作文档、正式文档</li></ol></div></details><details class="exam-question"><summary>沟通管理计划要回答哪些问题？</summary><div class="exam-answer"><ol class="exam-list"><li>谁向谁沟通</li><li>沟通什么，使用什么格式和详细程度</li><li>何时沟通、频率如何</li><li>使用什么方法或技术</li><li>谁有权发布，问题如何升级</li><li>如何获得反馈、维护计划</li></ol></div></details><details class="exam-question"><summary>沟通方式分为哪三类？</summary><div class="exam-answer"><p>交互式、推式、拉式。</p></div></details><details class="exam-question"><summary>干系人参与水平分为哪五类？</summary><div class="exam-answer"><p>不知晓、抵制、中立、支持、领导。</p></div></details><details class="exam-question"><summary>干系人映射分析/表现有哪些常见方法？</summary><div class="exam-answer"><ol class="exam-list"><li>方格模型：权力/利益方格、权力/影响方格、作用/影响方格</li><li>干系人立方体</li><li>凸显模型</li><li>影响方向</li><li>优先级排序</li></ol></div></details><details class="exam-question"><summary>采购工作说明书要写哪些内容？</summary><div class="exam-answer"><ol class="exam-list"><li>拟采购工作的范围</li><li>规格、数量、质量水平和绩效要求</li><li>履约期间与工作地点</li><li>所需报告、支持和其他附加服务</li></ol></div></details><details class="exam-question"><summary>监理的“三控、两管、一协调”是什么？</summary><div class="exam-answer"><ol class="exam-list"><li>三控：质量控制、进度控制、投资控制</li><li>两管：合同管理、信息管理</li><li>一协调：组织协调</li></ol></div></details></section>
+<section class="gl-card study-section" id="case-risk"><h4><span>02</span>风险管理</h4><div class="area-process-route" data-area="风险"><div class="route-title">风险管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(35)">11.1 规划风险管理</button><button type="button" class="study-process" onclick="openStudyProcess(36)">11.2 识别风险</button><button type="button" class="study-process" onclick="openStudyProcess(37)">11.3 实施定性风险分析</button><button type="button" class="study-process" onclick="openStudyProcess(38)">11.4 实施定量风险分析</button><button type="button" class="study-process" onclick="openStudyProcess(39)">11.5 规划风险应对</button></div></div><div class="route-row"><span class="route-group">执行</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(40)">11.6 实施风险应对</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button></div></div></div><div class="study-table-wrap"><table><thead><tr><th>对象</th><th>应对策略</th></tr></thead><tbody><tr><td>威胁</td><td>上报、规避、转移、减轻、接受</td></tr><tr><td>机会</td><td>上报、开拓、分享、提高、接受</td></tr><tr><td>整体项目风险</td><td>规避、开拓、转移或分享、减轻或提高、接受</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>策略</th><th>判定依据</th></tr></thead><tbody><tr><td>上报</td><td>超出项目范围或团队处理权限，交给有权层级</td></tr><tr><td>规避 / 开拓</td><td>消除威胁 / 确保机会发生</td></tr><tr><td>转移 / 分享</td><td>转交威胁影响与责任 / 与更适合的伙伴共同实现机会</td></tr><tr><td>减轻 / 提高</td><td>降低威胁概率或影响 / 增加机会概率或影响</td></tr><tr><td>接受</td><td>承认风险存在；主动接受可准备应急安排</td></tr></tbody></table></div><p><b>风险登记册：</b>已识别的风险、潜在责任人和应对；后续补充概率影响、优先级、策略、行动、资源、触发条件与状态。<b>风险报告：</b>整体风险来源、敞口与趋势，以及单项风险汇总。</p><p><b>残余风险：</b>应对后仍存在的风险。<b>次生风险：</b>应对措施引发的新风险。<b>回退计划：</b>主要应对无效时启用的备用安排。</p><ul class="gl-ul"><li>定性分析结合概率、影响及其他参数排序；不只看概率。</li><li>定量分析量化不确定性对整体目标的影响，并非每个项目都必须采用。</li><li>风险分类可以按来源、后果、可管理性、影响范围等维度组织；RBS按风险来源分层。</li></ul><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>只登记风险，没有责任人、行动或触发条件</td><td>补齐分析与应对，落实责任、资源、监测指标及触发条件。</td></tr><tr><td>规划了应对却未执行，也未检查效果</td><td>按计划实施，跟踪风险与措施效果，识别新风险并更新记录。</td></tr><tr><td>低优先级风险长期未发生就随意删除</td><td>定期复核状态；是否关闭应有依据和记录。</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="case-configuration"><h4><span>03</span>配置管理</h4><div class="study-chain"><span>制定配置管理计划</span><span class="study-arrow">→</span><span>配置项识别</span><span class="study-arrow">→</span><span>配置控制</span><span class="study-arrow">→</span><span>配置状态报告</span><span class="study-arrow">→</span><span>配置审计</span><span class="study-arrow">→</span><span>回顾与改进</span></div><div class="study-table-wrap"><table><thead><tr><th>配置库</th><th>用途</th></tr></thead><tbody><tr><td>开发库（工作库、动态库）</td><td>存放正在开发的工作版本</td></tr><tr><td>受控库（主库）</td><td>存放经评审、受控的阶段成果与基线</td></tr><tr><td>产品库（发行库、静态库）</td><td>存放获准发布或交付的产品与资料</td></tr></tbody></table></div><ul class="gl-ul"><li><b>配置项：</b>明确名称、标识、负责人、版本、状态、存储位置和访问权限。</li><li><b>状态：</b>草稿、正式、修改；版本号按项目约定的规则标识和递增。</li><li><b>检出/检入：</b>按工具和协作规则控制修改、合并、审核与入库，避免覆盖和混用。</li><li><b>基线：</b>经正式评审或批准的配置项集合，为后续工作提供参照；修改须受控。</li><li><b>状态报告：</b>记录配置项、变更请求、实施结果及基线的当前和历史状态。</li></ul><div class="study-table-wrap"><table><thead><tr><th>审计</th><th>检查重点</th></tr></thead><tbody><tr><td>功能配置审计</td><td>实际功能、性能与需求及配置标识是否一致</td></tr><tr><td>物理配置审计</td><td>应交付的配置项、文档、版本和记录是否完整</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>直接改受控库，变更无审批和历史</td><td>按流程申请、评估、批准、实施、验证和发布，维护追溯记录。</td></tr><tr><td>代码更新了，手册或部署包仍是旧版</td><td>核对相关配置项与基线，完成同步更新和发布检查。</td></tr><tr><td>临近交付才发现大量配置差异</td><td>按计划和重要节点开展配置审计，跟踪整改。</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="case-communication"><h4><span>04</span>沟通与干系人</h4><div class="area-process-route" data-area="沟通"><div class="route-title">沟通管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(32)">10.1 规划沟通管理</button></div></div><div class="route-row"><span class="route-group">执行</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(33)">10.2 管理沟通</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(34)">10.3 监督沟通</button></div></div></div><div class="area-process-route" data-area="干系人"><div class="route-title">干系人管理过程</div><div class="route-row"><span class="route-group">启动</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(45)">13.1 识别干系人</button></div></div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(46)">13.2 规划干系人参与</button></div></div><div class="route-row"><span class="route-group">执行</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(47)">13.3 管理干系人参与</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(48)">13.4 监督干系人参与</button></div></div></div><div class="study-table-wrap"><table><thead><tr><th>沟通方式</th><th>适用特点</th><th>示例</th></tr></thead><tbody><tr><td>交互式</td><td>即时交换、澄清和反馈</td><td>讨论、电话、会议</td></tr><tr><td>推式</td><td>向指定对象发送信息</td><td>邮件、通知、定向报告</td></tr><tr><td>拉式</td><td>接收者按需取用</td><td>知识库、门户、资料库</td></tr></tbody></table></div><p><b>沟通计划：</b>谁、向谁、沟通什么、何时/多频繁、用何方式、谁授权及如何升级。<b>沟通渠道数：</b>N位参与者两两建立潜在双向渠道时，为N(N－1)/2。</p><div class="study-table-wrap"><table><thead><tr><th>权力/利益</th><th>参与策略</th></tr></thead><tbody><tr><td>高权力、高利益</td><td>重点管理</td></tr><tr><td>高权力、低利益</td><td>令其满意</td></tr><tr><td>低权力、高利益</td><td>随时告知</td></tr><tr><td>低权力、低利益</td><td>监督</td></tr></tbody></table></div><p><b>参与水平：</b>不知晓、抵制、中立、支持、领导。参与度评估矩阵比较当前水平与期望水平。</p><p><b>干系人映射分析/表现：</b>方格模型（权力/利益、权力/影响、作用/影响）、干系人立方体、凸显模型、影响方向、优先级排序。</p><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>只识别领导，遗漏用户、运维或供应方</td><td>补充识别与分析，更新干系人登记册及参与计划。</td></tr><tr><td>重要分歧只发邮件，不确认理解</td><td>采用适当的交互沟通，澄清诉求并记录结论和责任。</td></tr><tr><td>统一发送大量资料，未考虑接收者需求</td><td>按对象调整内容、频率和渠道，并通过反馈验证效果。</td></tr></tbody></table></div><div class="study-concepts" data-concepts="干系人登记册"></div></section>
+<section class="gl-card study-section" id="case-integration"><h4><span>05</span>整合与变更</h4><div class="area-process-route" data-area="整合"><div class="route-title">整合管理过程</div><div class="route-row"><span class="route-group">启动</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(0)">4.1 制定项目章程</button></div></div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(1)">4.2 制定项目管理计划</button></div></div><div class="route-row"><span class="route-group">执行</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(2)">4.3 指导与管理项目工作</button><button type="button" class="study-process" onclick="openStudyProcess(3)">4.4 管理项目知识</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(4)">4.5 监控项目工作</button><button type="button" class="study-process" onclick="openStudyProcess(5)">4.6 实施整体变更控制</button></div></div><div class="route-row"><span class="route-group">收尾</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(6)">4.7 结束项目或阶段</button></div></div></div><h5>章程与计划</h5><p><b>章程：</b>项目目的、可测量目标和成功标准、高层级需求、项目描述与边界、主要可交付成果、整体风险、总体里程碑、预先批准的财务资源、关键干系人、审批要求、退出标准、项目经理职责职权及发起人授权。</p><p><b>职责：</b>发起人或有权机构批准章程；项目经理可以参与编制。项目管理计划需要整合各子计划及基准。</p><h5>变更管理程序</h5><div class="study-chain"><span>提出申请</span><span class="study-arrow">→</span><span>初审</span><span class="study-arrow">→</span><span>方案论证</span><span class="study-arrow">→</span><span>审查决定</span><span class="study-arrow">→</span><span>通知并实施</span><span class="study-arrow">→</span><span>实施监控</span><span class="study-arrow">→</span><span>效果评估</span><span class="study-arrow">→</span><span>变更收尾</span></div><ul class="gl-ul"><li><b>评估内容：</b>必要性、范围完整性、技术可行性、工作量，以及对范围、进度、成本、质量、资源、风险和合同的影响。</li><li><b>角色：</b>申请人提出请求；项目经理组织评估和实施；CCB或其他授权人按权限审查；配置管理人员维护受控版本与状态。</li><li><b>原则：</b>基准管理、流程化、分工明确、综合评估影响、保存相关文档。</li><li><b>紧急变更：</b>按预定紧急流程和授权处理，记录决定、措施及后续确认。</li></ul><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>口头答应客户，直接修改受控需求</td><td>记录变更，评估影响，按权限审批后实施。</td></tr><tr><td>变更已实施，计划和相关方仍使用旧版本</td><td>更新受影响的基准、文件与版本，并通知相关人员。</td></tr><tr><td>只处理技术改动，未评估成本和进度</td><td>开展综合影响评估，并落实资金、资源与进度安排。</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="case-quality"><h4><span>06</span>质量管理</h4><div class="area-process-route" data-area="质量"><div class="route-title">质量管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(23)">8.1 规划质量管理</button></div></div><div class="route-row"><span class="route-group">执行</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(24)">8.2 管理质量</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(25)">8.3 控制质量</button></div></div></div><div class="study-table-wrap"><table><thead><tr><th>过程</th><th>关注点</th><th>关键输出</th></tr></thead><tbody><tr><td>8.1 规划质量管理</td><td>明确要求、标准、目标与证明方法</td><td>质量管理计划、质量测量指标</td></tr><tr><td>8.2 管理质量</td><td>将质量政策和计划转化为活动，审计和改进过程</td><td>质量报告、测试与评估文件</td></tr><tr><td>8.3 控制质量</td><td>检查、测试并记录结果，核实成果</td><td>质量控制测量结果、核实的可交付成果、工作绩效信息</td></tr></tbody></table></div><p><b>质量管理计划：</b>质量标准与目标、角色职责、计划开展的质量管理和控制活动、使用的工具、问题处理及改进安排。</p><div class="study-table-wrap"><table><thead><tr><th>质量成本</th><th>示例</th></tr></thead><tbody><tr><td>预防成本</td><td>培训、质量规划、过程改进</td></tr><tr><td>评价成本</td><td>检查、测试、质量评价</td></tr><tr><td>内部失败成本</td><td>交付前发现缺陷造成的返工、报废</td></tr><tr><td>外部失败成本</td><td>交付后缺陷修复、保修、索赔</td></tr></tbody></table></div><h5>常用工具</h5><p><b>因果图</b>梳理原因；<b>流程图</b>检查过程；<b>核查表</b>记录数据；<b>直方图</b>看分布；<b>帕累托图</b>辨认主要问题；<b>散点图</b>看变量关联；<b>控制图</b>判断过程稳定性。</p><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>为赶进度取消评审或压缩必要测试</td><td>评估风险，保留必要质量活动并调整资源或进度安排。</td></tr><tr><td>缺陷修复后不复测，也不分析反复发生原因</td><td>登记缺陷、定位原因、修复、复测并关闭；必要时改进过程。</td></tr><tr><td>只说“质量良好”，没有指标和证据</td><td>明确指标、目标值、测量方法、记录和责任人。</td></tr></tbody></table></div><div class="study-concepts" data-concepts="因果图|帕累托图|控制图"></div></section>
+<section class="gl-card study-section" id="case-procurement"><h4><span>07</span>采购与合同</h4><div class="area-process-route" data-area="采购"><div class="route-title">采购管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(42)">12.1 规划采购管理</button></div></div><div class="route-row"><span class="route-group">执行</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(43)">12.2 实施采购</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button></div></div></div><div class="study-table-wrap"><table><thead><tr><th>文件或决策</th><th>关键内容</th></tr></thead><tbody><tr><td>采购工作说明书</td><td>拟采购工作、规格数量、质量与绩效、时间地点、附加服务</td></tr><tr><td>招标文件</td><td>向潜在卖方传达需求，征求信息、报价或方案</td></tr><tr><td>供方选择标准</td><td>事先明确评审维度、权重或判定方法</td></tr><tr><td>协议</td><td>范围与交付、验收、价格支付、责任、变更、违约及争议处理</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>合同类型</th><th>成本风险与适用关注</th></tr></thead><tbody><tr><td>固定总价 / 总价加激励费用 / 总价加经济价格调整</td><td>范围清楚时便于约定总价；关注激励和调整条件</td></tr><tr><td>成本加固定费用 / 成本加激励费用 / 成本加奖励费用</td><td>按约定补偿成本并支付费用；买方需要较强的成本监督</td></tr><tr><td>工料合同</td><td>按工时、材料等约定计价；关注费率、限额和工作量控制</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>未明确验收标准、付款条件或变更机制</td><td>在合同中明确交付、验收、支付、责任和变更处理安排。</td></tr><tr><td>选择卖方无标准，评价与要求不一致</td><td>依据事先确定的供方选择标准评审，记录结果并按权限授予合同。</td></tr><tr><td>供应方延期只口头催促</td><td>核实履约差异，保留书面记录，按合同协调纠偏、变更或索赔。</td></tr><tr><td>未验收、未核实完成量就付款</td><td>依据合同和履约、验收证据审查付款。</td></tr></tbody></table></div><div class="study-concepts" data-concepts="采购文档|协议"></div></section>
+<section class="gl-card study-section" id="case-resource"><h4><span>08</span>资源与团队</h4><div class="area-process-route" data-area="资源"><div class="route-title">资源管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(26)">9.1 规划资源管理</button><button type="button" class="study-process" onclick="openStudyProcess(27)">9.2 估算活动资源</button></div></div><div class="route-row"><span class="route-group">执行</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(28)">9.3 获取资源</button><button type="button" class="study-process" onclick="openStudyProcess(29)">9.4 建设团队</button><button type="button" class="study-process" onclick="openStudyProcess(30)">9.5 管理团队</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(31)">9.6 控制资源</button></div></div></div><p><b>团队建设阶段：</b>形成→震荡→规范→成熟→解散。成员或环境变化可能使团队回到前面的阶段。</p><p><b>冲突发展阶段：</b>潜伏→感知→感受→呈现→结束。潜伏是背景条件，感知是意识到分歧，感受涉及情绪，呈现是公开行动。</p><div class="study-table-wrap"><table><thead><tr><th>冲突处理方式</th><th>做法</th></tr></thead><tbody><tr><td>撤退/回避</td><td>暂时退出或推迟处理</td></tr><tr><td>缓和/包容</td><td>强调一致、适度让步</td></tr><tr><td>妥协/调解</td><td>各方让步，形成可接受方案</td></tr><tr><td>强迫/命令</td><td>凭借权力推行一方方案</td></tr><tr><td>合作/解决问题</td><td>共同分析根因，整合观点寻求解决</td></tr></tbody></table></div><p><b>RACI：</b>R执行负责，A最终负责/批准，C咨询，I知情。每项工作有且只有一个A，可以有多位R。</p><div class="study-table-wrap"><table><thead><tr><th>文件</th><th>关键内容</th></tr></thead><tbody><tr><td>资源管理计划</td><td>角色职责、组织图、资源获取、培训建设、控制与释放安排</td></tr><tr><td>团队章程</td><td>价值观、沟通、决策、冲突和会议约定</td></tr><tr><td>资源日历</td><td>可用日期、班次、数量或能力</td></tr><tr><td>团队绩效评价</td><td>能力、协作和整体效果的改善情况</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>关键岗位无人替补、分工与能力不匹配</td><td>分析资源与技能需求，落实人员分工、培训、备份和知识共享。</td></tr><tr><td>冲突持续升级，负责人不介入</td><td>了解原因与各方诉求，按紧迫性和影响选择处理方式，跟踪结果。</td></tr><tr><td>只靠长期加班推进项目</td><td>复核工作量、资源与进度，协调投入并建立合理激励和支持。</td></tr></tbody></table></div><div class="study-concepts" data-concepts="资源管理计划|责任分配矩阵"></div></section>
+<section class="gl-card study-section" id="case-scope"><h4><span>09</span>范围与需求</h4><div class="area-process-route" data-area="范围"><div class="route-title">范围管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(7)">5.1 规划范围管理</button><button type="button" class="study-process" onclick="openStudyProcess(8)">5.2 收集需求</button><button type="button" class="study-process" onclick="openStudyProcess(9)">5.3 定义范围</button><button type="button" class="study-process" onclick="openStudyProcess(10)">5.4 创建WBS</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(11)">5.5 确认范围</button><button type="button" class="study-process" onclick="openStudyProcess(12)">5.6 控制范围</button></div></div></div><p><b>范围基准：</b>项目范围说明书＋WBS＋WBS词典。<b>范围说明书：</b>产品范围描述、可交付成果、验收标准、项目的除外责任。</p><h5>WBS</h5><ul class="gl-ul"><li>面向可交付成果，覆盖全部项目工作，包括项目管理与外包工作。</li><li>遵循100%原则；组件边界清楚，同一组件不交叉从属。</li><li>工作包粒度应支持估算、分派、进度安排和绩效控制。</li><li>主要干系人参与分解和确认；通过WBS词典明确工作、责任、资源与验收条件。</li></ul><div class="study-table-wrap"><table><thead><tr><th>概念</th><th>含义</th></tr></thead><tbody><tr><td>范围蔓延</td><td>时间、成本和资源未相应调整，范围发生不受控制的扩张。</td></tr><tr><td>镀金</td><td>团队主动增加超出已批准范围的功能或工作。</td></tr><tr><td>需求文件</td><td>记录需要满足的条件和能力。</td></tr><tr><td>需求跟踪矩阵</td><td>连接需求来源、目标、交付成果、设计开发、测试与验收。</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>需求边界、验收标准不清就开发</td><td>组织需求澄清与评审，确认边界及可验证的验收标准。</td></tr><tr><td>客户随时新增需求，团队直接承诺</td><td>记录并分析变更，按审批结果调整范围及其他计划。</td></tr><tr><td>只在最终交付时统一验收</td><td>按交付安排进行范围确认，及时记录接受或未接受的结果。</td></tr></tbody></table></div><div class="study-concepts" data-concepts="范围基准|需求跟踪矩阵"></div></section>
+<section class="gl-card study-section" id="case-schedule"><h4><span>10</span>计算与进度</h4><div class="area-process-route" data-area="进度"><div class="route-title">进度管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(13)">6.1 规划进度管理</button><button type="button" class="study-process" onclick="openStudyProcess(14)">6.2 定义活动</button><button type="button" class="study-process" onclick="openStudyProcess(15)">6.3 排列活动顺序</button><button type="button" class="study-process" onclick="openStudyProcess(16)">6.4 估算活动持续时间</button><button type="button" class="study-process" onclick="openStudyProcess(17)">6.5 制定进度计划</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(18)">6.6 控制进度</button></div></div></div><div class="area-process-route" data-area="成本"><div class="route-title">成本管理过程</div><div class="route-row"><span class="route-group">规划</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(19)">7.1 规划成本管理</button><button type="button" class="study-process" onclick="openStudyProcess(20)">7.2 估算成本</button><button type="button" class="study-process" onclick="openStudyProcess(21)">7.3 制定预算</button></div></div><div class="route-row"><span class="route-group">监控</span><div class="route-processes"><button type="button" class="study-process" onclick="openStudyProcess(22)">7.4 控制成本</button></div></div></div><div class="study-table-wrap"><table><thead><tr><th>对照</th><th>关键区别</th></tr></thead><tbody><tr><td>6.2 定义活动 / 5.4 创建WBS</td><td>活动：完成工作包的具体行动；WBS：可交付成果和工作分解。</td></tr><tr><td>项目日历 / 资源日历</td><td>项目的工作时段 / 具体资源的可用时段和能力。</td></tr><tr><td>赶工 / 快速跟进</td><td>增加资源等缩短工期，通常增加成本 / 原顺序工作部分并行，通常增加返工风险。</td></tr><tr><td>资源平衡 / 资源平滑</td><td>按资源限制调整，可能改变工期 / 在浮动时间内调整，不延迟完工日期。</td></tr></tbody></table></div><h5>估算、预算与储备</h5><p><b>成本估算</b>确定预计需要多少钱；<b>7.3 制定预算</b>汇总并形成经批准的成本基准；<b>项目资金需求</b>说明资金总量及到位时点。</p><p><b>应急储备</b>用于已识别的风险，计入成本基准；<b>管理储备</b>用于项目范围内未预见的工作，不计入成本基准。<b>项目总预算＝成本基准＋管理储备。</b></p><h5>常用公式</h5><div class="study-table-wrap"><table><thead><tr><th>指标</th><th>公式</th></tr></thead><tbody><tr><td>进度/成本偏差</td><td>SV＝EV－PV；CV＝EV－AC</td></tr><tr><td>进度/成本绩效指数</td><td>SPI＝EV/PV；CPI＝EV/AC</td></tr><tr><td>非典型偏差预测</td><td>ETC＝BAC－EV；EAC＝AC＋ETC</td></tr><tr><td>剩余工作延续当前成本效率</td><td>ETC＝(BAC－EV)/CPI；EAC＝BAC/CPI</td></tr><tr><td>成本和进度效率共同影响剩余工作</td><td>ETC＝(BAC－EV)/(CPI×SPI)；EAC＝AC＋ETC</td></tr><tr><td>原估算失效，重新估算剩余工作</td><td>EAC＝AC＋重新自下而上估算的ETC</td></tr><tr><td>完工尚需绩效指数</td><td>以BAC为目标：TCPI＝(BAC－EV)/(BAC－AC)<br>以经批准的EAC为目标：TCPI＝(BAC－EV)/(EAC－AC)</td></tr><tr><td>完工偏差</td><td>VAC＝BAC－EAC；正值预计结余，负值预计超支。</td></tr><tr><td>O / M / P</td><td>最乐观估算 / 最可能估算 / 最悲观估算</td></tr><tr><td>三点估算</td><td>三角分布：(O＋M＋P)/3；常用贝塔近似：(O＋4M＋P)/6</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>资源超负荷、进度计划缺乏可执行性</td><td>核实资源日历和投入，调整逻辑、资源分配或进度安排。</td></tr><tr><td>发现延期或超支只修改报表数字</td><td>分析偏差原因与趋势，实施纠正措施；涉及基准变更时履行审批。</td></tr></tbody></table></div><h5>公式判读</h5><div class="study-table-wrap"><table><thead><tr><th>符号/结果</th><th>作答含义</th></tr></thead><tbody><tr><td>PV / EV / AC</td><td>计划价值 / 挣值（已完成工作的预算价值） / 实际成本</td></tr><tr><td>BAC / EAC / ETC / VAC</td><td>完工预算 / 完工估算 / 完工尚需估算 / 完工偏差</td></tr><tr><td>CV＜0；CPI＜1</td><td>成本超支</td></tr><tr><td>SV＜0；SPI＜1</td><td>进度落后</td></tr><tr><td>典型 / 非典型偏差</td><td>未来延续当前成本效率 / 剩余工作按原预算效率完成</td></tr><tr><td>总时差 / 自由时差</td><td>不延误项目完工日期且不违反进度制约的可延迟时间 / 不延误紧后活动最早开始日期且不违反进度制约的可延迟时间</td></tr><tr><td>ES / EF / LS / LF</td><td>最早开始 / 最早完成 / 最晚开始 / 最晚完成时间</td></tr><tr><td>从0时刻起算，无提前量、滞后量的完成到开始网络</td><td>EF＝ES＋持续时间；ES取紧前活动EF的最大值。LS＝LF－持续时间；LF取紧后活动LS的最小值。</td></tr><tr><td>总时差TF / 自由时差FF</td><td>TF＝LS－ES＝LF－EF；完成到开始且无提前量、滞后量时，FF＝紧后活动ES的最小值－本活动EF。</td></tr><tr><td>三点估算标准差</td><td>常用贝塔近似：σ＝(P－O)/6</td></tr><tr><td>沟通渠道</td><td>N位参与者两两建立潜在双向渠道时：N(N－1)/2；增加渠道数＝新增人数后的总数－原总数。</td></tr><tr><td>期望货币价值EMV</td><td>各情景的“概率×货币结果”之和，收益与损失使用一致符号</td></tr></tbody></table></div><details class="exam-question"><summary>计算自测：PV＝100，EV＝80，AC＝90，BAC＝200（万元）。求SV、CV、SPI、CPI，并按当前成本效率预测EAC。</summary><div class="exam-answer"><ol class="exam-list"><li>SV＝80－100＝－20万元，进度落后。</li><li>CV＝80－90＝－10万元，成本超支。</li><li>SPI＝80/100＝0.8；CPI＝80/90≈0.889。</li><li>EAC＝BAC/CPI＝200/(80/90)＝225万元。</li></ol></div></details><details class="exam-question"><summary>三点估算自测：O＝4天、M＝6天、P＝14天，采用常用贝塔近似，求期望持续时间与标准差。</summary><div class="exam-answer"><ol class="exam-list"><li>期望持续时间＝(4＋4×6＋14)/6＝7天。</li><li>标准差＝(14－4)/6≈1.67天。</li></ol></div></details></section>
+<section class="gl-card study-section" id="case-supervision"><h4><span>11</span>监理</h4><div class="study-table-wrap"><table><thead><tr><th>工作</th><th>内容</th></tr></thead><tbody><tr><td>三控</td><td>质量控制、进度控制、投资控制</td></tr><tr><td>两管</td><td>合同管理、信息管理</td></tr><tr><td>一协调</td><td>组织协调</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>角色</th><th>主要职责</th></tr></thead><tbody><tr><td>建设方</td><td>需求与投资决策、组织协调、审定和验收使用</td></tr><tr><td>承建方</td><td>依合同开展设计、开发、实施和交付</td></tr><tr><td>监理方</td><td>按委托与合同监督、审核、检查、记录、协调并跟踪整改</td></tr></tbody></table></div><p><b>监理文件：</b>监理规划与实施细则、日志、月报、会议纪要、通知与整改记录、验收及总结资料。</p><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>监理代替承建方实施，或超授权批准变更</td><td>明确三方职责与授权；监理提出审核意见并监督落实。</td></tr><tr><td>发现问题只口头提醒，不留记录、不复查</td><td>形成书面通知或记录，明确整改责任、时限并检查结果。</td></tr><tr><td>只确认功能可用，未核对合同和性能要求</td><td>依据合同、需求和适用标准检查质量、性能及相关交付。</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="case-document"><h4><span>12</span>信息与文档</h4><div class="study-table-wrap"><table><thead><tr><th>文档类型</th><th>示例</th></tr></thead><tbody><tr><td>开发文档</td><td>需求、功能和设计说明；开发、集成及质量计划；研究报告</td></tr><tr><td>产品文档</td><td>用户指南、培训手册、参考手册、支持和维护资料</td></tr><tr><td>管理文档</td><td>项目计划、进度与变更记录、阶段报告、职责说明</td></tr></tbody></table></div><p><b>文档质量等级：</b>最低限度文档、内部文档、工作文档、正式文档。</p><ul class="gl-ul"><li>统一文档标识、格式、命名和版本；明确编制、审核和批准责任。</li><li>维护目录、存储位置、权限及借阅或访问记录。</li><li>敏感信息按分类分级要求保护；传递和发布需获得相应授权。</li><li>归档应保持完整、可检索、可追溯，版本与交付成果一致。</li></ul><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>文档散落个人电脑，人员离岗后无法找到</td><td>统一存储和目录，落实权限、备份、交接及归档责任。</td></tr><tr><td>文档内容与系统功能不一致</td><td>核对配置版本与变更记录，审核并同步更新文档。</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="case-initiation"><h4><span>13</span>立项与组织</h4><p><b>项目建议书：</b>必要性、市场或业务需求、产品/服务方案、建设条件。<b>可行性研究：</b>技术、经济、社会效益、运行环境及其他可行性。</p><div class="study-table-wrap"><table><thead><tr><th>结构</th><th>项目经理权力</th><th>项目经理岗位</th><th>主要协调特点</th></tr></thead><tbody><tr><td>职能型</td><td>极少或无</td><td>兼职</td><td>以职能部门为主，跨部门协调较难</td></tr><tr><td>弱矩阵</td><td>低</td><td>兼职</td><td>主要承担协调职责</td></tr><tr><td>均衡矩阵</td><td>低至中</td><td>全职</td><td>与职能经理分享权力</td></tr><tr><td>强矩阵</td><td>中至高</td><td>全职</td><td>项目经理拥有较强资源协调权</td></tr><tr><td>项目型</td><td>高至几乎全权</td><td>全职</td><td>项目导向明显，关注资源重复和收尾安置</td></tr></tbody></table></div><p><b>PMO：</b>支持型提供方法与服务；控制型要求遵循规则；指令型直接管理项目。</p><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>未经充分论证就承诺不现实的目标</td><td>明确业务目标与约束，开展可行性分析并按权限决策。</td></tr><tr><td>项目经理不能落实跨部门资源</td><td>明确组织结构、授权和报告关系，协调职能负责人及发起人支持。</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="case-closing"><h4><span>14</span>验收与收尾</h4><div class="study-chain" data-flow="closing"><span>核对目标与未决事项</span><span class="study-arrow" aria-hidden="true">→</span><span>完成适用的验收与采购关闭</span><span class="study-arrow" aria-hidden="true">→</span><span>最终成果移交</span><span class="study-arrow" aria-hidden="true">→</span><span>报告、经验教训与归档</span><span class="study-arrow" aria-hidden="true">→</span><span>释放资源并正式关闭</span></div><ul class="gl-ul"><li>核对项目或阶段目标、合同要求和可交付成果，处理未完成或未决事项。</li><li>完成适用的测试、验收和采购关闭，保留正式确认记录。</li><li>移交最终产品、服务或成果，落实培训、支持和运营衔接。</li><li>整理最终报告与经验教训，归档计划、记录及配置资料。</li><li>按安排释放资源，完成项目或阶段的正式关闭。</li></ul><p><b>最终报告：</b>项目概况、范围/进度/成本/质量目标达成情况、成果验证、效益安排、主要风险处理及最终移交情况。</p><div class="study-table-wrap"><table><thead><tr><th>材料中的问题</th><th>可写措施</th></tr></thead><tbody><tr><td>系统上线就宣布项目结束</td><td>核对验收、移交、合同与归档要求，办理正式收尾。</td></tr><tr><td>项目提前终止，没有总结或处理遗留事项</td><td>记录终止原因、已完成和未完成工作，处理合同、资料与资源交接。</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="case-answer"><h4><span>15</span>答题写法</h4><div class="study-table-wrap"><table><thead><tr><th>题目要求</th><th>可直接采用的表达</th></tr></thead><tbody><tr><td>指出问题</td><td>“需求未经评审和确认即进入开发，需求管理不到位。”</td></tr><tr><td>提出措施</td><td>“组织相关干系人评审需求，明确范围边界和验收标准，经确认后纳入受控管理。”</td></tr><tr><td>说明影响</td><td>“未评估变更对范围、进度、成本和质量的综合影响，可能造成返工、延期和超支。”</td></tr><tr><td>判断并改正</td><td>“错误。11.4 实施定量风险分析并非每个项目都必须开展，应根据项目风险和分析需要决定。”</td></tr><tr><td>写流程或分类</td><td>按题目指定的流程或分类维度逐条写标准名称。问过程时写过程，问文件时写文件。</td></tr><tr><td>计算题</td><td>公式 → 代入数据 → 结果及单位 → 状态或措施。例如“SPI＝0.8＜1，进度落后”。</td></tr></tbody></table></div></section></div></div></div>
+
+<div class="modal-overlay study-modal" id="glr"><div class="modal-box"><div class="m-head"><div class="m-title">规律总结 · ITTO考前速记</div><button class="m-close" onclick="glrClose()" title="关闭 (Esc)">✕</button></div><div class="gl-wrap"><nav class="study-nav" aria-label="规律总结 · ITTO考前速记目录"><button type="button" onclick="studyJump('glr','rule-locate')">题干定位</button><button type="button" onclick="studyJump('glr','rule-process')">过程分布</button><button type="button" onclick="studyJump('glr','rule-deliver')">成果与验收</button><button type="button" onclick="studyJump('glr','rule-performance')">绩效数据流</button><button type="button" onclick="studyJump('glr','rule-baseline')">计划、基准与文件</button><button type="button" onclick="studyJump('glr','rule-change')">变更请求</button><button type="button" onclick="studyJump('glr','rule-input')">常见输入与例外</button><button type="button" onclick="studyJump('glr','rule-tools')">工具分类与辨析</button><button type="button" onclick="studyJump('glr','rule-output')">关键输出与更新</button><button type="button" onclick="studyJump('glr','rule-frequency')">开展频率</button><button type="button" onclick="studyJump('glr','rule-fill')">填空自测</button><button type="button" onclick="studyJump('glr','rule-judge')">判断纠错</button></nav><section class="gl-card study-section" id="rule-locate"><h4><span>01</span>题干定位</h4><div class="study-table-wrap"><table><thead><tr><th>题干中的核心动作</th><th>对应过程</th></tr></thead><tbody><tr><td>正式批准项目、授权项目经理</td><td><button type="button" class="study-process" onclick="openStudyProcess(0)">4.1 制定项目章程</button></td></tr><tr><td>将各项计划协调为综合计划</td><td><button type="button" class="study-process" onclick="openStudyProcess(1)">4.2 制定项目管理计划</button></td></tr><tr><td>把工作包分解为具体行动</td><td><button type="button" class="study-process" onclick="openStudyProcess(14)">6.2 定义活动</button></td></tr><tr><td>检验或测试成果，核实质量</td><td><button type="button" class="study-process" onclick="openStudyProcess(25)">8.3 控制质量</button></td></tr><tr><td>客户正式接受已完成成果</td><td><button type="button" class="study-process" onclick="openStudyProcess(11)">5.5 确认范围</button></td></tr><tr><td>审查、批准并沟通变更决定</td><td><button type="button" class="study-process" onclick="openStudyProcess(5)">4.6 实施整体变更控制</button></td></tr><tr><td>改善团队能力、互动与氛围</td><td><button type="button" class="study-process" onclick="openStudyProcess(29)">9.4 建设团队</button></td></tr><tr><td>跟踪成员表现、反馈、处理冲突</td><td><button type="button" class="study-process" onclick="openStudyProcess(30)">9.5 管理团队</button></td></tr><tr><td>确保项目信息恰当生成与传递</td><td><button type="button" class="study-process" onclick="openStudyProcess(33)">10.2 管理沟通</button></td></tr><tr><td>检查信息需求是否得到满足</td><td><button type="button" class="study-process" onclick="openStudyProcess(34)">10.3 监督沟通</button></td></tr><tr><td>制定风险应对策略和行动</td><td><button type="button" class="study-process" onclick="openStudyProcess(39)">11.5 规划风险应对</button></td></tr><tr><td>执行已经商定的风险应对</td><td><button type="button" class="study-process" onclick="openStudyProcess(40)">11.6 实施风险应对</button></td></tr><tr><td>检查风险应对效果、跟踪新旧风险</td><td><button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button></td></tr><tr><td>获取卖方应答、选择卖方、授予合同</td><td><button type="button" class="study-process" onclick="openStudyProcess(43)">12.2 实施采购</button></td></tr><tr><td>监督履约、纠偏和采购关闭</td><td><button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button></td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="rule-process"><h4><span>02</span>过程分布</h4><div class="study-stats"><span>启动<b>2</b></span><span>规划<b>24</b></span><span>执行<b>10</b></span><span>监控<b>12</b></span><span>收尾<b>1</b></span></div><div class="study-table-wrap"><table><thead><tr><th>知识领域</th><th>过程数</th><th>过程组分布</th></tr></thead><tbody><tr><td>整合</td><td>7</td><td>启动1 · 规划1 · 执行2 · 监控2 · 收尾1</td></tr><tr><td>范围</td><td>6</td><td>规划4 · 监控2</td></tr><tr><td>进度</td><td>6</td><td>规划5 · 监控1</td></tr><tr><td>成本</td><td>4</td><td>规划3 · 监控1</td></tr><tr><td>质量</td><td>3</td><td>规划1 · 执行1 · 监控1</td></tr><tr><td>资源</td><td>6</td><td>规划2 · 执行3 · 监控1</td></tr><tr><td>沟通</td><td>3</td><td>规划1 · 执行1 · 监控1</td></tr><tr><td>风险</td><td>7</td><td>规划5 · 执行1 · 监控1</td></tr><tr><td>采购</td><td>3</td><td>规划1 · 执行1 · 监控1</td></tr><tr><td>干系人</td><td>4</td><td>启动1 · 规划1 · 执行1 · 监控1</td></tr></tbody></table></div><p><b>启动：</b><button type="button" class="study-process" onclick="openStudyProcess(0)">4.1 制定项目章程</button>、<button type="button" class="study-process" onclick="openStudyProcess(45)">13.1 识别干系人</button>。<b>收尾：</b><button type="button" class="study-process" onclick="openStudyProcess(6)">4.7 结束项目或阶段</button>。</p><p><b>11.2 识别风险</b>属于规划，<b>11.6 实施风险应对</b>属于执行；<b>5.5 确认范围</b>属于监控。过程组会交互、重复，不等同于项目阶段。</p></section>
+<section class="gl-card study-section" id="rule-deliver"><h4><span>03</span>成果与验收</h4><div class="study-chain"><span>4.3 指导与管理项目工作</span><span class="study-arrow">→</span><span>可交付成果</span><span class="study-arrow">→</span><span>8.3 控制质量</span><span class="study-arrow">→</span><span>核实的可交付成果</span><span class="study-arrow">→</span><span>5.5 确认范围</span><span class="study-arrow">→</span><span>验收的可交付成果</span><span class="study-arrow">→</span><span>4.7 结束项目或阶段</span></div><div class="study-table-wrap"><table><thead><tr><th>成果状态</th><th>判断依据</th><th>下一步</th></tr></thead><tbody><tr><td>可交付成果</td><td>已形成，可检查</td><td>质量核实</td></tr><tr><td>核实的可交付成果</td><td>质量要求已满足</td><td>正式验收</td></tr><tr><td>验收的可交付成果</td><td>有权验收方已接受</td><td>收尾与移交</td></tr></tbody></table></div><p><b>8.3 控制质量</b>关注正确性和质量符合性；<b>5.5 确认范围</b>关注正式接受。两项工作可协调开展，同一成果的状态应可追溯。</p></section>
+<section class="gl-card study-section" id="rule-performance"><h4><span>04</span>绩效数据流</h4><div class="study-chain" data-flow="performance"><span><button type="button" class="study-process" onclick="openStudyProcess(2)">4.3 指导与管理项目工作</button></span><span class="study-arrow" aria-hidden="true">→</span><span>工作绩效数据</span><span class="study-arrow" aria-hidden="true">→</span><span>领域监控过程（10个）</span><span class="study-arrow" aria-hidden="true">→</span><span>工作绩效信息</span><span class="study-arrow" aria-hidden="true">→</span><span><button type="button" class="study-process" onclick="openStudyProcess(4)">4.5 监控项目工作</button></span><span class="study-arrow" aria-hidden="true">→</span><span>工作绩效报告</span></div><details class="flow-members"><summary>领域监控过程（10个）</summary><div class="flow-member-links"><button type="button" class="study-process" onclick="openStudyProcess(11)">5.5 确认范围</button><button type="button" class="study-process" onclick="openStudyProcess(12)">5.6 控制范围</button><button type="button" class="study-process" onclick="openStudyProcess(18)">6.6 控制进度</button><button type="button" class="study-process" onclick="openStudyProcess(22)">7.4 控制成本</button><button type="button" class="study-process" onclick="openStudyProcess(25)">8.3 控制质量</button><button type="button" class="study-process" onclick="openStudyProcess(31)">9.6 控制资源</button><button type="button" class="study-process" onclick="openStudyProcess(34)">10.3 监督沟通</button><button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button><button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button><button type="button" class="study-process" onclick="openStudyProcess(48)">13.4 监督干系人参与</button></div></details><div class="study-table-wrap"><table><thead><tr><th>层次</th><th>含义</th><th>产生或汇总过程</th></tr></thead><tbody><tr><td>工作绩效数据</td><td>原始事实：实际工期、成本、工作量、缺陷数量等</td><td><button type="button" class="study-process" onclick="openStudyProcess(2)">4.3 指导与管理项目工作</button></td></tr><tr><td>工作绩效信息</td><td>经过比较和分析的状态、偏差及原因</td><td>整合管理以外的10个监控过程</td></tr><tr><td>工作绩效报告</td><td>状态、进展、预测等报告形式</td><td><button type="button" class="study-process" onclick="openStudyProcess(4)">4.5 监控项目工作</button></td></tr></tbody></table></div><div class="flow-branch" data-flow="report-distribution"><span class="flow-branch-label">工作绩效报告</span><span class="study-arrow" aria-hidden="true">→</span><div class="flow-branch-targets"><button type="button" class="study-process" onclick="openStudyProcess(5)">4.6 实施整体变更控制</button><button type="button" class="study-process" onclick="openStudyProcess(30)">9.5 管理团队</button><button type="button" class="study-process" onclick="openStudyProcess(33)">10.2 管理沟通</button><button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button></div></div></section>
+<section class="gl-card study-section" id="rule-baseline"><h4><span>05</span>计划、基准与文件</h4><div class="study-table-wrap"><table><thead><tr><th>项目管理计划的基准</th><th>形成过程</th><th>组成或内容</th></tr></thead><tbody><tr><td>范围基准</td><td><button type="button" class="study-process" onclick="openStudyProcess(10)">5.4 创建WBS</button></td><td>项目范围说明书＋WBS＋WBS词典</td></tr><tr><td>进度基准</td><td><button type="button" class="study-process" onclick="openStudyProcess(17)">6.5 制定进度计划</button></td><td>经批准的进度模型</td></tr><tr><td>成本基准</td><td><button type="button" class="study-process" onclick="openStudyProcess(21)">7.3 制定预算</button></td><td>经批准、按时间分配的预算，含应急储备，不含管理储备</td></tr></tbody></table></div><ul class="gl-ul"><li><b>项目管理计划：</b>包括子管理计划、基准及其他组件。项目范围说明书、WBS、WBS词典通过范围基准纳入其中；项目章程不属于其组件。</li><li><b>范围管理计划 / 项目范围说明书：</b>前者规定“怎样管理范围”；后者说明“项目交付什么”，是范围基准的组成部分。</li><li><b>基准：</b>提供“与什么比较”的参照；变更须经规定的整体变更控制。</li><li><b>项目文件：</b>记录需求、风险、问题、估算依据和进展等事实或分析。</li><li><b>7.2 估算成本的范围基准：</b>范围说明书界定边界，WBS定位工作包，WBS词典补充工作描述、资源、成本和验收信息。</li><li><b>执行10＋监控12：</b>共22个过程均输入项目管理计划；使用的具体组件依各过程而定。</li></ul><div class="study-concepts" data-concepts="项目管理计划|项目文件"></div></section>
+<section class="gl-card study-section" id="rule-change"><h4><span>06</span>变更请求</h4><div class="study-chain" data-flow="change"><span>变更请求</span><span class="study-arrow" aria-hidden="true">→</span><span><button type="button" class="study-process" onclick="openStudyProcess(5)">4.6 实施整体变更控制</button></span><span class="study-arrow" aria-hidden="true">→</span><span>批准的变更请求</span><span class="study-arrow" aria-hidden="true">→</span><span><button type="button" class="study-process" onclick="openStudyProcess(2)">4.3 指导与管理项目工作</button></span><span class="study-arrow" aria-hidden="true">→</span><span>执行并形成工作结果</span></div><div id="changeRequestSources"></div><div class="flow-branch" data-flow="approved-change-check"><span class="flow-branch-label">批准的变更请求</span><span class="study-arrow" aria-hidden="true">→</span><div class="flow-branch-targets"><button type="button" class="study-process" onclick="openStudyProcess(25)">8.3 控制质量</button><button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button></div></div></section>
+<section class="gl-card study-section" id="rule-input"><h4><span>07</span>常见输入与例外</h4><div class="study-table-wrap"><table><thead><tr><th>输入</th><th>分布</th><th>未列为输入的过程</th></tr></thead><tbody><tr><td>组织过程资产</td><td>47个过程</td><td><button type="button" class="study-process" onclick="openStudyProcess(11)">5.5 确认范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button></td></tr><tr><td>事业环境因素</td><td>40个过程</td><td><button type="button" class="study-process" onclick="openStudyProcess(6)">4.7 结束项目或阶段</button>、<button type="button" class="study-process" onclick="openStudyProcess(11)">5.5 确认范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(12)">5.6 控制范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(18)">6.6 控制进度</button>、<button type="button" class="study-process" onclick="openStudyProcess(22)">7.4 控制成本</button>、<button type="button" class="study-process" onclick="openStudyProcess(24)">8.2 管理质量</button>、<button type="button" class="study-process" onclick="openStudyProcess(31)">9.6 控制资源</button>、<button type="button" class="study-process" onclick="openStudyProcess(40)">11.6 实施风险应对</button>、<button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button></td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>易混项</th><th>区别</th></tr></thead><tbody><tr><td>事业环境因素 / 组织过程资产</td><td>环境、文化、资源条件等 / 组织流程、模板、历史记录和知识库等</td></tr><tr><td>项目管理计划 / 项目文件</td><td>管理安排及基准 / 工作记录、清单、分析和报告</td></tr><tr><td>需求文件 / 需求跟踪矩阵</td><td>需求本身 / 需求来源到实现和验证的关联</td></tr><tr><td>风险登记册 / 风险报告</td><td>逐项风险 / 整体风险与单项风险汇总</td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="rule-tools"><h4><span>08</span>工具分类与辨析</h4><div class="study-table-wrap"><table><thead><tr><th>类别</th><th>典型工具</th></tr></thead><tbody><tr><td>数据收集</td><td>头脑风暴、访谈、焦点小组、问卷调查、标杆对照、核对单</td></tr><tr><td>数据分析</td><td>备选方案分析、成本效益分析、根本原因分析、偏差分析、趋势分析</td></tr><tr><td>数据表现</td><td>亲和图、思维导图、流程图、矩阵图、直方图、散点图</td></tr><tr><td>决策</td><td>投票、独裁型决策制定、多标准决策分析</td></tr><tr><td>人际关系与团队技能</td><td>积极倾听、引导、冲突管理、谈判、领导力</td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>对照</th><th>区别</th></tr></thead><tbody><tr><td>核对单 / 核查表</td><td>检查是否遗漏 / 分类记录观测数据</td></tr><tr><td>类比 / 参数 / 自下而上估算</td><td>借用类似经验 / 用参数关系计算 / 逐层估算汇总</td></tr><tr><td>资源平衡 / 资源平滑</td><td>可能改变关键路径与工期 / 在浮动时间内调整，保持完工日期</td></tr><tr><td>赶工 / 快速跟进</td><td>增加资源等以缩短时间 / 将原顺序工作部分重叠</td></tr></tbody></table></div><p><b>专家判断：</b>35个过程列有该工具。未列入的14个过程：<button type="button" class="study-process" onclick="openStudyProcess(11)">5.5 确认范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(12)">5.6 控制范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(15)">6.3 排列活动顺序</button>、<button type="button" class="study-process" onclick="openStudyProcess(17)">6.5 制定进度计划</button>、<button type="button" class="study-process" onclick="openStudyProcess(18)">6.6 控制进度</button>、<button type="button" class="study-process" onclick="openStudyProcess(24)">8.2 管理质量</button>、<button type="button" class="study-process" onclick="openStudyProcess(25)">8.3 控制质量</button>、<button type="button" class="study-process" onclick="openStudyProcess(28)">9.3 获取资源</button>、<button type="button" class="study-process" onclick="openStudyProcess(29)">9.4 建设团队</button>、<button type="button" class="study-process" onclick="openStudyProcess(30)">9.5 管理团队</button>、<button type="button" class="study-process" onclick="openStudyProcess(31)">9.6 控制资源</button>、<button type="button" class="study-process" onclick="openStudyProcess(33)">10.2 管理沟通</button>、<button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button>、<button type="button" class="study-process" onclick="openStudyProcess(48)">13.4 监督干系人参与</button>。</p><div class="study-concepts" data-concepts="数据收集|数据分析|数据表现|人际关系与团队技能"></div></section>
+<section class="gl-card study-section" id="rule-output"><h4><span>09</span>关键输出与更新</h4><div class="study-table-wrap"><table><thead><tr><th>输出</th><th>来源或相关过程</th></tr></thead><tbody><tr><td>项目章程、假设日志</td><td><button type="button" class="study-process" onclick="openStudyProcess(0)">4.1 制定项目章程</button></td></tr><tr><td>经验教训登记册</td><td><button type="button" class="study-process" onclick="openStudyProcess(3)">4.4 管理项目知识</button></td></tr><tr><td>需求文件、需求跟踪矩阵</td><td><button type="button" class="study-process" onclick="openStudyProcess(8)">5.2 收集需求</button></td></tr><tr><td>资源需求、估算依据、资源分解结构</td><td><button type="button" class="study-process" onclick="openStudyProcess(27)">9.2 估算活动资源</button></td></tr><tr><td>团队绩效评价</td><td><button type="button" class="study-process" onclick="openStudyProcess(29)">9.4 建设团队</button></td></tr><tr><td>风险登记册、风险报告</td><td><button type="button" class="study-process" onclick="openStudyProcess(36)">11.2 识别风险</button></td></tr><tr><td>采购关闭</td><td><button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button></td></tr></tbody></table></div><div class="study-table-wrap"><table><thead><tr><th>执行、监控过程的更新例外</th><th>区别</th></tr></thead><tbody><tr><td><button type="button" class="study-process" onclick="openStudyProcess(3)">4.4 管理项目知识</button></td><td>输出经验教训登记册；没有普通变更请求、项目文件更新。</td></tr><tr><td><button type="button" class="study-process" onclick="openStudyProcess(33)">10.2 管理沟通</button></td><td>输出项目沟通记录；没有普通变更请求。</td></tr><tr><td><button type="button" class="study-process" onclick="openStudyProcess(40)">11.6 实施风险应对</button></td><td>有变更请求和项目文件更新；没有项目管理计划更新。</td></tr><tr><td><button type="button" class="study-process" onclick="openStudyProcess(5)">4.6 实施整体变更控制</button></td><td>输出批准的变更请求；项目文件更新为变更日志。</td></tr></tbody></table></div><p><b>事业环境因素更新：</b><button type="button" class="study-process" onclick="openStudyProcess(28)">9.3 获取资源</button>、<button type="button" class="study-process" onclick="openStudyProcess(29)">9.4 建设团队</button>、<button type="button" class="study-process" onclick="openStudyProcess(30)">9.5 管理团队</button>。</p></section>
+<section class="gl-card study-section" id="rule-frequency"><h4><span>10</span>开展频率</h4><div class="study-table-wrap"><table><thead><tr><th>频率</th><th>过程</th></tr></thead><tbody><tr data-frequency="once"><td>一次或在预定义点开展</td><td><details class="frequency-members"><summary>14个过程</summary><div><button type="button" class="study-process" onclick="openStudyProcess(0)">4.1 制定项目章程</button>、<button type="button" class="study-process" onclick="openStudyProcess(1)">4.2 制定项目管理计划</button>、<button type="button" class="study-process" onclick="openStudyProcess(6)">4.7 结束项目或阶段</button>、<button type="button" class="study-process" onclick="openStudyProcess(7)">5.1 规划范围管理</button>、<button type="button" class="study-process" onclick="openStudyProcess(8)">5.2 收集需求</button>、<button type="button" class="study-process" onclick="openStudyProcess(9)">5.3 定义范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(10)">5.4 创建WBS</button>、<button type="button" class="study-process" onclick="openStudyProcess(13)">6.1 规划进度管理</button>、<button type="button" class="study-process" onclick="openStudyProcess(19)">7.1 规划成本管理</button>、<button type="button" class="study-process" onclick="openStudyProcess(21)">7.3 制定预算</button>、<button type="button" class="study-process" onclick="openStudyProcess(23)">8.1 规划质量管理</button>、<button type="button" class="study-process" onclick="openStudyProcess(26)">9.1 规划资源管理</button>、<button type="button" class="study-process" onclick="openStudyProcess(35)">11.1 规划风险管理</button>、<button type="button" class="study-process" onclick="openStudyProcess(42)">12.1 规划采购管理</button></div></details></td></tr><tr data-frequency="periodic"><td>按需要定期开展</td><td><details class="frequency-members"><summary>8个过程</summary><div><button type="button" class="study-process" onclick="openStudyProcess(11)">5.5 确认范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(20)">7.2 估算成本</button>、<button type="button" class="study-process" onclick="openStudyProcess(27)">9.2 估算活动资源</button>、<button type="button" class="study-process" onclick="openStudyProcess(28)">9.3 获取资源</button>、<button type="button" class="study-process" onclick="openStudyProcess(32)">10.1 规划沟通管理</button>、<button type="button" class="study-process" onclick="openStudyProcess(43)">12.2 实施采购</button>、<button type="button" class="study-process" onclick="openStudyProcess(45)">13.1 识别干系人</button>、<button type="button" class="study-process" onclick="openStudyProcess(46)">13.2 规划干系人参与</button></div></details></td></tr><tr data-frequency="throughout"><td>在整个项目期间开展</td><td><details class="frequency-members"><summary>26个过程</summary><div><button type="button" class="study-process" onclick="openStudyProcess(2)">4.3 指导与管理项目工作</button>、<button type="button" class="study-process" onclick="openStudyProcess(3)">4.4 管理项目知识</button>、<button type="button" class="study-process" onclick="openStudyProcess(4)">4.5 监控项目工作</button>、<button type="button" class="study-process" onclick="openStudyProcess(5)">4.6 实施整体变更控制</button>、<button type="button" class="study-process" onclick="openStudyProcess(12)">5.6 控制范围</button>、<button type="button" class="study-process" onclick="openStudyProcess(14)">6.2 定义活动</button>、<button type="button" class="study-process" onclick="openStudyProcess(15)">6.3 排列活动顺序</button>、<button type="button" class="study-process" onclick="openStudyProcess(16)">6.4 估算活动持续时间</button>、<button type="button" class="study-process" onclick="openStudyProcess(17)">6.5 制定进度计划</button>、<button type="button" class="study-process" onclick="openStudyProcess(18)">6.6 控制进度</button>、<button type="button" class="study-process" onclick="openStudyProcess(22)">7.4 控制成本</button>、<button type="button" class="study-process" onclick="openStudyProcess(24)">8.2 管理质量</button>、<button type="button" class="study-process" onclick="openStudyProcess(25)">8.3 控制质量</button>、<button type="button" class="study-process" onclick="openStudyProcess(29)">9.4 建设团队</button>、<button type="button" class="study-process" onclick="openStudyProcess(30)">9.5 管理团队</button>、<button type="button" class="study-process" onclick="openStudyProcess(31)">9.6 控制资源</button>、<button type="button" class="study-process" onclick="openStudyProcess(33)">10.2 管理沟通</button>、<button type="button" class="study-process" onclick="openStudyProcess(34)">10.3 监督沟通</button>、<button type="button" class="study-process" onclick="openStudyProcess(36)">11.2 识别风险</button>、<button type="button" class="study-process" onclick="openStudyProcess(37)">11.3 实施定性风险分析</button>、<button type="button" class="study-process" onclick="openStudyProcess(39)">11.5 规划风险应对</button>、<button type="button" class="study-process" onclick="openStudyProcess(40)">11.6 实施风险应对</button>、<button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button>、<button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button>、<button type="button" class="study-process" onclick="openStudyProcess(47)">13.3 管理干系人参与</button>、<button type="button" class="study-process" onclick="openStudyProcess(48)">13.4 监督干系人参与</button></div></details></td></tr><tr data-frequency="conditional"><td>按项目需要采用</td><td><details class="frequency-members"><summary>1个过程</summary><div><button type="button" class="study-process" onclick="openStudyProcess(38)">11.4 实施定量风险分析</button></div></details></td></tr></tbody></table></div></section>
+<section class="gl-card study-section" id="rule-fill"><h4><span>11</span>填空自测</h4><div class="exam-actions"><button type="button" onclick="examAnswers('glr',true)">显示答案</button><button type="button" onclick="examAnswers('glr',false)">收起答案</button></div><details class="exam-question"><summary>启动组有哪两个过程？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(0)">4.1 制定项目章程</button>、<button type="button" class="study-process" onclick="openStudyProcess(45)">13.1 识别干系人</button></p></div></details><details class="exam-question"><summary>收尾组只有哪个过程？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(6)">4.7 结束项目或阶段</button></p></div></details><details class="exam-question"><summary>五个过程组的过程数分别是多少？</summary><div class="exam-answer"><p>启动2、规划24、执行10、监控12、收尾1，共49个。</p></div></details><details class="exam-question"><summary>范围、进度和成本基准分别由什么过程形成？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(10)">5.4 创建WBS</button>、<button type="button" class="study-process" onclick="openStudyProcess(17)">6.5 制定进度计划</button>、<button type="button" class="study-process" onclick="openStudyProcess(21)">7.3 制定预算</button></p></div></details><details class="exam-question"><summary>范围基准的三个组成是什么？</summary><div class="exam-answer"><p>项目范围说明书、WBS、WBS词典。</p></div></details><details class="exam-question"><summary>项目范围说明书、WBS和项目章程，哪些属于项目管理计划？</summary><div class="exam-answer"><p><b>项目范围说明书、WBS：</b>均与WBS词典共同组成范围基准，通过范围基准纳入项目管理计划。</p><p><b>项目章程：</b>授权项目及项目经理，是4.2 制定项目管理计划的输入，不属于计划组件。</p></div></details><details class="exam-question"><summary>7.2 估算成本的输入“范围基准”中，哪一部分补充工作包的详细工作说明？</summary><div class="exam-answer"><p>WBS词典。</p></div></details><details class="exam-question"><summary>工作绩效数据、信息和报告分别是什么？</summary><div class="exam-answer"><p>数据：原始事实；信息：分析后的状态和偏差；报告：用于沟通和决策的整理结果。</p></div></details><details class="exam-question"><summary>哪个过程输出工作绩效报告？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(4)">4.5 监控项目工作</button></p></div></details><details class="exam-question"><summary>将工作绩效报告列为输入的是哪些过程？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(5)">4.6 实施整体变更控制</button>、<button type="button" class="study-process" onclick="openStudyProcess(30)">9.5 管理团队</button>、<button type="button" class="study-process" onclick="openStudyProcess(33)">10.2 管理沟通</button>、<button type="button" class="study-process" onclick="openStudyProcess(41)">11.7 监督风险</button></p></div></details><details class="exam-question"><summary>将批准的变更请求列为输入的是哪些过程？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(2)">4.3 指导与管理项目工作</button>、<button type="button" class="study-process" onclick="openStudyProcess(25)">8.3 控制质量</button>、<button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button></p></div></details><details class="exam-question"><summary>规划组中，哪些过程输出变更请求？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(14)">6.2 定义活动</button>、<button type="button" class="study-process" onclick="openStudyProcess(17)">6.5 制定进度计划</button>、<button type="button" class="study-process" onclick="openStudyProcess(39)">11.5 规划风险应对</button>、<button type="button" class="study-process" onclick="openStudyProcess(42)">12.1 规划采购管理</button></p></div></details><details class="exam-question"><summary>启动组中，哪个过程输出变更请求？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(45)">13.1 识别干系人</button></p></div></details><details class="exam-question"><summary>采购文件为什么可用于13.1 识别干系人？</summary><div class="exam-answer"><p>合同等采购文件载明买方、卖方等合同当事方及其关系，可据此识别关键干系人。</p><p>采购文件属于项目具体资料；组织可复用的采购政策、模板和历史记录属于组织过程资产，法律法规、组织文化等属于事业环境因素。</p></div></details><details class="exam-question"><summary>4.4 管理项目知识的核心输出是什么？</summary><div class="exam-answer"><p>经验教训登记册。</p></div></details><details class="exam-question"><summary>5.2 收集需求输出哪两项核心成果？</summary><div class="exam-answer"><p>需求文件、需求跟踪矩阵。</p></div></details><details class="exam-question"><summary>三种估算过程共同输出的支持文件是什么？</summary><div class="exam-answer"><p>估算依据：6.4 估算活动持续时间、7.2 估算成本、9.2 估算活动资源均输出。</p></div></details><details class="exam-question"><summary>9.3 获取资源的前三项输出是什么？</summary><div class="exam-answer"><p>物质资源分配单、项目团队派工单、资源日历。</p></div></details><details class="exam-question"><summary>9.4 建设团队输出哪项评价？</summary><div class="exam-answer"><p>团队绩效评价。</p></div></details><details class="exam-question"><summary>11.2 识别风险首次输出哪两份核心风险文件？</summary><div class="exam-answer"><p>风险登记册、风险报告。</p></div></details><details class="exam-question"><summary>11.3 实施定性风险分析与11.4 实施定量风险分析的输出如何区别？</summary><div class="exam-answer"><p>定性分析更新假设日志、问题日志、风险登记册、风险报告；定量分析更新风险报告。</p></div></details><details class="exam-question"><summary>4.6 实施整体变更控制的变更类输出是什么？</summary><div class="exam-answer"><p>批准的变更请求；项目文件更新为变更日志。</p></div></details><details class="exam-question"><summary>采购关闭属于哪个过程？</summary><div class="exam-answer"><p><button type="button" class="study-process" onclick="openStudyProcess(44)">12.3 控制采购</button></p></div></details><details class="exam-question"><summary>应急储备、管理储备是否计入成本基准？</summary><div class="exam-answer"><p>应急储备计入；管理储备不计入。</p></div></details></section>
+<section class="gl-card study-section" id="rule-judge"><h4><span>12</span>判断纠错</h4><details class="exam-question"><summary>“13.1 识别干系人属于启动过程组，所以只需在项目开始时做一次。”</summary><div class="exam-answer"><p>错误。13.1 识别干系人应根据需要在整个项目期间定期开展。</p></div></details><details class="exam-question"><summary>“5.5 确认范围属于收尾过程组。”</summary><div class="exam-answer"><p>错误。5.5 确认范围属于监控过程组；4.7 结束项目或阶段属于收尾过程组。</p></div></details><details class="exam-question"><summary>“8.3 控制质量输出验收的可交付成果。”</summary><div class="exam-answer"><p>错误。8.3 控制质量输出核实的可交付成果；5.5 确认范围输出验收的可交付成果。</p></div></details><details class="exam-question"><summary>“工作绩效报告是4.5 监控项目工作的输入，工作绩效数据是其输出。”</summary><div class="exam-answer"><p>错误。4.5 监控项目工作输入工作绩效信息，输出工作绩效报告。</p></div></details><details class="exam-question"><summary>“执行、监控过程都输出变更请求。”</summary><div class="exam-answer"><p>错误。4.4 管理项目知识、10.2 管理沟通不输出普通变更请求；4.6 实施整体变更控制输出批准的变更请求。</p></div></details><details class="exam-question"><summary>“项目范围说明书、WBS和WBS词典共同构成范围基准。”</summary><div class="exam-answer"><p>正确。</p></div></details><details class="exam-question"><summary>“风险管理计划与风险登记册都记录逐条风险及其责任人。”</summary><div class="exam-answer"><p>错误。计划规定风险如何管理；登记册记录具体风险及相关分析、应对和跟踪信息。</p></div></details><details class="exam-question"><summary>“定量风险分析是每个项目必须开展的过程。”</summary><div class="exam-answer"><p>错误。并非每个项目都需要开展定量风险分析。</p></div></details><details class="exam-question"><summary>“资源平滑可能延迟项目完工日期，资源平衡不会。”</summary><div class="exam-answer"><p>错误。资源平滑在浮动时间内调整，保持完工日期；资源平衡可能改变关键路径和工期。</p></div></details><details class="exam-question"><summary>“快速跟进就是增加资源和加班。”</summary><div class="exam-answer"><p>错误。快速跟进是将原顺序工作部分重叠或并行；增加资源等缩短持续时间属于赶工思路。</p></div></details><details class="exam-question"><summary>“同一项工作只能有一位R。”</summary><div class="exam-answer"><p>错误。RACI中A应唯一，R可以有多位。</p></div></details><details class="exam-question"><summary>“配置审计只需在交付前做一次。”</summary><div class="exam-answer"><p>错误。应按配置管理计划和重要节点开展，并跟踪整改。</p></div></details></section></div></div></div>
+
+<script>
+var D=[{"n":"制定项目章程","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"startup","d":"是编写一份正式批准项目并授权项目经理在项目活动中使用组织资源的文件的过程。","r":"①明确项目与组织战略目标之间的直接联系<br>②确立项目的正式地位<br>③展示组织对项目的承诺","i":["①立项管理文件<br>·项目建议书<br>·可行性研究报告<br>·项目评估报告","②协议","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据收集<br>·头脑风暴<br>·焦点小组<br>·访谈","③人际关系与团队技能<br>·冲突管理<br>·引导<br>·会议管理","④会议"],"o":["①项目章程","②假设日志"]},{"n":"制定项目管理计划","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是定义、准备和协调项目计划的所有组成部分，并把它们整合为一份综合项目管理计划的过程。","r":"生成一份综合文档，用于确定所有项目工作的基础及执行方式。","i":["①项目章程","②其他过程的输出","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据收集<br>·头脑风暴<br>·核对单<br>·焦点小组<br>·访谈","③人际关系与团队技能<br>·冲突管理<br>·引导<br>·会议管理","④会议"],"o":["①项目管理计划<br>·子管理计划：范围管理计划、需求管理计划、进度管理计划、成本管理计划、质量管理计划、资源管理计划、沟通管理计划、风险管理计划、采购管理计划、干系人参与计划<br>·基准：范围基准、进度基准、成本基准<br>·其他组件：变更管理计划、配置管理计划、绩效测量基准、项目生命周期描述、开发方法、管理评审"]},{"n":"指导与管理项目工作","note":"（本过程需要在整个项目期间开展。）","p":"execution","d":"是为实现项目目标而领导和执行项目管理计划中所确定的工作，并实施已批准变更的过程。","r":"对项目工作和可交付成果开展综合管理，以提高项目成功的可能性。","i":["①项目管理计划<br>·任何组件","②项目文件<br>·需求跟踪矩阵<br>·风险登记册<br>·风险报告<br>·里程碑清单<br>·项目进度计划<br>·项目沟通记录<br>·经验教训登记册<br>·变更日志","③批准的变更请求","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②项目管理信息系统","③会议"],"o":["①可交付成果","②工作绩效数据","③问题日志","④变更请求","⑤项目管理计划（更新）<br>·任何组件","⑥项目文件（更新）<br>·活动清单<br>·假设日志<br>·经验教训登记册<br>·需求文件<br>·风险登记册<br>·干系人登记册","⑦组织过程资产（更新）"]},{"n":"管理项目知识","note":"（本过程需要在整个项目期间开展。）","p":"execution","d":"是使用现有知识并生成新知识，以实现项目目标，并且帮助组织学习的过程。","r":"①利用已有的组织知识来创造或改进项目成果<br>②使当前项目创造的知识可用于支持组织运营和未来的项目或阶段","i":["①项目管理计划<br>·所有组件","②项目文件<br>·经验教训登记册<br>·资源分解结构<br>·项目团队派工单<br>·干系人登记册","③可交付成果","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②知识管理","③信息管理","④人际关系与团队技能<br>·积极倾听<br>·引导<br>·领导力<br>·人际交往<br>·政治意识"],"o":["①经验教训登记册","②项目管理计划（更新）<br>·任何组件","③组织过程资产（更新）"]},{"n":"监控项目工作","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是跟踪、审查和报告整体项目进展，以实现项目管理计划中确定的绩效目标的过程。","r":"①让干系人了解项目的当前状态并认可为处理绩效问题而采取的行动<br>②通过成本和进度预测，让干系人了解项目的未来状态","i":["①项目管理计划<br>·任何组件","②项目文件<br>·假设日志<br>·风险登记册<br>·风险报告<br>·里程碑清单<br>·估算依据<br>·问题日志<br>·经验教训登记册<br>·成本预测<br>·进度预测<br>·质量报告","③工作绩效信息","④协议","⑤事业环境因素","⑥组织过程资产"],"t":["①专家判断","②数据分析<br>·备选方案分析<br>·成本效益分析<br>·挣值分析<br>·根本原因分析<br>·趋势分析<br>·偏差分析","③决策<br>·投票","④会议"],"o":["①工作绩效报告","②变更请求","③项目管理计划（更新）<br>·任何组件","④项目文件（更新）<br>·成本预测<br>·进度预测<br>·问题日志<br>·经验教训登记册<br>·风险登记册"]},{"n":"实施整体变更控制","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是审查所有变更请求，批准对项目的变更，管理对可交付成果、项目文件和项目管理计划的变更，并对变更处理结果进行沟通的过程。","r":"综合评审已记录的变更，同时考虑整体项目风险及其对项目目标和计划的影响。","i":["①项目管理计划<br>·变更管理计划<br>·配置管理计划<br>·范围基准<br>·进度基准<br>·成本基准","②项目文件<br>·估算依据<br>·变更日志<br>·需求跟踪矩阵<br>·风险报告","③工作绩效报告","④变更请求","⑤事业环境因素","⑥组织过程资产"],"t":["①专家判断","②变更控制工具","③数据分析<br>·备选方案分析<br>·成本效益分析","④决策<br>·投票<br>·独裁型决策制定<br>·多标准决策分析","⑤会议"],"o":["①批准的变更请求","②项目管理计划（更新）<br>·任何组件","③项目文件（更新）<br>·变更日志"]},{"n":"结束项目或阶段","note":"（仅开展一次或仅在项目的预定义点开展。）","p":"closing","d":"是终结项目、阶段或合同的所有活动的过程。","r":"①存档项目或阶段信息，完成计划的工作<br>②释放组织团队资源以展开新的工作","i":["①项目章程","②项目管理计划<br>·所有组件","③项目文件<br>·假设日志<br>·估算依据<br>·需求文件<br>·里程碑清单<br>·风险登记册<br>·风险报告<br>·变更日志<br>·问题日志<br>·经验教训登记册<br>·项目沟通记录<br>·质量控制测量结果<br>·质量报告","④验收的可交付成果","⑤立项管理文件","⑥协议","⑦采购文档","⑧组织过程资产"],"t":["①专家判断","②数据分析<br>·文件分析<br>·回归分析<br>·趋势分析<br>·偏差分析","③会议"],"o":["①项目文件（更新）<br>·经验教训登记册","②最终产品、服务或成果移交","③项目最终报告","④组织过程资产（更新）"]},{"n":"规划范围管理","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是为了记录如何定义、确认和控制项目范围及产品范围，而创建范围管理计划的过程。","r":"在整个项目期间对如何管理范围提供指南和方向。","i":["①项目章程","②项目管理计划<br>·质量管理计划<br>·项目生命周期描述<br>·开发方法","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据分析<br>·备选方案分析","③会议"],"o":["①范围管理计划","②需求管理计划"]},{"n":"收集需求","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是为实现目标而确定、记录并管理干系人的需要和需求的过程。","r":"为定义产品范围和项目范围奠定基础。","i":["①立项管理文件","②项目章程","③项目管理计划<br>·范围管理计划<br>·需求管理计划<br>·干系人参与计划","④项目文件<br>·假设日志<br>·干系人登记册<br>·经验教训登记册","⑤协议","⑥事业环境因素","⑦组织过程资产"],"t":["①专家判断","②数据收集<br>·头脑风暴<br>·访谈<br>·焦点小组<br>·问卷调查<br>·标杆对照","③数据分析<br>·文件分析","④决策<br>·投票<br>·独裁型决策制定<br>·多标准决策分析","⑤数据表现<br>·亲和图<br>·思维导图","⑥人际关系与团队技能<br>·名义小组技术<br>·观察和交谈<br>·引导","⑦系统交互图","⑧原型法"],"o":["①需求文件","②需求跟踪矩阵"]},{"n":"定义范围","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是制定项目和产品详细描述的过程。","r":"描述产品、服务或成果的边界和验收标准。","i":["①项目章程","②项目管理计划<br>·范围管理计划","③项目文件<br>·假设日志<br>·需求文件<br>·风险登记册","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②数据分析<br>·备选方案分析","③决策<br>·多标准决策分析","④人际关系与团队技能<br>·引导","⑤产品分析"],"o":["①项目范围说明书<br>·产品范围描述<br>·可交付成果<br>·验收标准<br>·项目的除外责任","②项目文件（更新）<br>·假设日志<br>·需求文件<br>·需求跟踪矩阵<br>·干系人登记册"]},{"n":"创建WBS","note":"（仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是把项目可交付成果和项目工作分解成较小、更易于管理的组件的过程。","r":"为所要交付的内容提供架构。","i":["①项目管理计划<br>·范围管理计划","②项目文件<br>·需求文件<br>·项目范围说明书","③事业环境因素","④组织过程资产"],"t":["①专家判断","②分解"],"o":["①范围基准<br>·项目范围说明书<br>·WBS<br>·WBS词典","②项目文件（更新）<br>·假设日志<br>·需求文件"]},{"n":"确认范围","note":"（确认范围过程应根据需要在整个项目期间定期开展。）","p":"monitoring","d":"是正式验收已完成的项目可交付成果的过程。","r":"①使验收过程具有客观性<br>②通过确认每个可交付成果来提高最终产品、服务或成果获得验收的可能性","i":["①项目管理计划<br>·范围管理计划<br>·需求管理计划<br>·范围基准","②项目文件<br>·需求文件<br>·需求跟踪矩阵<br>·质量报告<br>·经验教训登记册","③工作绩效数据","④核实的可交付成果"],"t":["①检查","②决策<br>·投票"],"o":["①验收的可交付成果","②变更请求","③工作绩效信息","④项目文件（更新）<br>·需求文件<br>·需求跟踪矩阵<br>·经验教训登记册"]},{"n":"控制范围","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是监督项目和产品的范围状态，管理范围基准变更的过程。","r":"在整个项目期间保持对范围基准的维护。","i":["①项目管理计划<br>·范围管理计划<br>·需求管理计划<br>·变更管理计划<br>·配置管理计划<br>·范围基准<br>·绩效测量基准","②项目文件<br>·需求文件<br>·需求跟踪矩阵<br>·经验教训登记册","③工作绩效数据","④组织过程资产"],"t":["数据分析<br>·偏差分析<br>·趋势分析"],"o":["①工作绩效信息","②变更请求","③项目管理计划（更新）<br>·范围管理计划<br>·范围基准<br>·进度基准<br>·成本基准<br>·绩效测量基准","④项目文件（更新）<br>·需求文件<br>·需求跟踪矩阵<br>·经验教训登记册"]},{"n":"规划进度管理","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是为规划、编制、管理、执行和控制项目进度而制定政策、程序和文档的过程。","r":"为如何在整个项目期间管理项目进度提供指南和方向。","i":["①项目章程","②项目管理计划<br>·范围管理计划<br>·开发方法","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据分析<br>·备选方案分析","③会议"],"o":["进度管理计划"]},{"n":"定义活动","note":"（本过程需要在整个项目期间开展。）","p":"planning","d":"是识别和记录为完成项目可交付成果而需采取的具体行动的过程。","r":"将工作包分解为进度活动，作为对项目工作进行进度估算、规划、执行、监督和控制的基础。","i":["①项目管理计划<br>·进度管理计划<br>·范围基准","②事业环境因素","③组织过程资产"],"t":["①专家判断","②分解","③滚动式规划","④会议"],"o":["①活动清单","②活动属性","③里程碑清单","④变更请求","⑤项目管理计划（更新）<br>·进度基准<br>·成本基准"]},{"n":"排列活动顺序","note":"（本过程需要在整个项目期间开展。）","p":"planning","d":"是识别和记录项目活动之间的关系的过程。","r":"定义工作之间的逻辑顺序，以便在既定的所有项目制约因素下获得最高的效率。","i":["①项目管理计划<br>·进度管理计划<br>·范围基准","②项目文件<br>·假设日志<br>·活动属性<br>·活动清单<br>·里程碑清单","③事业环境因素","④组织过程资产"],"t":["①紧前关系绘图法（PDM）<br>·完成到开始（FS）<br>·完成到完成（FF）<br>·开始到开始（SS）<br>·开始到完成（SF）","②箭线图法","③确定和整合依赖关系<br>·强制性依赖关系<br>·选择性依赖关系<br>·外部依赖关系<br>·内部依赖关系","④提前量和滞后量","⑤项目管理信息系统"],"o":["①项目进度网络图","②项目文件（更新）<br>·活动属性<br>·活动清单<br>·假设日志<br>·里程碑清单"]},{"n":"估算活动持续时间","note":"（本过程需要在整个项目期间开展。）","p":"planning","d":"是根据资源估算的结果，估算完成单项活动所需工作时段数的过程。","r":"确定完成每个活动所需花费的时间量。","i":["①项目管理计划<br>·进度管理计划<br>·范围基准","②项目文件<br>·假设日志<br>·风险登记册<br>·活动属性<br>·活动清单<br>·里程碑清单<br>·经验教训登记册<br>·资源需求<br>·资源分解结构<br>·资源日历<br>·项目团队派工单","③事业环境因素","④组织过程资产"],"t":["①专家判断","②类比估算","③参数估算","④三点估算","⑤自下而上估算","⑥数据分析<br>·备选方案分析<br>·储备分析","⑦决策<br>·投票","⑧会议"],"o":["①持续时间估算","②估算依据","③项目文件（更新）<br>·活动属性<br>·假设日志<br>·经验教训登记册"]},{"n":"制定进度计划","note":"（本过程需要在整个项目期间开展。）","p":"planning","d":"是分析活动顺序、持续时间、资源需求和进度制约因素，创建用于项目执行和监控的进度模型的过程。","r":"为完成项目活动而制定具有计划日期的进度模型。","i":["①项目管理计划<br>·进度管理计划<br>·范围基准","②项目文件<br>·假设日志<br>·风险登记册<br>·活动属性<br>·活动清单<br>·里程碑清单<br>·项目进度网络图<br>·估算依据<br>·持续时间估算<br>·经验教训登记册<br>·资源需求<br>·项目团队派工单<br>·资源日历","③协议","④事业环境因素","⑤组织过程资产"],"t":["①进度网络分析","②关键路径法","③资源优化<br>·资源平衡<br>·资源平滑","④数据分析<br>·假设情景分析<br>·模拟","⑤提前量和滞后量","⑥进度压缩<br>·赶工<br>·快速跟进","⑦计划评审技术","⑧项目管理信息系统","⑨敏捷发布规划"],"o":["①进度基准","②项目进度计划","③进度数据","④项目日历","⑤变更请求","⑥项目管理计划（更新）<br>·进度管理计划<br>·成本基准","⑦项目文件（更新）<br>·活动属性<br>·假设日志<br>·持续时间估算<br>·经验教训登记册<br>·资源需求<br>·风险登记册"]},{"n":"控制进度","note":"（本过程在整个项目期间开展。）","p":"monitoring","d":"是监督项目状态，以更新项目进度和管理进度基准变更的过程。","r":"在整个项目期间保持对进度基准的维护。","i":["①项目管理计划<br>·进度管理计划<br>·进度基准<br>·范围基准<br>·绩效测量基准","②项目文件<br>·资源日历<br>·项目进度计划<br>·项目日历<br>·进度数据<br>·经验教训登记册","③工作绩效数据","④组织过程资产"],"t":["①数据分析<br>·挣值分析<br>·迭代燃尽图<br>·绩效审查<br>·趋势分析<br>·偏差分析<br>·假设情景分析","②关键路径法","③项目管理信息系统","④资源优化","⑤提前量和滞后量","⑥进度压缩"],"o":["①工作绩效信息","②进度预测","③变更请求","④项目管理计划（更新）<br>·进度管理计划<br>·进度基准<br>·成本基准<br>·绩效测量基准","⑤项目文件（更新）<br>·假设日志<br>·估算依据<br>·经验教训登记册<br>·项目进度计划<br>·资源日历<br>·进度数据<br>·风险登记册"]},{"n":"规划成本管理","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是确定如何估算、预算、管理、监督和控制项目成本的过程。","r":"在整个项目期间为如何管理项目成本提供指南和方向。","i":["①项目章程","②项目管理计划<br>·进度管理计划<br>·风险管理计划","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据分析<br>·备选方案分析","③会议"],"o":["成本管理计划"]},{"n":"估算成本","note":"（本过程应根据需要在整个项目期间定期开展。）","p":"planning","d":"是对完成项目工作所需资源成本进行近似估算的过程。","r":"确定项目所需的资金。","i":["①项目管理计划<br>·成本管理计划<br>·质量管理计划<br>·范围基准","②项目文件<br>·风险登记册<br>·经验教训登记册<br>·资源需求<br>·项目进度计划","③事业环境因素","④组织过程资产"],"t":["①专家判断","②类比估算","③参数估算","④自下而上估算","⑤三点估算","⑥数据分析<br>·备选方案分析<br>·储备分析<br>·质量成本","⑦项目管理信息系统","⑧决策<br>·投票"],"o":["①成本估算","②估算依据","③项目文件（更新）<br>·假设日志<br>·经验教训登记册<br>·风险登记册"]},{"n":"制定预算","note":"（仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是汇总所有单个活动或工作包的估算成本，建立一个经批准的成本基准的过程。","r":"确定可以依据其进行监督和控制项目绩效的成本基准。","i":["①项目管理计划<br>·成本管理计划<br>·资源管理计划<br>·范围基准","②商业文件<br>·商业论证<br>·效益管理计划","③项目文件<br>·估算依据<br>·成本估算<br>·项目进度计划<br>·风险登记册","④协议","⑤事业环境因素","⑥组织过程资产"],"t":["①专家判断","②成本汇总","③数据分析<br>·储备分析","④历史信息审核","⑤资金限制平衡","⑥融资"],"o":["①成本基准","②项目资金需求","③项目文件（更新）<br>·成本估算<br>·项目进度计划<br>·风险登记册"]},{"n":"控制成本","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是监督项目状态，以更新项目成本和管理成本基准变更的过程。","r":"在整个项目期间保持对成本基准的维护。","i":["①项目管理计划<br>·成本管理计划<br>·成本基准<br>·绩效测量基准","②项目资金需求","③项目文件<br>·经验教训登记册","④工作绩效数据","⑤组织过程资产"],"t":["①专家判断","②数据分析<br>·挣值分析<br>·偏差分析<br>·趋势分析<br>·储备分析","③完工尚需绩效指数","④项目管理信息系统"],"o":["①工作绩效信息","②成本预测","③变更请求","④项目管理计划（更新）<br>·成本管理计划<br>·成本基准<br>·绩效测量基准","⑤项目文件（更新）<br>·假设日志<br>·估算依据<br>·成本估算<br>·经验教训登记册<br>·风险登记册"]},{"n":"规划质量管理","note":"（仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是识别项目及其可交付成果的质量要求、标准，并书面描述项目将如何证明符合质量要求、标准的过程。","r":"为在整个项目期间如何管理和核实质量提供指南和方向。","i":["①项目章程","②项目管理计划<br>·需求管理计划<br>·风险管理计划<br>·干系人参与计划<br>·范围基准","③项目文件<br>·假设日志<br>·需求文件<br>·需求跟踪矩阵<br>·风险登记册<br>·干系人登记册","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②数据收集<br>·标杆对照<br>·头脑风暴<br>·访谈","③数据分析<br>·成本效益分析<br>·质量成本","④决策<br>·多标准决策分析","⑤数据表现<br>·流程图<br>·逻辑数据模型<br>·矩阵图<br>·思维导图","⑥测试与检查的规划","⑦会议"],"o":["①质量管理计划","②质量测量指标","③项目管理计划（更新）<br>·风险管理计划<br>·范围基准","④项目文件（更新）<br>·经验教训登记册<br>·需求跟踪矩阵<br>·风险登记册<br>·干系人登记册"]},{"n":"管理质量","note":"（管理质量过程需要在整个项目期间开展。）","p":"execution","d":"是把组织的质量政策用于项目，并将质量管理计划转化为可执行的质量活动的过程。","r":"①提高实现质量目标的可能性<br>②识别无效过程和导致质量低劣的原因<br>③使用控制质量过程的数据和结果向干系人展示项目的总体质量状态。","i":["①项目管理计划<br>·质量管理计划","②项目文件<br>·经验教训登记册<br>·质量控制测量结果<br>·质量测量指标<br>·风险报告","③组织过程资产"],"t":["①数据收集<br>·核对单","②数据分析<br>·备选方案分析<br>·文件分析<br>·过程分析<br>·根本原因分析","③决策<br>·多标准决策分析","④数据表现<br>·亲和图<br>·因果图<br>·流程图<br>·直方图<br>·矩阵图<br>·散点图","⑤审计","⑥面向X的设计","⑦问题解决","⑧质量改进方法"],"o":["①质量报告","②测试与评估文件","③变更请求","④项目管理计划（更新）<br>·质量管理计划<br>·范围基准<br>·进度基准<br>·成本基准","⑤项目文件（更新）<br>·问题日志<br>·经验教训登记册<br>·风险登记册"]},{"n":"控制质量","note":"（控制质量过程需要在整个项目期间开展。）","p":"monitoring","d":"是为了评估绩效，确保项目输出完整、正确且满足客户期望，而监督和记录质量管理活动执行结果的过程。","r":"①核实项目可交付成果和工作已经达到主要干系人的质量要求，可供最终验收<br>②确定项目输出是否达到预期目的，这些输出需要满足所有适用标准、要求、法规和规范","i":["①项目管理计划<br>·质量管理计划","②项目文件<br>·经验教训登记册<br>·质量测量指标<br>·测试与评估文件","③批准的变更请求","④可交付成果","⑤工作绩效数据","⑥事业环境因素","⑦组织过程资产"],"t":["①数据收集<br>·核对单<br>·核查表<br>·统计抽样<br>·问卷调查","②数据分析<br>·绩效审查<br>·根本原因分析","③检查","④测试/产品评估","⑤数据表现<br>·因果图<br>·控制图<br>·直方图<br>·散点图","⑥会议"],"o":["①工作绩效信息","②质量控制测量结果","③核实的可交付成果","④变更请求","⑤项目管理计划（更新）<br>·质量管理计划","⑥项目文件（更新）<br>·问题日志<br>·经验教训登记册<br>·风险登记册<br>·测试与评估文件"]},{"n":"规划资源管理","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是定义如何估算、获取、管理和利用团队及实物资源的过程。","r":"根据项目类型和复杂程度确定适用于项目资源的管理方法和管理制度。","i":["①项目章程","②项目管理计划<br>·质量管理计划<br>·范围基准","③项目文件<br>·需求文件<br>·项目进度计划<br>·风险登记册<br>·干系人登记册","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②数据表现<br>·层级型<br>·矩阵型<br>·文本型","③组织理论","④会议"],"o":["①资源管理计划","②团队章程","③项目文件（更新）<br>·假设日志<br>·风险登记册"]},{"n":"估算活动资源","note":"（本过程应根据需要在整个项目期间定期开展。）","p":"planning","d":"是估算执行活动所需的团队资源，以及材料、设备和用品的类型和数量的过程。","r":"明确完成项目所需的资源种类、数量和特性。","i":["①项目管理计划<br>·范围基准<br>·资源管理计划","②项目文件<br>·假设日志<br>·风险登记册<br>·活动清单<br>·活动属性<br>·成本估算<br>·资源日历","③事业环境因素","④组织过程资产"],"t":["①专家判断","②自下而上估算","③类比估算","④参数估算","⑤数据分析<br>·备选方案分析","⑥项目管理信息系统","⑦会议"],"o":["①资源需求","②估算依据","③资源分解结构","④项目文件（更新）<br>·假设日志<br>·活动属性<br>·经验教训登记册"]},{"n":"获取资源","note":"（本过程应根据需要在整个项目期间定期开展。）","p":"execution","d":"是获取项目所需的团队资源、设施、设备、材料、用品和其他资源的过程。","r":"①明确并指导资源选择<br>②将选择的资源分配给相应的活动","i":["①项目管理计划<br>·资源管理计划<br>·采购管理计划<br>·成本基准","②项目文件<br>·项目进度计划<br>·资源需求<br>·资源日历<br>·干系人登记册","③事业环境因素","④组织过程资产"],"t":["①决策<br>·多标准决策分析","②人际关系与团队技能<br>·谈判","③预分派","④虚拟团队"],"o":["①物质资源分配单","②项目团队派工单","③资源日历","④变更请求","⑤项目管理计划（更新）<br>·资源管理计划<br>·成本基准","⑥项目文件（更新）<br>·经验教训登记册<br>·项目进度计划<br>·资源分解结构<br>·资源需求<br>·风险登记册<br>·干系人登记册","⑦事业环境因素（更新）","⑧组织过程资产（更新）"]},{"n":"建设团队","note":"（本过程需要在整个项目期间开展。）","p":"execution","d":"是提高工作能力，促进团队成员互动，改善团队整体氛围，以提高项目绩效的过程。","r":"改进团队协作、增强人际关系技能、激励员工、减少摩擦以及提升整体项目绩效。","i":["①项目管理计划<br>·资源管理计划","②项目文件<br>·项目团队派工单<br>·团队章程<br>·经验教训登记册<br>·项目进度计划<br>·资源日历","③事业环境因素","④组织过程资产"],"t":["①集中办公","②虚拟团队","③沟通技术","④人际关系与团队技能<br>·冲突管理<br>·影响力<br>·激励<br>·谈判<br>·团队建设","⑤认可与奖励","⑥培训","⑦个人和团队评估","⑧会议"],"o":["①团队绩效评价","②变更请求","③项目管理计划（更新）<br>·资源管理计划","④项目文件（更新）<br>·项目团队派工单<br>·经验教训登记册<br>·团队章程<br>·项目进度计划<br>·资源日历","⑤事业环境因素（更新）","⑥组织过程资产（更新）"]},{"n":"管理团队","note":"（本过程需要在整个项目期间开展。）","p":"execution","d":"是跟踪团队成员工作表现、提供反馈、解决问题并管理团队变更以优化项目绩效的过程。","r":"影响团队行为、管理冲突以及解决问题。","i":["①项目管理计划<br>·资源管理计划","②项目文件<br>·问题日志<br>·经验教训登记册<br>·项目团队派工单<br>·团队章程","③工作绩效报告","④团队绩效评价","⑤事业环境因素","⑥组织过程资产"],"t":["①人际关系与团队技能<br>·冲突管理<br>·决策<br>·情商<br>·影响力<br>·领导力","②项目管理信息系统"],"o":["①变更请求","②项目管理计划（更新）<br>·资源管理计划<br>·进度基准<br>·成本基准","③项目文件（更新）<br>·问题日志<br>·经验教训登记册<br>·项目团队派工单","④事业环境因素（更新）"]},{"n":"控制资源","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是确保按计划为项目分配实物资源，以及根据资源使用计划监督资源实际使用情况，并采取必要纠正措施的过程。","r":"①确保所分配的资源适时、适地可用于项目<br>②资源在不再需要时被释放","i":["①项目管理计划<br>·资源管理计划","②项目文件<br>·项目进度计划<br>·问题日志<br>·资源需求<br>·资源分解结构<br>·经验教训登记册<br>·物质资源分配单<br>·风险登记册","③工作绩效数据","④协议","⑤组织过程资产"],"t":["①数据分析<br>·备选方案分析<br>·成本效益分析<br>·绩效审查<br>·趋势分析","②问题解决","③人际关系与团队技能<br>·谈判<br>·影响力","④项目管理信息系统"],"o":["①工作绩效信息","②变更请求","③项目管理计划（更新）<br>·资源管理计划<br>·进度基准<br>·成本基准","④项目文件（更新）<br>·假设日志<br>·问题日志<br>·经验教训登记册<br>·物质资源分配单<br>·资源分解结构<br>·风险登记册"]},{"n":"规划沟通管理","note":"（本过程应根据需要在整个项目期间定期开展。）","p":"planning","d":"是基于每个干系人或干系人群体的信息需求、可用的组织资产，以及具体项目的需求，为项目沟通活动制定恰当的方法和计划的过程。","r":"①及时向干系人提供相关信息<br>②引导干系人有效参与项目<br>③编制书面沟通计划","i":["①项目章程","②项目管理计划<br>·资源管理计划<br>·干系人参与计划","③项目文件<br>·需求文件<br>·干系人登记册","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②沟通需求分析","③沟通技术","④沟通模型","⑤沟通方法","⑥人际关系与团队技能<br>·沟通风格评估<br>·政治意识<br>·文化意识","⑦数据表现<br>·干系人参与度评估矩阵","⑧会议"],"o":["①沟通管理计划","②项目管理计划（更新）<br>·干系人参与计划","③项目文件（更新）<br>·干系人登记册<br>·项目进度计划"]},{"n":"管理沟通","note":"（本过程需要在整个项目期间开展。）","p":"execution","d":"是确保项目信息及时且恰当地收集、生成、发布、存储、监督和最终处置的过程。","r":"促成项目团队与干系人之间的有效信息流动。","i":["①项目管理计划<br>·资源管理计划<br>·沟通管理计划<br>·干系人参与计划","②项目文件<br>·变更日志<br>·问题日志<br>·经验教训登记册<br>·质量报告<br>·风险报告<br>·干系人登记册","③工作绩效报告","④事业环境因素","⑤组织过程资产"],"t":["①沟通技术","②沟通方法","③沟通技能<br>·沟通胜任力<br>·反馈<br>·非言语<br>·演示","④项目管理信息系统","⑤项目报告","⑥人际关系与团队技能<br>·积极倾听<br>·冲突管理<br>·文化意识<br>·会议管理<br>·人际交往<br>·政治意识","⑦会议"],"o":["①项目沟通记录","②项目管理计划（更新）<br>·沟通管理计划<br>·干系人参与计划","③项目文件（更新）<br>·问题日志<br>·经验教训登记册<br>·项目进度计划<br>·风险登记册<br>·干系人登记册","④组织过程资产（更新）"]},{"n":"监督沟通","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是确保满足项目及其干系人的信息需求的过程。","r":"按沟通管理计划和干系人参与计划的要求优化信息传递流程。","i":["①项目管理计划<br>·资源管理计划<br>·沟通管理计划<br>·干系人参与计划","②项目文件<br>·问题日志<br>·经验教训登记册<br>·项目沟通记录","③工作绩效数据","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②项目管理信息系统","③数据表现<br>·干系人参与度评估矩阵","④人际关系与团队技能<br>·观察和交谈","⑤会议"],"o":["①工作绩效信息","②变更请求","③项目管理计划（更新）<br>·沟通管理计划<br>·干系人参与计划","④项目文件（更新）<br>·问题日志<br>·经验教训登记册<br>·干系人登记册"]},{"n":"规划风险管理","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是定义如何实施项目风险管理活动的过程。","r":"确保风险管理的水平、方法和可见度与项目风险程度相匹配，与对组织和其他干系人的重要程度相适应。","i":["①项目章程","②项目管理计划<br>·所有组件","③项目文件<br>·干系人登记册","④事业环境因素","⑤组织过程资产"],"t":["①专家判断","②数据分析<br>·干系人分析","③会议"],"o":["风险管理计划"]},{"n":"识别风险","note":"（本过程应在整个项目期间开展。）","p":"planning","d":"是识别单个项目风险以及整体项目风险的来源，并记录风险特征的过程。","r":"①记录现有的单个项目风险，以及整体项目风险的来源<br>②汇总相关信息，以便项目团队能够恰当地应对已识别的风险","i":["①项目管理计划<br>·需求管理计划<br>·进度管理计划<br>·成本管理计划<br>·质量管理计划<br>·资源管理计划<br>·风险管理计划<br>·范围基准<br>·进度基准<br>·成本基准","②项目文件<br>·估算依据<br>·假设日志<br>·干系人登记册<br>·需求文件<br>·持续时间估算<br>·成本估算<br>·资源需求<br>·问题日志<br>·经验教训登记册","③采购文档","④协议","⑤事业环境因素","⑥组织过程资产"],"t":["①专家判断","②数据收集<br>·头脑风暴<br>·核对单<br>·访谈","③数据分析<br>·根本原因分析<br>·假设条件和制约因素分析<br>·SWOT分析<br>·文件分析","④人际关系与团队技能<br>·引导","⑤提示清单","⑥会议"],"o":["①风险登记册","②风险报告","③项目文件（更新）<br>·假设日志<br>·问题日志<br>·经验教训登记册"]},{"n":"实施定性风险分析","note":"（本过程需要在整个项目期间开展。）","p":"planning","d":"是通过评估单个项目风险发生的概率和影响及其他特征，对风险进行优先级排序，从而为后续分析或行动提供基础的过程。","r":"重点关注高优先级的风险。","i":["①项目管理计划<br>·风险管理计划","②项目文件<br>·假设日志<br>·风险登记册<br>·干系人登记册","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据收集<br>·访谈","③数据分析<br>·风险数据质量评估<br>·风险概率和影响评估<br>·其他风险参数评估","④人际关系与团队技能<br>·引导","⑤风险分类","⑥数据表现<br>·概率和影响矩阵<br>·层级图","⑦会议"],"o":["项目文件（更新）<br>·假设日志<br>·问题日志<br>·风险登记册<br>·风险报告"]},{"n":"实施定量风险分析","note":"（本过程并非每个项目必需，但如果采用，它会在整个项目期间持续开展。）","p":"planning","d":"是就已识别的单个项目风险和不确定性的其他来源对整体项目目标的影响进行定量分析的过程。","r":"①量化整体项目风险敞口<br>②提供额外的定量风险信息，以支持风险应对规划","i":["①项目管理计划<br>·风险管理计划<br>·范围基准<br>·进度基准<br>·成本基准","②项目文件<br>·假设日志<br>·里程碑清单<br>·估算依据<br>·持续时间估算<br>·成本估算<br>·资源需求<br>·成本预测<br>·风险登记册<br>·风险报告<br>·进度预测","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据收集<br>·访谈","③人际关系与团队技能<br>·引导","④不确定性表现方式","⑤数据分析<br>·模拟<br>·敏感性分析<br>·决策树分析<br>·影响图"],"o":["项目文件（更新）<br>·风险报告"]},{"n":"规划风险应对","note":"（本过程需要在整个项目期间开展。）","p":"planning","d":"是为处理整体项目风险敞口，以及应对单个项目风险而制定可选方案、选择应对策略并商定应对行动的过程。","r":"①制定应对整体项目风险和单个项目风险的适当方法<br>②分配资源，并根据需要将相关活动添加进项目文件和项目管理计划中","i":["①项目管理计划<br>·资源管理计划<br>·风险管理计划<br>·成本基准","②项目文件<br>·风险登记册<br>·风险报告<br>·资源日历<br>·项目团队派工单<br>·项目进度计划<br>·经验教训登记册<br>·干系人登记册","③事业环境因素","④组织过程资产"],"t":["①专家判断","②数据收集<br>·访谈","③人际关系与团队技能<br>·引导","④威胁应对策略<br>·上报<br>·规避<br>·转移<br>·减轻<br>·接受","⑤机会应对策略<br>·上报<br>·开拓<br>·分享<br>·提高<br>·接受","⑥应急应对策略","⑦整体项目风险应对策略<br>·规避<br>·开拓<br>·转移或分享<br>·减轻或提高<br>·接受","⑧数据分析<br>·备选方案分析<br>·成本效益分析","⑨决策<br>·多标准决策分析"],"o":["①变更请求","②项目管理计划（更新）<br>·进度管理计划<br>·成本管理计划<br>·质量管理计划<br>·资源管理计划<br>·采购管理计划<br>·范围基准<br>·进度基准<br>·成本基准","③项目文件（更新）<br>·假设日志<br>·成本预测<br>·经验教训登记册<br>·项目进度计划<br>·项目团队派工单<br>·风险登记册<br>·风险报告"]},{"n":"实施风险应对","note":"（本过程需要在整个项目期间开展。）","p":"execution","d":"是执行商定的风险应对计划的过程。","r":"①确保按计划执行商定的风险应对措施<br>②管理整体项目风险敞口、最小化单个项目威胁，以及最大化单个项目机会","i":["①项目管理计划<br>·风险管理计划","②项目文件<br>·经验教训登记册<br>·风险登记册<br>·风险报告","③组织过程资产"],"t":["①专家判断","②人际关系与团队技能<br>·影响力","③项目管理信息系统"],"o":["①变更请求","②项目文件（更新）<br>·经验教训登记册<br>·问题日志<br>·项目团队派工单<br>·风险登记册<br>·风险报告"]},{"n":"监督风险","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是在整个项目期间，监督风险应对计划的实施，并跟踪已识别风险、识别和分析新风险，以及评估风险管理有效性的过程。","r":"保证项目决策是在整体项目风险和单个项目风险当前信息的基础上进行。","i":["①项目管理计划<br>·风险管理计划","②项目文件<br>·问题日志<br>·经验教训登记册<br>·风险登记册<br>·风险报告","③工作绩效数据","④工作绩效报告"],"t":["①数据分析<br>·技术绩效分析<br>·储备分析","②审计","③会议"],"o":["①工作绩效信息","②变更请求","③项目管理计划（更新）<br>·风险管理计划","④项目文件（更新）<br>·假设日志<br>·问题日志<br>·经验教训登记册<br>·风险登记册<br>·风险报告","⑤组织过程资产（更新）"]},{"n":"规划采购管理","note":"（本过程仅开展一次或仅在项目的预定义点开展。）","p":"planning","d":"是记录项目采购决策、明确采购方法，及识别潜在卖方的过程。","r":"确定是否从项目外部获取货物和服务，如果获取，还要确定将在什么时候、以什么方式获取什么货物和服务。","i":["①商业文件<br>·商业论证<br>·效益管理计划","②项目章程","③项目管理计划<br>·范围管理计划<br>·质量管理计划<br>·资源管理计划<br>·范围基准","④项目文件<br>·风险登记册<br>·干系人登记册<br>·需求文件<br>·需求跟踪矩阵<br>·里程碑清单<br>·资源需求<br>·项目团队派工单","⑤事业环境因素","⑥组织过程资产"],"t":["①专家判断","②数据收集<br>·市场调研","③数据分析<br>·自制或外购分析","④供方选择分析","⑤会议"],"o":["①采购管理计划","②采购策略","③采购工作说明书","④招标文件","⑤自制或外购决策","⑥独立成本估算","⑦供方选择标准","⑧变更请求","⑨项目文件（更新）<br>·经验教训登记册<br>·里程碑清单<br>·需求文件<br>·需求跟踪矩阵<br>·风险登记册<br>·干系人登记册","⑩组织过程资产（更新）"]},{"n":"实施采购","note":"（本过程根据需要在整个项目期间定期开展。）","p":"execution","d":"是获取卖方应答、选择卖方并授予合同的过程。","r":"选定合格卖方并签署关于货物或服务交付的法律协议。协议包括正式合同。","i":["①项目管理计划<br>·范围管理计划<br>·需求管理计划<br>·沟通管理计划<br>·风险管理计划<br>·采购管理计划<br>·配置管理计划<br>·成本基准<br>·进度基准","②项目文件<br>·需求文件<br>·项目进度计划<br>·风险登记册<br>·干系人登记册<br>·经验教训登记册","③采购文档","④卖方建议书","⑤事业环境因素","⑥组织过程资产"],"t":["①专家判断","②广告","③投标人会议","④数据分析<br>·建议书评价","⑤人际关系与团队技能<br>·谈判"],"o":["①选定的卖方","②协议","③变更请求","④项目管理计划（更新）<br>·需求管理计划<br>·质量管理计划<br>·沟通管理计划<br>·风险管理计划<br>·采购管理计划<br>·范围基准<br>·进度基准<br>·成本基准","⑤项目文件（更新）<br>·经验教训登记册<br>·需求文件<br>·需求跟踪矩阵<br>·资源日历<br>·风险登记册<br>·干系人登记册","⑥组织过程资产（更新）"]},{"n":"控制采购","note":"（本过程应根据需要在整个项目期间开展。）","p":"monitoring","d":"是管理采购关系，监督合同绩效、实施必要的变更和纠偏，以及关闭合同的过程。","r":"确保买卖双方履行法律协议，满足项目需求。","i":["①项目管理计划<br>·需求管理计划<br>·风险管理计划<br>·采购管理计划<br>·变更管理计划<br>·进度基准","②项目文件<br>·假设日志<br>·需求文件<br>·需求跟踪矩阵<br>·里程碑清单<br>·风险登记册<br>·干系人登记册<br>·质量报告<br>·经验教训登记册","③采购文档","④协议","⑤工作绩效数据","⑥批准的变更请求","⑦事业环境因素","⑧组织过程资产"],"t":["①专家判断","②索赔管理","③数据分析<br>·绩效审查<br>·挣值分析<br>·趋势分析","④检查","⑤审计"],"o":["①采购关闭","②采购文档（更新）","③工作绩效信息","④变更请求","⑤项目管理计划（更新）<br>·风险管理计划<br>·采购管理计划<br>·进度基准<br>·成本基准","⑥项目文件（更新）<br>·经验教训登记册<br>·资源需求<br>·需求跟踪矩阵<br>·风险登记册<br>·干系人登记册","⑦组织过程资产（更新）"]},{"n":"识别干系人","note":"（本过程应根据需要在整个项目期间定期开展。）","p":"startup","d":"是定期识别项目干系人，分析和记录他们的利益、参与度、相互依赖性、影响力和对项目成功的潜在影响的过程。","r":"使项目团队能够建立对每个干系人或干系人群体的适度关注。","i":["①立项管理文件","②项目章程","③项目管理计划<br>·沟通管理计划<br>·干系人参与计划","④项目文件<br>·需求文件<br>·问题日志<br>·变更日志","⑤协议","⑥事业环境因素","⑦组织过程资产"],"t":["①专家判断","②数据收集<br>·问卷调查<br>·头脑风暴","③数据分析<br>·干系人分析<br>·文件分析","④数据表现<br>·干系人映射分析/表现","⑤会议"],"o":["①干系人登记册","②变更请求","③项目管理计划（更新）<br>·需求管理计划<br>·沟通管理计划<br>·风险管理计划<br>·干系人参与计划","④项目文件（更新）<br>·假设日志<br>·问题日志<br>·风险登记册"]},{"n":"规划干系人参与","note":"（本过程应根据需要在整个项目期间定期开展。）","p":"planning","d":"是根据干系人的需求、期望、利益和潜在影响，制定项目干系人参与项目的方法的过程。","r":"提供与干系人进行有效互动的可行计划。","i":["①项目章程","②项目管理计划<br>·资源管理计划<br>·沟通管理计划<br>·风险管理计划","③项目文件<br>·假设日志<br>·风险登记册<br>·干系人登记册<br>·项目进度计划<br>·问题日志<br>·变更日志","④协议","⑤事业环境因素","⑥组织过程资产"],"t":["①专家判断","②数据收集<br>·标杆对照","③数据分析<br>·假设条件和制约因素分析<br>·根本原因分析","④决策<br>·优先级排序","⑤数据表现<br>·思维导图<br>·干系人参与度评估矩阵","⑥会议"],"o":["干系人参与计划"]},{"n":"管理干系人参与","note":"（本过程需要在整个项目期间开展。）","p":"execution","d":"是通过与干系人进行沟通协作，以满足其需求与期望、处理问题，并促进干系人合理参与的过程。","r":"尽可能提高干系人的支持度，并降低干系人的抵制程度。","i":["①项目管理计划<br>·沟通管理计划<br>·风险管理计划<br>·干系人参与计划<br>·变更管理计划","②项目文件<br>·变更日志<br>·问题日志<br>·经验教训登记册<br>·干系人登记册","③事业环境因素","④组织过程资产"],"t":["①专家判断","②沟通技能<br>·反馈","③人际关系与团队技能<br>·冲突管理<br>·文化意识<br>·谈判<br>·观察和交谈<br>·政治意识","④基本规则","⑤会议"],"o":["①变更请求","②项目管理计划（更新）<br>·沟通管理计划<br>·干系人参与计划","③项目文件（更新）<br>·变更日志<br>·问题日志<br>·经验教训登记册<br>·干系人登记册"]},{"n":"监督干系人参与","note":"（本过程需要在整个项目期间开展。）","p":"monitoring","d":"是监督项目干系人关系，并通过修订参与策略和计划来引导干系人合理参与项目的过程。","r":"随着项目进展和环境变化，维持或提升干系人参与活动的效率和效果。","i":["①项目管理计划<br>·资源管理计划<br>·沟通管理计划<br>·干系人参与计划","②项目文件<br>·风险登记册<br>·干系人登记册<br>·问题日志<br>·项目沟通记录<br>·经验教训登记册","③工作绩效数据","④事业环境因素","⑤组织过程资产"],"t":["①数据分析<br>·备选方案分析<br>·根本原因分析<br>·干系人分析","②决策<br>·多标准决策分析<br>·投票","③数据表现<br>·干系人参与度评估矩阵","④沟通技能<br>·反馈<br>·演示","⑤人际关系与团队技能<br>·积极倾听<br>·文化意识<br>·领导力<br>·人际交往<br>·政治意识","⑥会议"],"o":["①工作绩效信息","②变更请求","③项目管理计划（更新）<br>·资源管理计划<br>·沟通管理计划<br>·干系人参与计划","④项目文件（更新）<br>·经验教训登记册<br>·问题日志<br>·风险登记册<br>·干系人登记册"]}];;
+
+var TERM_KNOWLEDGE={"范围基准":{"desc":"经批准、用于比较实际范围的参照，由以下三部分共同构成。","parts":["项目范围说明书","WBS","WBS词典"],"label":"构成"},"项目范围说明书":{"desc":"详细描述项目和产品的范围、拟交付成果、验收标准及项目的除外责任的文件。","parts":["产品范围描述","可交付成果","验收标准","项目的除外责任"],"label":"主要内容"},"WBS":{"desc":"按可交付成果逐层分解项目的全部工作；下级工作合计覆盖上级工作。","parts":["控制账户","规划包","工作包"],"label":"相关管理单元"},"WBS词典":{"desc":"为WBS组件补充详细说明；估算成本时，可据此了解工作内容及相关资源、质量与验收要求。","parts":["账户编码标识","工作描述","假设条件和制约因素","负责的组织","进度里程碑","相关进度活动","所需资源","成本估算","质量要求","验收标准","技术参考文献","协议信息"],"label":"可记录的字段"},"控制账户":{"desc":"在WBS选定层级整合范围、预算和进度，集中衡量绩效的管理控制点。一个控制账户可以包含工作包和规划包。","parts":[],"label":"理解要点"},"规划包":{"desc":"控制账户内工作内容已知、但详细进度活动尚未规划的WBS组件。工作逐步明确后，再分解为工作包。","parts":[],"label":"理解要点"},"工作包":{"desc":"WBS最底层的工作单元，可用于估算、分派和控制；安排进度时，可继续分解为具体活动。","parts":[],"label":"理解要点"},"项目管理计划":{"desc":"经协调整合的项目管理依据，说明如何执行、监督、控制和结束项目。","parts":["子管理计划","基准","其他组件"],"label":"常见组件类别"},"子管理计划":{"desc":"分别规定各方面如何开展管理。","parts":["范围管理计划","需求管理计划","进度管理计划","成本管理计划","质量管理计划","资源管理计划","沟通管理计划","风险管理计划","采购管理计划","干系人参与计划"],"label":"常见子计划"},"基准":{"desc":"经批准、用于比较实际绩效的参照。","parts":["范围基准","进度基准","成本基准"],"label":"三大基准"},"其他组件":{"desc":"为整体管理补充变更、配置、绩效与生命周期等安排。","parts":["变更管理计划","配置管理计划","绩效测量基准","项目生命周期描述","开发方法","管理评审"],"label":"常见组件"},"任何组件":{"desc":"根据当前过程的需要，选用项目管理计划中相关的组件。","parts":[],"label":"理解要点"},"所有组件":{"desc":"项目管理计划中全部已形成的组件，作为整体管理、知识管理或收尾等工作的依据。","parts":[],"label":"理解要点"},"范围管理计划":{"desc":"规定范围如何定义、分解、验收和控制。","parts":["如何编制项目范围说明书","如何创建、维护和批准WBS","如何正式验收可交付成果","如何处理范围变更"],"label":"主要安排"},"需求管理计划":{"desc":"规定如何识别、分析、记录、跟踪和控制需求。","parts":["需求活动的规划、跟踪和报告","需求配置与变更控制","需求优先级排序","产品测量指标","需求跟踪属性"],"label":"主要安排"},"进度管理计划":{"desc":"规定如何建立和维护进度模型，以及如何衡量和控制进度。","parts":["进度模型与使用方法","准确度、计量单位与维护方式","控制临界值","绩效测量规则","报告格式与过程说明"],"label":"主要安排"},"成本管理计划":{"desc":"规定成本估算、预算、资金使用和成本控制的方法。","parts":["计量单位、精确度与准确度","组织程序链接","控制临界值","绩效测量规则","报告格式","其他细节，如融资和汇率处理"],"label":"主要安排"},"质量管理计划":{"desc":"把质量政策转化为本项目可执行的质量管理安排。","parts":["采用的质量标准与目标","质量角色和职责","拟开展的质量活动","需要审查的可交付成果和过程","质量工具及测量方法","不合格处理与持续改进"],"label":"主要安排"},"资源管理计划":{"desc":"说明如何识别、获取、安排、建设、管理和释放资源。","parts":["资源识别与获取","角色与职责","项目组织图","团队资源安排","培训与团队建设","资源控制","认可计划"],"label":"主要安排"},"沟通管理计划":{"desc":"明确谁在何时，用什么方式，向谁传递哪些信息。","parts":["干系人的沟通需求","信息内容、格式、详细程度和语言","发送人、接收人及保密授权","沟通方法、技术、频率与时限","所需资源","问题升级路径","计划更新和术语说明"],"label":"主要安排"},"风险管理计划":{"desc":"规定本项目怎样开展风险管理，而不是逐条列举风险。","parts":["风险策略与方法","角色和职责","资金与时间安排","风险类别","干系人风险偏好","概率与影响的定义","概率和影响矩阵","报告格式","跟踪方式"],"label":"主要安排"},"采购管理计划":{"desc":"规定采购活动与项目其他工作如何协调和受控。","parts":["采购活动安排及协调","关键采购日期","采购绩效指标","采购角色、职权和职责","采购约束与假设","独立估算与合同管理安排","预审卖方和采购风险处理"],"label":"主要安排"},"干系人参与计划":{"desc":"为争取支持、处理抵制和引导参与提供具体安排。","parts":["当前参与水平与期望水平","干系人的需求、期望和影响","促进参与的策略与行动","负责人员、沟通要求及调整方式"],"label":"主要安排"},"变更管理计划":{"desc":"规定变更从提出到决策、实施和确认的处理方式。","parts":["提交和记录变更","影响分析与评审","决策权限与审批","结果沟通","实施、跟踪与关闭"],"label":"主要安排"},"配置管理计划":{"desc":"规定哪些配置项需要受控，以及怎样识别、记账、变更和审计。","parts":["配置项识别与命名","配置基线与版本管理","配置变更控制","配置状态记录和报告","配置审计"],"label":"主要安排"},"绩效测量基准":{"desc":"把范围、进度和成本整合起来，作为绩效评价的共同参照。","parts":["范围基准","进度基准","成本基准"],"label":"关联内容"},"项目生命周期描述":{"desc":"说明项目经历哪些阶段、如何衔接以及何时评审。","parts":["阶段划分","阶段目标与主要交付","阶段关口和转段条件"],"label":"主要内容"},"开发方法":{"desc":"说明如何开发产品或成果。","parts":["预测型","迭代型","增量型","适应型","混合型"],"label":"常见选择"},"进度基准":{"desc":"经批准的进度模型，用来比较计划与实际日期、时长及进展。","parts":[],"label":"理解要点"},"成本基准":{"desc":"经批准、按时间分配的项目预算，是比较实际成本与计划成本的参照。","parts":["经批准的活动或工作包预算，按控制账户逐级汇总","包含纳入预算的应急储备","按时间分配，常以S曲线表示"],"label":"构成与表现"},"项目文件":{"desc":"管理项目时形成或使用的记录、清单、分析和报告等。","parts":["需求文件","需求跟踪矩阵","项目范围说明书","活动清单","活动属性","里程碑清单","项目进度计划","项目进度网络图","持续时间估算","进度数据","项目日历","进度预测","成本估算","成本预测","估算依据","质量测量指标","质量控制测量结果","质量报告","测试与评估文件","资源需求","资源分解结构","资源日历","项目团队派工单","物质资源分配单","团队章程","风险登记册","风险报告","干系人登记册","项目沟通记录","假设日志","问题日志","经验教训登记册","变更日志"],"label":"文件索引"},"项目章程":{"desc":"正式批准项目，并授权项目经理使用组织资源。","parts":["项目目的","可测量的项目目标和成功标准","高层级需求","高层级项目描述、边界和主要可交付成果","整体项目风险","总体里程碑进度计划","预先批准的财务资源","关键干系人名单","项目审批要求","项目退出标准","项目经理及其职责和职权","发起人或批准者的姓名和职权"],"label":"主要内容"},"立项管理文件":{"desc":"从业务与投资角度支持项目是否值得开展的决策。","parts":["项目建议书","可行性研究报告","项目评估报告"],"label":"常见文件"},"项目建议书":{"desc":"提出项目建设的必要性、初步方案和建设条件。","parts":["项目必要性","市场或业务需求预测","产品或服务方案","建设必需的条件"],"label":"常见内容"},"可行性研究报告":{"desc":"从多个角度论证方案能否落地，以及是否值得投入。","parts":["技术可行性","经济可行性","社会效益可行性","运行环境可行性","其他方面可行性"],"label":"分析维度"},"项目评估报告":{"desc":"在已有研究基础上评估方案、风险和投资合理性，为决策提供意见。","parts":[],"label":"理解要点"},"商业文件":{"desc":"为项目的商业合理性和预期效益提供依据。","parts":["商业论证","效益管理计划"],"label":"常见文件"},"商业论证":{"desc":"比较投入、收益、风险与备选方案，说明项目为什么值得做。","parts":[],"label":"理解要点"},"效益管理计划":{"desc":"说明预期效益怎样实现、由谁负责及如何衡量。","parts":["目标效益","战略一致性","效益实现时间","效益责任人","测量指标","假设与风险"],"label":"常见内容"},"协议":{"desc":"约定参与各方的工作、责任、权利义务和合作关系的文件。协议各方都是需要识别和管理的干系人。","parts":["合同","意向书","服务级别协议","其他书面约定"],"label":"可能形式"},"事业环境因素":{"desc":"项目团队通常不能直接控制，但会影响项目工作的内外部条件。","parts":["组织文化、治理与结构","资源可用性与人员能力","基础设施和信息系统","市场条件与行业标准","法律、政策和外部环境"],"label":"常见示例"},"组织过程资产":{"desc":"组织积累、可供复用的流程、政策、模板及知识。","parts":["政策、流程和程序","模板、指南与标准做法","历史项目记录","经验教训知识库","成本、风险等历史数据库"],"label":"常见内容"},"假设日志":{"desc":"记录尚待验证的假设，以及工作受到的制约。","parts":["假设内容与提出依据","制约因素","验证方式、责任人与状态","变化及其影响"],"label":"常见记录"},"问题日志":{"desc":"跟踪已经发生、需要处理的问题。","parts":["问题描述与分类","提出时间及提出人","优先级","处理责任人","目标解决日期","状态及解决结果"],"label":"常见记录"},"经验教训登记册":{"desc":"在项目期间及时记录经验，供当前工作改进和后续复用。","parts":["场景与类别","发生了什么","影响与原因","采取的行动","有效做法及改进建议"],"label":"常见内容"},"变更日志":{"desc":"跟踪变更请求从提出到关闭的状态及决策。","parts":["变更编号与描述","提出人和提出日期","影响分析","批准、拒绝或延期决定","实施及核实状态"],"label":"常见记录"},"变更请求":{"desc":"对项目文档、可交付成果或基准提出修改的正式建议。","parts":["纠正措施","预防措施","缺陷补救","对受控计划或文件的更新建议"],"label":"常见形式"},"批准的变更请求":{"desc":"已完成规定评审、获准执行的变更。","parts":["明确的变更内容","适用版本及范围","责任人与实施安排","实施后的验证要求"],"label":"实施关注点"},"可交付成果":{"desc":"项目需要产出的、可验证的产品、服务能力或其他成果。","parts":[],"label":"理解要点"},"核实的可交付成果":{"desc":"已经过控制质量检查，确认符合相关质量要求的成果。","parts":[],"label":"理解要点"},"验收的可交付成果":{"desc":"获得有权验收方正式接受的成果。","parts":[],"label":"理解要点"},"最终产品、服务或成果移交":{"desc":"把最终成果及必要支持资料正式移交给接收方。","parts":["成果交接","使用、维护与支持资料","培训和运营衔接","交接确认"],"label":"常见事项"},"工作绩效数据":{"desc":"项目执行中直接采集的原始事实和测量值。","parts":["实际开始和完成日期","已完成工作量","实际成本和资源消耗","缺陷数量","变更实施情况"],"label":"示例"},"工作绩效信息":{"desc":"把原始数据与计划、标准和背景结合后形成的分析结果。","parts":["偏差及原因","交付与质量状态","资源或采购执行情况","风险和沟通效果"],"label":"示例"},"工作绩效报告":{"desc":"将绩效信息整理成便于决策、沟通的报告或展示。","parts":["状态报告","进展报告","预测","仪表盘和例外报告"],"label":"可能形式"},"需求文件":{"desc":"记录为实现业务和项目目标需要满足的条件与能力。","parts":["业务需求","干系人需求","解决方案需求：功能、非功能","过渡与就绪需求","项目需求","质量需求"],"label":"常见类别"},"需求跟踪矩阵":{"desc":"把每项需求从来源连接到实现和验证结果，便于查漏及评估变更。","parts":["需求标识与描述","来源、目标及责任方","对应可交付成果或WBS组件","对应设计、开发与测试","状态、优先级及验收结果"],"label":"常见字段"},"产品范围描述":{"desc":"说明产品或服务的特征、功能与边界。","parts":[],"label":"理解要点"},"验收标准":{"desc":"事先商定的、用于判断成果能否被接受的条件。","parts":["可测量指标","检查或测试方法","判定阈值","验收方与确认方式"],"label":"可明确的内容"},"项目的除外责任":{"desc":"明确不属于本项目范围的内容。","parts":[],"label":"理解要点"},"活动清单":{"desc":"列出完成项目工作需要开展的进度活动。","parts":["活动标识","活动名称","足以理解工作的描述"],"label":"常见字段"},"活动属性":{"desc":"补充活动的逻辑、资源及安排信息。","parts":["前置和后续活动","逻辑关系","提前量和滞后量","资源需求","强制日期、制约与假设","责任方和活动类型"],"label":"常见字段"},"里程碑清单":{"desc":"列出重要事件或节点及其属性。","parts":["里程碑名称","对应的目标或成果","强制或可选属性","相关日期"],"label":"常见字段"},"项目进度网络图":{"desc":"用节点和连线表现活动之间的逻辑顺序。","parts":[],"label":"理解要点"},"持续时间估算":{"desc":"完成活动需要的工作时段数估计。","parts":["估计时长","可能的取值范围","相应置信程度"],"label":"常见表达"},"估算依据":{"desc":"记录估算为什么得到这个数值，方便追溯和复核。","parts":["估算方法与数据来源","采用的假设","已知制约因素","估算范围和准确度","置信程度","涉及估算的不确定性和风险"],"label":"常见内容"},"项目进度计划":{"desc":"把进度模型结果呈现为活动、日期、时长与逻辑关系。","parts":["横道图","里程碑图","带日期的进度网络图"],"label":"常见表现"},"进度数据":{"desc":"支撑进度模型建立和维护的数据集合。","parts":["活动属性与逻辑关系","资源需求与资源安排","假设、制约与备选方案","进度储备与风险信息"],"label":"常见内容"},"项目日历":{"desc":"规定项目层面的可工作日、班次和非工作时段。","parts":[],"label":"理解要点"},"资源日历":{"desc":"说明某类或某个资源何时可用、可用多少。","parts":["工作日与班次","节假日与请假","可用数量或能力","已占用时段"],"label":"常见内容"},"进度预测":{"desc":"根据当前进展和趋势，估计未来日期或完工时间。","parts":[],"label":"理解要点"},"成本估算":{"desc":"对完成工作所需资金作近似评估。","parts":["人工、材料、设备与服务等成本","直接和间接成本","风险应对及适用储备","估算范围与准确度"],"label":"常见关注点"},"项目资金需求":{"desc":"说明项目需要筹集或提供多少资金、何时到位。","parts":["总资金需求","按阶段或期间的资金需求","成本基准对应的支出安排","管理储备等资金安排"],"label":"常见内容"},"成本预测":{"desc":"根据已发生成本和剩余工作，估计未来资金及完工成本。","parts":["完工估算","完工尚需估算","完工偏差"],"label":"常见指标"},"质量测量指标":{"desc":"定义要测量的质量属性以及具体测量办法。","parts":["测量对象和属性","指标定义与计算方式","目标值及容差","测量频率和方法"],"label":"主要内容"},"质量控制测量结果":{"desc":"质量检查、测试和测量得到的实际结果。","parts":["被测对象","实际测量值","适用标准与偏差","检查时间和记录"],"label":"常见记录"},"质量报告":{"desc":"汇总质量状况、问题和改进建议，支持管理决策。","parts":["质量问题及影响","过程与产品改进建议","纠正建议","质量控制结果的概括"],"label":"常见内容"},"测试与评估文件":{"desc":"指导和记录测试、检查或评估的资料。","parts":["测试计划和程序","测试用例或检查清单","评价标准","测试、评估记录"],"label":"可能内容"},"团队章程":{"desc":"团队共同认可的价值观、行为规范和协作约定。","parts":["团队价值观","沟通准则","决策标准与过程","冲突处理约定","会议指南","团队工作协议"],"label":"常见内容"},"资源需求":{"desc":"明确完成工作需要哪些资源，以及数量和特性。","parts":["资源类型","数量与能力要求","对应活动或工作包","使用时间与适用条件"],"label":"常见内容"},"资源分解结构":{"desc":"按资源类别和类型组织的层级结构。","parts":["人员资源","材料","设备","用品"],"label":"分类示例"},"物质资源分配单":{"desc":"记录实物资源分配给哪些工作、地点或责任方。","parts":["资源名称与数量","分配对象","使用地点与时间","保管和释放安排"],"label":"常见内容"},"项目团队派工单":{"desc":"记录人员被分配到项目的角色或工作。","parts":["人员与角色","职责或任务","投入时间","报告关系"],"label":"常见内容"},"团队绩效评价":{"desc":"评价团队能力、协作和整体工作效果。","parts":["技能和能力改进","团队凝聚力","人员流动情况","需继续改进的方面"],"label":"观察维度"},"项目沟通记录":{"desc":"项目沟通中形成或分发的信息记录。","parts":["会议纪要","状态信息和通知","项目报告","正式往来与反馈记录"],"label":"常见形式"},"风险登记册":{"desc":"记录单个项目风险及后续分析、应对和跟踪信息。","parts":["初识别：风险清单、潜在风险责任人、潜在应对措施","分析后：概率、影响、优先级和紧迫性等","规划后：商定策略、行动、责任人和所需资源","跟踪时：触发条件、状态、残余风险和次生风险"],"label":"随过程逐步补充"},"风险报告":{"desc":"从整体层面反映项目风险，同时概括单个风险的情况。","parts":["整体项目风险的来源","整体风险敞口与趋势","单个风险的汇总统计","主要风险、分析结论与建议"],"label":"常见内容"},"干系人登记册":{"desc":"记录干系人的身份、需求、影响及分类。","parts":["身份信息","评估信息","干系人分类"],"label":"主要内容"},"采购策略":{"desc":"决定用何种交付方式、合同付款方式及采购阶段来获取外部资源。","parts":["交付方式","合同支付类型","采购阶段划分"],"label":"主要维度"},"采购工作说明书":{"desc":"对拟放入合同的那部分工作范围作足够清晰的描述。","parts":["规格与数量","质量与绩效要求","履约期间与地点","必要的报告、支持和附加服务"],"label":"常见内容"},"招标文件":{"desc":"向潜在卖方传达采购需求并征求应答。","parts":["信息邀请书","报价邀请书","建议邀请书"],"label":"常见文件"},"供方选择标准":{"desc":"比较、评审和选择卖方的依据。","parts":["价格及全生命周期成本","技术能力与方案","经验与业绩","人员及管理能力","交付能力、风险与服务支持"],"label":"常见评价维度"},"自制或外购决策":{"desc":"根据分析结果，决定由内部完成还是从外部获取。","parts":[],"label":"理解要点"},"独立成本估算":{"desc":"由买方或第三方独立估算采购成本，供比较卖方报价使用。","parts":[],"label":"理解要点"},"采购文档":{"desc":"采购文件是采购活动相关书面资料的统称，涵盖需求说明、询价招标、评选以及协议履行记录。","parts":["采购工作说明书","招标文件","独立成本估算","供方选择标准","卖方建议书","协议","采购往来与绩效记录"],"label":"常见资料"},"卖方建议书":{"desc":"卖方针对采购要求提交的方案或应答。","parts":["技术方案","价格与支付建议","交付安排","人员能力与履约承诺"],"label":"常见内容"},"选定的卖方":{"desc":"完成适用评审程序后确定的供应方。","parts":[],"label":"理解要点"},"采购关闭":{"desc":"确认采购工作及相关合同义务已经完成，办理正式关闭。","parts":["交付和验收确认","未决事项及索赔处理","财务结算","记录归档与关闭确认"],"label":"常见事项"},"项目最终报告":{"desc":"说明项目或阶段的目标完成情况，以及结果和遗留事项。","parts":["项目或阶段概况","范围、进度和成本目标达成情况","质量目标和成果验证","效益实现情况或安排","主要风险及处理结果","最终移交和后续建议"],"label":"常见内容"},"其他过程的输出":{"desc":"制定项目管理计划时，汇总其他过程已经形成的计划、基准或相关结果。","parts":[],"label":"理解要点"},"数据收集":{"desc":"获取用于分析和决策的事实、观点或历史资料。","parts":["头脑风暴","焦点小组","访谈","核对单","问卷调查","标杆对照","核查表","统计抽样","市场调研"],"label":"方法索引"},"数据分析":{"desc":"把数据转化为可用于判断原因、比较方案或预测结果的结论。","parts":["备选方案分析","成本效益分析","挣值分析","根本原因分析","趋势分析","偏差分析","文件分析","回归分析","储备分析","假设情景分析","模拟","迭代燃尽图","绩效审查","质量成本","过程分析","干系人分析","假设条件和制约因素分析","SWOT分析","风险数据质量评估","风险概率和影响评估","其他风险参数评估","敏感性分析","决策树分析","影响图","技术绩效分析","自制或外购分析","建议书评价"],"label":"方法索引"},"数据表现":{"desc":"把信息组织为图形、模型或矩阵，便于理解与比较。","parts":["亲和图","思维导图","流程图","逻辑数据模型","矩阵图","因果图","直方图","散点图","控制图","层级型","矩阵型","文本型","干系人参与度评估矩阵","概率和影响矩阵","层级图","干系人映射分析/表现"],"label":"方法索引"},"人际关系与团队技能":{"desc":"通过沟通、协作和影响他人来完成工作。","parts":["冲突管理","引导","会议管理","积极倾听","领导力","人际交往","政治意识","名义小组技术","观察和交谈","谈判","影响力","激励","团队建设","决策","情商","沟通风格评估","文化意识"],"label":"方法索引"},"决策":{"desc":"从候选行动中作出选择。","parts":["投票","独裁型决策制定","多标准决策分析","优先级排序"],"label":"方法索引"},"沟通技能":{"desc":"帮助信息被正确表达、接收和理解。","parts":["沟通胜任力","反馈","非言语","演示"],"label":"方法索引"},"资源优化":{"desc":"在资源能力与进度条件之间作调整。","parts":["资源平衡","资源平滑"],"label":"常见方法"},"进度压缩":{"desc":"设法缩短进度，同时保持既定范围。","parts":["赶工","快速跟进"],"label":"主要方法"},"确定和整合依赖关系":{"desc":"分别从依赖的性质（强制性、选择性）和控制范围（内部、外部）判断活动关系，并整合到网络图中。","parts":["强制性依赖关系","选择性依赖关系","外部依赖关系","内部依赖关系"],"label":"依赖关系类型"},"威胁应对策略":{"desc":"对可能造成不利影响的风险选择适当处理方式。","parts":["上报","规避","转移","减轻","接受"],"label":"策略"},"机会应对策略":{"desc":"对可能带来有利影响的风险选择适当处理方式。","parts":["上报","开拓","分享","提高","接受"],"label":"策略"},"整体项目风险应对策略":{"desc":"针对整体项目风险敞口选择应对方向。","parts":["规避","开拓","转移或分享","减轻或提高","接受"],"label":"策略"},"干系人映射分析/表现":{"desc":"用不同维度展示干系人之间的差异，帮助制定参与策略。","parts":["方格模型","干系人立方体","凸显模型","影响方向","优先级排序"],"label":"常见方法"},"凸显模型":{"desc":"综合权力、紧迫性和合法性等特征，辨认哪些干系人更需要关注。","parts":[],"label":"理解要点"},"组织理论":{"desc":"利用组织结构、行为和协作方面的理论，设计合适的资源管理方式。","parts":[],"label":"要点"},"质量成本":{"desc":"为达到质量要求以及因不符合要求而发生的成本。","parts":["一致性成本","非一致性成本"],"label":"成本分类"},"应急应对策略":{"desc":"为特定风险事先准备行动，达到约定触发条件时实施。","parts":["应急行动","触发条件","责任人与资源","必要时的回退方案"],"label":"常见安排"},"专家判断":{"desc":"请具备相关经验或专业知识的人对问题、方案或估算提出意见；要说明专家适用领域，并识别偏见与不确定性。","parts":[],"label":"理解要点"},"头脑风暴":{"desc":"先广泛提出想法，再整理、归类或评价；避免一开始就否定意见，压缩可选空间。","parts":[],"label":"理解要点"},"访谈":{"desc":"向合适的个人或小组有针对性提问，获取需求、经验、风险或背景信息。","parts":[],"label":"理解要点"},"焦点小组":{"desc":"邀请具有代表性的参与者，在主持人引导下讨论特定主题并收集观点。","parts":[],"label":"理解要点"},"问卷调查":{"desc":"用结构化问题向较多对象收集信息；注意问题表述、样本代表性和回收质量。","parts":[],"label":"理解要点"},"标杆对照":{"desc":"把当前做法或目标与可比项目、组织或行业实践比较，识别差距和改进机会。","parts":[],"label":"理解要点"},"核对单":{"desc":"列出应当考虑或完成的项目，用于检查有没有遗漏；偏重“查全”。","parts":[],"label":"理解要点"},"核查表":{"desc":"用预先设计的表格记录和分类实际观测数据，如某类缺陷发生次数；偏重“记数”。","parts":[],"label":"理解要点"},"统计抽样":{"desc":"从总体抽取部分样本进行检查或测量，据此了解总体；样本大小和抽样方法影响可靠性。","parts":[],"label":"理解要点"},"会议":{"desc":"让相关人员共同澄清信息、讨论问题或作出决定；应明确目的、议程、参与者及后续行动。","parts":[],"label":"理解要点"},"会议管理":{"desc":"准备议程、控制时间和讨论范围、处理分歧，并记录结论与跟进责任。","parts":[],"label":"理解要点"},"冲突管理":{"desc":"根据冲突的重要性和时限选择处理方式，如合作、妥协、缓和、强迫或撤退；没有一种方式适合所有场景。","parts":[],"label":"理解要点"},"引导":{"desc":"帮助参与者有效讨论、澄清分歧并形成可执行共识；不是替参与者直接作决定。","parts":[],"label":"理解要点"},"积极倾听":{"desc":"专注接收对方信息，通过复述、澄清和确认减少误解。","parts":[],"label":"理解要点"},"领导力":{"desc":"围绕共同目标提供方向、激励和支持，推动人员协作和行动。","parts":[],"label":"理解要点"},"人际交往":{"desc":"建立并维护工作关系，以获取信息、理解观点和协调资源。","parts":[],"label":"理解要点"},"政治意识":{"desc":"理解组织中的正式与非正式权力关系，以恰当方式沟通和推动工作。","parts":[],"label":"理解要点"},"文化意识":{"desc":"理解语言、价值观和工作习惯差异，减少沟通与协作中的误解。","parts":[],"label":"理解要点"},"影响力":{"desc":"在不一定拥有直接职权的情况下，争取他人理解、支持和行动。","parts":[],"label":"理解要点"},"谈判":{"desc":"围绕利益、约束和可选方案协商，争取可执行且双方能够接受的安排。","parts":[],"label":"理解要点"},"情商":{"desc":"识别和管理自身与他人的情绪，改善判断、冲突处理和团队互动。","parts":[],"label":"理解要点"},"激励":{"desc":"理解成员的需求和动机，提供合适目标、支持与反馈，促使其投入工作。","parts":[],"label":"理解要点"},"团队建设":{"desc":"通过协作活动、沟通和共同解决问题，增强成员间的信任与配合。","parts":[],"label":"理解要点"},"认可与奖励":{"desc":"及时认可符合项目目标和团队价值的行为；评价标准应清晰、公平且适合成员需求。","parts":[],"label":"理解要点"},"培训":{"desc":"弥补成员履行职责所需的知识或技能差距，并关注培训后的实际应用。","parts":[],"label":"理解要点"},"个人和团队评估":{"desc":"通过测评、观察或其他工具了解成员与团队的偏好、能力及协作特点。","parts":[],"label":"理解要点"},"集中办公":{"desc":"让团队成员在同一地点工作，促进面对面沟通与快速协作。","parts":[],"label":"理解要点"},"虚拟团队":{"desc":"成员跨地点，通过沟通技术协作；需要特别处理时区、信任和信息可见性问题。","parts":[],"label":"理解要点"},"预分派":{"desc":"在资源获取前，某些人员或资源已被确定用于项目，如投标承诺或特定专业能力要求。","parts":[],"label":"理解要点"},"基本规则":{"desc":"约定团队和干系人在协作中的可接受行为，明确处理分歧和违反约定的方式。","parts":[],"label":"理解要点"},"沟通胜任力":{"desc":"根据对象、情境和目的，选择合适的表达方式并使信息被准确理解。","parts":[],"label":"理解要点"},"反馈":{"desc":"接收方回应信息，帮助发送方确认理解、发现偏差并进行调整。","parts":[],"label":"理解要点"},"非言语":{"desc":"用表情、姿态、眼神、语调等传递或补充意思；要结合文化和情境解释。","parts":[],"label":"理解要点"},"演示":{"desc":"面向特定受众，以有组织的文字、图示和口头说明传递重点并促成理解。","parts":[],"label":"理解要点"},"沟通风格评估":{"desc":"识别干系人偏好的信息表达和接收方式，据此调整沟通形式。","parts":[],"label":"理解要点"},"沟通技术":{"desc":"传递信息所用的工具和媒介，如邮件、会议系统、协作平台；选择时考虑可用性、易用性和保密需求。","parts":[],"label":"理解要点"},"沟通需求分析":{"desc":"识别哪些人需要哪些信息、何时需要以及为何需要，避免信息不足或无效堆积。","parts":[],"label":"理解要点"},"沟通方法":{"desc":"按信息交互方式选择交互式、推式或拉式沟通；不能把已发送等同于已被理解。","parts":["交互式：双方或多方实时交换信息，如讨论和会议","推式：发送给指定接收者，如邮件和通知","拉式：信息放在指定位置，由接收者按需获取"],"label":"三种方式"},"沟通模型":{"desc":"用发送、编码、传递、解码、接收、反馈和噪声等要素分析信息在哪个环节失真。","parts":[],"label":"理解要点"},"观察和交谈":{"desc":"在实际工作情境中观察行为、了解做法，并通过交谈澄清真实需求或问题。","parts":[],"label":"理解要点"},"名义小组技术":{"desc":"先独立提出想法，再集中讨论、投票或排序，使成员意见得到较均衡的表达。","parts":[],"label":"理解要点"},"系统交互图":{"desc":"展示系统边界以及与外部人员或系统之间的信息、输入和输出关系。","parts":[],"label":"理解要点"},"原型法":{"desc":"用可体验的早期模型获得反馈，帮助澄清需求并发现理解差异。","parts":[],"label":"理解要点"},"产品分析":{"desc":"通过产品分解、系统分析或价值分析等方法，把产品描述转化为更清晰的范围和要求。","parts":[],"label":"理解要点"},"文件分析":{"desc":"检查现有文件中的信息、一致性、假设和缺口，为需求、风险或决策提供依据。","parts":[],"label":"理解要点"},"备选方案分析":{"desc":"比较不同做法的成本、风险、资源和效果，选择适合目标与约束的方案。","parts":[],"label":"理解要点"},"成本效益分析":{"desc":"比较方案的预期收益与实施成本，判断投入是否值得以及哪个方案更合算。","parts":[],"label":"理解要点"},"根本原因分析":{"desc":"追查问题或偏差背后的根本原因，避免只修复表面症状或反复处理同类问题。","parts":[],"label":"理解要点"},"趋势分析":{"desc":"观察指标随时间变化的方向和速度，判断状态改善、恶化或未来可能的结果。","parts":[],"label":"理解要点"},"偏差分析":{"desc":"比较实际结果与基准或目标，明确偏差大小、原因及是否需要采取行动。","parts":[],"label":"理解要点"},"回归分析":{"desc":"利用历史数据估计变量之间的统计关系，用于解释或预测；相关关系不自动等于因果关系。","parts":[],"label":"理解要点"},"过程分析":{"desc":"检查工作过程中的步骤、接口和浪费，找出改进质量或效率的机会。","parts":[],"label":"理解要点"},"假设条件和制约因素分析":{"desc":"检验假设是否成立，并分析制约因素带来的影响和风险。","parts":[],"label":"理解要点"},"SWOT分析":{"desc":"从优势、劣势、机会和威胁四个方面识别有利与不利因素。","parts":[],"label":"理解要点"},"提示清单":{"desc":"用预先定义的类别或框架提示思考，以帮助系统识别风险；不保证覆盖所有风险。","parts":[],"label":"理解要点"},"储备分析":{"desc":"判断为不确定性预留的时间或资金是否足够、是否需要调整；区分应急储备与管理储备。","parts":["应急储备","管理储备"],"label":"储备类型"},"历史信息审核":{"desc":"审查可比项目的估算、成本及实施记录，判断哪些经验能够用于当前预算或估算。","parts":[],"label":"理解要点"},"投票":{"desc":"可采用一致同意、大多数同意或相对多数等规则；应事先明确采用哪种规则。","parts":[],"label":"理解要点"},"独裁型决策制定":{"desc":"由一个具有相应决策权限的人为群体作决定；并不代表可以绕过规定的审批权限。","parts":[],"label":"理解要点"},"多标准决策分析":{"desc":"为多个评价标准赋予适当权重，对候选方案评分并比较结果。","parts":[],"label":"理解要点"},"优先级排序":{"desc":"依据价值、影响、紧迫性或其他约定标准，决定关注与处理的先后次序。","parts":[],"label":"理解要点"},"亲和图":{"desc":"把大量零散想法按相似性归组，识别主题和模式。","parts":[],"label":"理解要点"},"思维导图":{"desc":"围绕一个主题展示概念之间的联系，帮助整理信息和发现关联。","parts":[],"label":"理解要点"},"流程图":{"desc":"展示步骤、判断和流向，帮助理解过程及查找返工、瓶颈或缺口。","parts":[],"label":"理解要点"},"逻辑数据模型":{"desc":"说明业务信息的实体、属性及其关系，帮助澄清数据结构和质量要求。","parts":[],"label":"理解要点"},"矩阵图":{"desc":"用行列交叉展示两组或多组因素之间的关系及强弱。","parts":[],"label":"理解要点"},"直方图":{"desc":"按区间展示数据的频数分布，帮助观察集中程度、分散和分布形态。","parts":[],"label":"理解要点"},"散点图":{"desc":"展示两变量观测值的对应关系，用于观察关联；不能仅凭图形确认因果关系。","parts":[],"label":"理解要点"},"因果图":{"desc":"从人员、方法、设备、材料等适当维度梳理可能原因，又称鱼骨图或石川图。","parts":[],"label":"理解要点"},"控制图":{"desc":"按时间绘制过程数据，并结合中心线和控制界限判断过程是否稳定；控制界限不同于规格界限。","parts":[],"label":"理解要点"},"层级型":{"desc":"用树状层级展示角色、组织或工作之间的从属关系。","parts":["WBS","组织分解结构","资源分解结构"],"label":"常见结构"},"矩阵型":{"desc":"把工作与人员或角色交叉对应，说明谁执行、谁最终负责、谁参与咨询以及谁需知情。","parts":["责任分配矩阵"],"label":"常见形式"},"文本型":{"desc":"以文字详细说明角色的职责、职权、能力和任职要求。","parts":[],"label":"理解要点"},"层级图":{"desc":"用图形同时呈现多个风险参数，支持风险优先级判断。气泡图通过横轴、纵轴和气泡大小表达三个参数。","parts":[],"label":"理解要点"},"干系人分析":{"desc":"分析干系人的利益、需求、期望、影响力及可能反应，据此安排沟通和参与。","parts":[],"label":"理解要点"},"权力/利益方格":{"desc":"按干系人影响项目的权力及其对项目的关注程度分类，帮助确定管理和沟通重点。","parts":[],"label":"理解要点"},"权力/影响方格":{"desc":"比较干系人的权力和对项目的实际影响能力，识别需要重点协调的对象。","parts":[],"label":"理解要点"},"作用/影响方格":{"desc":"结合干系人的参与作用和对项目的影响，选择适当的参与策略。","parts":[],"label":"理解要点"},"干系人立方体":{"desc":"将多个干系人分类维度组合成三维视图，避免只凭单一特征判断。","parts":[],"label":"理解要点"},"影响方向":{"desc":"识别干系人来自上级、下属、项目外部还是同级，并据此安排协作。","parts":[],"label":"理解要点"},"干系人参与度评估矩阵":{"desc":"比较当前与期望的参与水平，如不知晓、抵制、中立、支持和领导，识别需要弥合的差距。","parts":[],"label":"理解要点"},"分解":{"desc":"把较大的成果或工作逐层拆成更小、更便于管理的部分；创建WBS与定义活动的分解对象和目的不同。","parts":[],"label":"理解要点"},"滚动式规划":{"desc":"近期工作规划得更细，远期工作先保留较高层级描述，再随信息增加逐步细化。","parts":[],"label":"理解要点"},"紧前关系绘图法":{"desc":"用节点表示活动，以逻辑关系连接活动，常见关系为FS、FF、SS和SF。","parts":["完成到开始","完成到完成","开始到开始","开始到完成"],"label":"四种逻辑关系"},"完成到开始":{"desc":"后续活动开始前，紧前活动必须完成；FS是常见的活动关系。","parts":[],"label":"理解要点"},"完成到完成":{"desc":"后续活动完成前，紧前活动必须完成；FF约束完成时点，不要求两者同时开始。","parts":[],"label":"理解要点"},"开始到开始":{"desc":"后续活动开始前，紧前活动必须开始；SS并不要求两者同时完成。","parts":[],"label":"理解要点"},"开始到完成":{"desc":"后续活动完成前，紧前活动必须开始；SF较少使用，应结合具体工作关系理解。","parts":[],"label":"理解要点"},"箭线图法":{"desc":"用箭线表示活动、节点表示事件；必要时用不耗时的虚活动表达逻辑关系。","parts":[],"label":"理解要点"},"强制性依赖关系":{"desc":"来自工作本身性质或合同、法规等强制要求的关系，通常较难任意调整。","parts":[],"label":"理解要点"},"选择性依赖关系":{"desc":"基于经验、偏好或最佳实践选择的逻辑关系，压缩或重排进度时可审查是否仍有必要。","parts":[],"label":"理解要点"},"外部依赖关系":{"desc":"项目活动与项目团队控制范围之外的活动之间的关系。","parts":[],"label":"理解要点"},"内部依赖关系":{"desc":"项目内部活动之间的关系，通常可由项目团队安排和管理。","parts":[],"label":"理解要点"},"提前量和滞后量":{"desc":"提前量允许后续活动相对提早开展；滞后量使其等待一段时间；应明确理由并避免用它掩盖不清晰的工作逻辑。","parts":[],"label":"理解要点"},"类比估算":{"desc":"利用可比工作的历史结果估计当前工作，通常较快，但准确性取决于相似程度和数据质量。","parts":[],"label":"理解要点"},"参数估算":{"desc":"利用单位成本、生产率或统计关系等参数，结合工作规模计算估算值。","parts":[],"label":"理解要点"},"三点估算":{"desc":"使用最乐观、最可能和最悲观三种估计；三角分布期望值为(O＋M＋P)/3，常用贝塔近似为(O＋4M＋P)/6。","parts":[],"label":"理解要点"},"自下而上估算":{"desc":"先估计较细层次的工作，再逐层汇总；注意接口、间接工作和重复计入问题。","parts":[],"label":"理解要点"},"进度网络分析":{"desc":"结合活动关系、时间和资源等条件分析进度模型，识别关键路径及调整机会。","parts":[],"label":"理解要点"},"关键路径法":{"desc":"计算活动的最早、最晚日期和浮动时间，识别决定最短项目工期的最长路径；关键路径可能不止一条。","parts":["总时差","自由时差"],"label":"相关时间参数"},"资源平衡":{"desc":"为解决资源不足或过度分配而调整活动日期，可能改变关键路径并延长工期。","parts":[],"label":"理解要点"},"资源平滑":{"desc":"在活动可用浮动时间内调整资源使用，保持关键路径和完工日期，但不一定消除全部资源冲突。","parts":[],"label":"理解要点"},"假设情景分析":{"desc":"提出“如果发生某情况会怎样”的场景，评估其对项目目标的影响。","parts":[],"label":"理解要点"},"模拟":{"desc":"反复计算不同输入组合的结果分布；蒙特卡洛模拟可用于评估成本或进度的不确定性。","parts":[],"label":"理解要点"},"赶工":{"desc":"通过增加资源等方式缩短活动时间，通常增加成本；应选择能够缩短总体工期且成本合适的工作。","parts":[],"label":"理解要点"},"快速跟进":{"desc":"把原本顺序开展的工作改为部分重叠或并行，通常增加协调和返工风险。","parts":[],"label":"理解要点"},"计划评审技术":{"desc":"用三点估算分析活动时间的不确定性；常用期望值为(O＋4M＋P)/6，标准差近似为(P－O)/6。","parts":[],"label":"理解要点"},"敏捷发布规划":{"desc":"结合产品目标、优先级、团队交付能力和迭代节奏，估计后续发布的范围与时间。","parts":[],"label":"理解要点"},"挣值分析":{"desc":"用PV、EV和AC综合评价进度与成本；SV＝EV－PV，CV＝EV－AC，SPI＝EV/PV，CPI＝EV/AC。","parts":[],"label":"理解要点"},"迭代燃尽图":{"desc":"展示一个迭代内剩余工作的变化，用于比较实际进展和期望消耗趋势。","parts":[],"label":"理解要点"},"绩效审查":{"desc":"把实际进展与计划、目标或约定要求比较，识别偏差、原因及改进行动。","parts":[],"label":"理解要点"},"完工尚需绩效指数":{"desc":"衡量剩余工作为满足指定成本目标所需达到的成本效率。","parts":["以BAC为目标：TCPI＝(BAC－EV)/(BAC－AC)","以经批准的EAC为目标：TCPI＝(BAC－EV)/(EAC－AC)"],"label":"计算式"},"成本汇总":{"desc":"把活动或工作包的成本逐级汇总到控制账户及项目层级，注意与WBS和进度安排对应。","parts":[],"label":"理解要点"},"资金限制平衡":{"desc":"比较预计支出与资金到位时点，必要时调整工作安排以满足资金约束。","parts":[],"label":"理解要点"},"融资":{"desc":"获取支持项目实施所需的资金；具体方式应适合组织授权和项目安排。","parts":[],"label":"理解要点"},"审计":{"desc":"以系统、独立的方式检查过程、活动或记录是否符合要求，并识别改进机会。","parts":[],"label":"理解要点"},"面向X的设计":{"desc":"在设计阶段关注某项特定目标，如可靠性、可维护性、可制造性或安全性，减少后续问题。","parts":[],"label":"理解要点"},"问题解决":{"desc":"明确问题、分析原因、比较方案、实施解决措施，并检查是否有效。","parts":[],"label":"理解要点"},"质量改进方法":{"desc":"使用适合情境的方法持续改进，如PDCA、六西格玛等；不能把检查成品当成全部质量改进。","parts":["PDCA：计划、实施、检查、行动","六西格玛：以数据分析减少变异和缺陷"],"label":"理解要点"},"检查":{"desc":"对成果或记录进行审阅、测量或核对，以判断是否符合要求；在确认范围中常用于验收。","parts":[],"label":"理解要点"},"测试/产品评估":{"desc":"通过实际运行、试验或评价活动，验证产品的功能、性能或适用性是否满足要求。","parts":[],"label":"理解要点"},"测试与检查的规划":{"desc":"在开展检查前确定测什么、如何测、采用什么标准、由谁测以及如何记录结果。","parts":[],"label":"理解要点"},"风险数据质量评估":{"desc":"检查风险信息是否准确、可靠、完整且足够客观，判断分析基础是否可信。","parts":[],"label":"理解要点"},"风险概率和影响评估":{"desc":"分别评价风险发生可能性及其对项目目标的影响，支持优先级判断。","parts":[],"label":"理解要点"},"其他风险参数评估":{"desc":"除概率和影响外，还可评估紧迫性、邻近性、潜伏期、可管理性、可控性、可检测性、连通性等。","parts":[],"label":"理解要点"},"风险分类":{"desc":"按来源、受影响领域或其他适当类别对风险分组，发现集中原因和系统性问题。","parts":["风险分解结构"],"label":"相关结构"},"概率和影响矩阵":{"desc":"把风险的发生概率与目标影响组合，映射到预先约定的风险等级。","parts":[],"label":"理解要点"},"不确定性表现方式":{"desc":"用取值范围、概率分布或事件分支等方式表示未知情况，而不是只给一个确定数字。","parts":[],"label":"理解要点"},"敏感性分析":{"desc":"辨认哪些输入变量变化对目标结果的影响最大，常以龙卷风图帮助比较。","parts":[],"label":"理解要点"},"决策树分析":{"desc":"以分支展示决策、可能事件及概率和收益或损失，比较不同选择的预期结果。","parts":[],"label":"理解要点"},"影响图":{"desc":"用图形展示决策、事件和结果之间的影响关系，为风险建模和选择方案提供结构。","parts":[],"label":"理解要点"},"上报":{"desc":"当风险超出项目范围或项目经理权限时，交由适当层级处理，并明确接收方和责任。","parts":[],"label":"理解要点"},"规避":{"desc":"改变计划以消除威胁，或使目标不再受到该威胁影响。","parts":[],"label":"理解要点"},"转移":{"desc":"通过合同、保险等方式将威胁的部分影响及应对责任交给第三方；并不保证风险消失。","parts":[],"label":"理解要点"},"减轻":{"desc":"降低威胁发生的概率、影响，或两者同时降低。","parts":[],"label":"理解要点"},"接受":{"desc":"承认风险存在；主动接受可预留应急安排，被动接受则在发生时再按约定处理。","parts":[],"label":"理解要点"},"开拓":{"desc":"采取行动使机会更确定地发生，如安排最有能力的资源争取关键收益。","parts":[],"label":"理解要点"},"分享":{"desc":"与有能力把握机会的第三方合作，共担责任并分享收益。","parts":[],"label":"理解要点"},"提高":{"desc":"增加机会发生的概率、正面影响，或同时提高两者。","parts":[],"label":"理解要点"},"转移或分享":{"desc":"对整体不利风险考虑转移，对整体有利机会考虑分享；结合整体目标与合作条件选择。","parts":[],"label":"理解要点"},"减轻或提高":{"desc":"对整体威胁降低暴露，对整体机会增强获益能力；要评价措施成本和总体效果。","parts":[],"label":"理解要点"},"技术绩效分析":{"desc":"比较实际技术表现与预定目标，判断差异是否意味着风险正在变化。","parts":[],"label":"理解要点"},"市场调研":{"desc":"了解潜在供应方、可用产品、市场价格和交付能力，为采购安排提供依据。","parts":[],"label":"理解要点"},"自制或外购分析":{"desc":"比较内部实施与外部采购的成本、能力、进度、风险和长期影响，支持获取方式决策。","parts":[],"label":"理解要点"},"供方选择分析":{"desc":"选择合适的供应方评选思路，如重价格、重资质或综合质量与成本，明确评价方法。","parts":[],"label":"理解要点"},"广告":{"desc":"通过适当渠道发布采购信息，扩大合格潜在卖方的知晓范围。","parts":[],"label":"理解要点"},"建议书评价":{"desc":"依据预先确定的标准评审卖方方案、价格和履约能力，形成选择依据。","parts":[],"label":"理解要点"},"索赔管理":{"desc":"记录、分析和处理合同双方未达成一致的争议；依据协议约定逐步处理和升级。","parts":[],"label":"理解要点"},"知识管理":{"desc":"促进人与人分享经验、判断和诀窍，既关注显性知识，也关注不易文档化的隐性知识。","parts":[],"label":"理解要点"},"信息管理":{"desc":"整理、存储、检索和传递可以编撰的信息，使合适的人能够获取和使用。","parts":[],"label":"理解要点"},"项目管理信息系统":{"desc":"支持计划、执行、跟踪和报告的信息工具集合，如进度、成本、资源和协作系统。","parts":[],"label":"理解要点"},"变更控制工具":{"desc":"记录请求、跟踪评审、维护版本并关联实施和核实结果，帮助实现可追溯的变更处理。","parts":[],"label":"理解要点"},"项目报告":{"desc":"整理项目状态、进展和预测，按不同接收者的信息需求进行展示和沟通。","parts":[],"label":"理解要点"},"投标人会议":{"desc":"在投标前集中回答潜在卖方对采购要求的疑问，帮助形成一致理解并公平提供信息。","parts":[],"label":"理解要点"},"采购往来与绩效记录":{"desc":"记录采购沟通、交付、检查、付款、变更及索赔处理，支持合同履约跟踪和采购关闭。","parts":[],"label":"要点"},"合同":{"desc":"采购买卖双方对交付内容、权利义务、价格、履约和违约处理等作出的约定。","parts":["总价合同","成本补偿合同","工料合同"],"label":"常见合同类型"},"总价合同":{"desc":"以约定的总价格完成规定工作，适用于范围和要求较明确的采购。","parts":["固定总价合同","总价加激励费用合同","总价加经济价格调整合同"],"label":"常见类型"},"固定总价合同":{"desc":"约定明确工作范围和总价格；卖方通常承担较多的履约成本风险，获准的范围变更仍须按合同处理。","parts":[],"label":"要点"},"总价加激励费用合同":{"desc":"在总价合同中设置与成本、进度或技术绩效等目标相联系的激励安排，通常约定最高限价。","parts":[],"label":"要点"},"总价加经济价格调整合同":{"desc":"按约定对通胀、汇率或特定经济条件变化调整价格，常用于履行期较长的采购。","parts":[],"label":"要点"},"成本补偿合同":{"desc":"支付允许的实际成本，并按约定支付费用或利润，适用于范围或成本不确定性较大的采购。","parts":["成本加固定费用合同","成本加激励费用合同","成本加奖励费用合同"],"label":"常见类型"},"成本加固定费用合同":{"desc":"报销允许的实际成本，并支付预先约定的固定费用；固定费用不随实际成本同比增长。","parts":[],"label":"要点"},"成本加激励费用合同":{"desc":"报销允许的实际成本，按约定的绩效目标和分担规则确定激励费用。","parts":[],"label":"要点"},"成本加奖励费用合同":{"desc":"报销允许的实际成本，并依据约定的绩效评价办法决定奖励费用。","parts":[],"label":"要点"},"工料合同":{"desc":"按约定的单位人工费率、材料价格等和实际投入结算，兼有总价与成本补偿合同的特点。","parts":[],"label":"要点"},"信息邀请书":{"desc":"信息邀请书（RFI）用于了解潜在卖方、产品或解决方案的信息，帮助明确采购方案。","parts":[],"label":"要点"},"报价邀请书":{"desc":"报价邀请书（RFQ）用于在需求和规格较明确时，请卖方提供价格及相关交易条件。","parts":[],"label":"要点"},"建议邀请书":{"desc":"建议邀请书（RFP）用于请卖方就买方需求提出技术、管理、交付及价格等综合方案。","parts":[],"label":"要点"},"组织分解结构":{"desc":"组织分解结构（OBS）按组织单元、部门或团队展示职责与分工层次，可将项目工作与负责的组织单元联系起来。","parts":[],"label":"要点"},"责任分配矩阵":{"desc":"责任分配矩阵（RAM）将工作包或活动与人员、角色相联系，明确执行和管理责任。","parts":["RACI矩阵"],"label":"常见形式"},"RACI矩阵":{"desc":"用执行负责、最终负责、咨询、知情四种关系表达工作责任。","parts":["R：执行负责","A：最终负责/批准","C：咨询","I：知情"],"label":"责任类型"},"风险分解结构":{"desc":"按风险来源分层组织潜在风险类别，帮助系统识别单个项目风险。","parts":[],"label":"要点"},"风险类别":{"desc":"对潜在风险来源进行分类，支持系统地识别风险。","parts":["风险分解结构"],"label":"常见组织方式"},"身份信息":{"desc":"记录干系人的姓名、组织职位、地点、联系方式，以及在项目中的角色。","parts":[],"label":"要点"},"评估信息":{"desc":"记录干系人的主要需求、期望、影响项目成果的潜力，以及最能影响项目的阶段。","parts":[],"label":"要点"},"干系人分类":{"desc":"记录按内部或外部、权力或利益、影响方向等模型进行分类的结果。","parts":["干系人映射分析/表现"],"label":"常用分类模型"},"应急储备":{"desc":"为应对已识别的风险而预留的时间或资金。","parts":[],"label":"要点"},"管理储备":{"desc":"为项目范围内未预见的工作预留的项目预算，使用按授权和变更管理要求处理。","parts":[],"label":"要点"},"一致性成本":{"desc":"为确保成果符合质量要求而投入的成本。","parts":["预防成本","评价成本"],"label":"构成"},"非一致性成本":{"desc":"成果不符合质量要求而造成的损失和处理成本。","parts":["内部失败成本","外部失败成本"],"label":"构成"},"预防成本":{"desc":"为避免产生缺陷而投入的成本，如培训、过程改进和预防性质量活动。","parts":[],"label":"要点"},"评价成本":{"desc":"为评价成果是否符合要求而投入的成本，如检查、测试和质量检验。","parts":[],"label":"要点"},"内部失败成本":{"desc":"缺陷在交付客户前发现所产生的成本，如返工、报废和内部纠正。","parts":[],"label":"要点"},"外部失败成本":{"desc":"缺陷在交付客户后发现所产生的成本，如保修、责任处理和客户损失。","parts":[],"label":"要点"},"完工估算":{"desc":"完工估算（EAC）根据实际绩效和对剩余工作的估计，预测最终总成本。","parts":["EAC＝AC＋ETC","按原预算效率完成剩余工作：EAC＝AC＋BAC－EV","延续当前成本效率：EAC＝BAC/CPI","原估算失效时：EAC＝AC＋重新自下而上估算的ETC","成本和进度效率共同影响剩余工作：EAC＝AC＋(BAC－EV)/(CPI×SPI)"],"label":"计算式"},"完工尚需估算":{"desc":"完工尚需估算（ETC）估计完成剩余工作还需要的成本。","parts":["ETC＝EAC－AC","按原预算效率完成剩余工作：ETC＝BAC－EV","延续当前成本效率：ETC＝(BAC－EV)/CPI","成本和进度效率共同影响剩余工作：ETC＝(BAC－EV)/(CPI×SPI)"],"label":"计算式"},"完工偏差":{"desc":"完工偏差（VAC）比较批准的完工预算与当前预测完工成本；正值表示预计结余，负值表示预计超支。","parts":["VAC＝BAC－EAC"],"label":"计算式"},"总时差":{"desc":"总时差（TF）是活动从最早日期延迟，而不延误项目完工日期、也不违反进度制约的时间。","parts":["TF＝LS－ES＝LF－EF","最早开始时间","最早完成时间","最晚开始时间","最晚完成时间"],"label":"计算式"},"自由时差":{"desc":"自由时差（FF）是在不推迟任何紧后活动最早开始日期、也不违反进度制约的前提下，活动可以延迟的时间。","parts":["完成到开始且无提前量、滞后量时：FF＝紧后活动最早开始时间的最小值－本活动最早完成时间"],"label":"计算式"},"管理评审":{"desc":"规定在项目的重要节点检查进展、管理方法及未决问题，并作出继续、调整或其他管理决定的安排。","parts":[],"label":"要点"},"方格模型":{"desc":"用两个维度对干系人分类，确定沟通和参与管理的重点。","parts":["权力/利益方格","权力/影响方格","作用/影响方格"],"label":"常见形式"},"最早开始时间":{"desc":"最早开始时间（ES）：根据逻辑关系、持续时间和适用制约，活动最早可以开始的时间。","parts":[],"label":"要点"},"最早完成时间":{"desc":"最早完成时间（EF）：按最早开始时间和活动持续时间计算的最早完成时间。","parts":[],"label":"要点"},"最晚开始时间":{"desc":"最晚开始时间（LS）：在满足项目完成日期及其他进度制约的条件下，活动最晚可以开始的时间。","parts":[],"label":"要点"},"最晚完成时间":{"desc":"最晚完成时间（LF）：在满足项目完成日期及其他进度制约的条件下，活动最晚可以完成的时间。","parts":[],"label":"要点"},"帕累托图":{"desc":"将问题类别按发生频数或影响程度由高到低排列的柱状图，常结合累计百分比曲线，用于识别需要优先解决的主要问题。","parts":[],"label":"要点"}};
+var TERM_ALIASES={"紧前关系绘图法（PDM）":"紧前关系绘图法","完成到开始（FS）":"完成到开始","完成到完成（FF）":"完成到完成","开始到开始（SS）":"开始到开始","开始到完成（SF）":"开始到完成","根本原因分析（RCA）":"根本原因分析","挣值分析（EVA）":"挣值分析","问卷和调查":"问卷调查","干系人分析法":"干系人分析","投标大会":"投标人会议","采购文件":"采购文档","工作分解结构":"WBS","工作分解结构词典":"WBS词典","WBS字典":"WBS词典","实物资源分配单":"物质资源分配单","需求文档":"需求文件","项目管理信息系统（PMIS）":"项目管理信息系统","信息邀请书RFI":"信息邀请书","报价邀请书RFQ":"报价邀请书","建议邀请书RFP":"建议邀请书"};
+
+function studyJump(panelId,sectionId){
+ var wrap=document.querySelector('#'+panelId+' .gl-wrap'),target=document.getElementById(sectionId),nav=wrap.querySelector('.study-nav');
+ if(!target)return;
+ wrap.scrollTo({top:wrap.scrollTop+target.getBoundingClientRect().top-wrap.getBoundingClientRect().top-nav.offsetHeight-10,behavior:'auto'});
+}
+var studyReturn=null;
+function openStudyProcess(index){
+ var panel=document.querySelector('.study-modal.on');
+ if(panel){
+  studyReturn={id:panel.id,trigger:panel.contains(document.activeElement)?document.activeElement:null};
+  studyClose(panel.id,true);
+ }
+ op(index,true);
+}
+function returnToStudy(){
+ var target=studyReturn;
+ if(!target)return;
+ studyReturn=null;
+ document.getElementById('mo').classList.remove('on');
+ updateStudyBack();
+ studyOpen(target.id);
+ if(target.trigger&&target.trigger.isConnected)target.trigger.focus({preventScroll:true});
+}
+function updateStudyBack(){
+ var button=document.getElementById('studyBack'),label=studyReturn?(studyReturn.id==='glr'?'规律总结':'案例必背'):'';
+ button.hidden=!studyReturn;
+ button.textContent=studyReturn?'← 返回'+label:'';
+ document.querySelector('#mo .m-close').title=studyReturn?'返回'+label+' (Esc)':'关闭 (Esc)';
+ document.querySelector('#mo .m-close').setAttribute('aria-label',studyReturn?'返回'+label:'关闭过程详情');
+}
+function linkStudyProcesses(root){
+ var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(node){
+  return node.parentElement.closest('button,a,script,style,textarea')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;
+ }}),nodes=[];
+ while(walker.nextNode())nodes.push(walker.currentNode);
+ nodes.forEach(function(node){
+  var text=numberedProcessText(node.nodeValue),pattern=new RegExp(PROCESS_REF_PATTERN.source,'g'),fragment=document.createDocumentFragment(),last=0,found=false,match;
+  while((match=pattern.exec(text))!==null){
+   var name=match[1],label=PROCESS_CODE_MAP[name]+' '+name;
+   if(match[0]!==label)continue;
+   fragment.appendChild(document.createTextNode(text.slice(last,match.index)));
+   var button=document.createElement('button'),index=D.findIndex(function(p){return p.n===name;});
+   button.type='button';button.className='study-process';button.textContent=label;
+   button.setAttribute('onclick','openStudyProcess('+index+')');
+   fragment.appendChild(button);last=pattern.lastIndex;found=true;
+  }
+  if(found){fragment.appendChild(document.createTextNode(text.slice(last)));node.replaceWith(fragment);}
+ });
+}
+
+function examAnswers(panelId,open){document.querySelectorAll('#'+panelId+' .exam-question').forEach(function(d){d.open=open;});}
+var PROCESS_CODES=["4.1","4.2","4.3","4.4","4.5","4.6","4.7","5.1","5.2","5.3","5.4","5.5","5.6","6.1","6.2","6.3","6.4","6.5","6.6","7.1","7.2","7.3","7.4","8.1","8.2","8.3","9.1","9.2","9.3","9.4","9.5","9.6","10.1","10.2","10.3","11.1","11.2","11.3","11.4","11.5","11.6","11.7","12.1","12.2","12.3","13.1","13.2","13.3","13.4"];
+var PROCESS_CODE_MAP={"制定项目章程":"4.1","制定项目管理计划":"4.2","指导与管理项目工作":"4.3","管理项目知识":"4.4","监控项目工作":"4.5","实施整体变更控制":"4.6","结束项目或阶段":"4.7","规划范围管理":"5.1","收集需求":"5.2","定义范围":"5.3","创建WBS":"5.4","确认范围":"5.5","控制范围":"5.6","规划进度管理":"6.1","定义活动":"6.2","排列活动顺序":"6.3","估算活动持续时间":"6.4","制定进度计划":"6.5","控制进度":"6.6","规划成本管理":"7.1","估算成本":"7.2","制定预算":"7.3","控制成本":"7.4","规划质量管理":"8.1","管理质量":"8.2","控制质量":"8.3","规划资源管理":"9.1","估算活动资源":"9.2","获取资源":"9.3","建设团队":"9.4","管理团队":"9.5","控制资源":"9.6","规划沟通管理":"10.1","管理沟通":"10.2","监督沟通":"10.3","规划风险管理":"11.1","识别风险":"11.2","实施定性风险分析":"11.3","实施定量风险分析":"11.4","规划风险应对":"11.5","实施风险应对":"11.6","监督风险":"11.7","规划采购管理":"12.1","实施采购":"12.2","控制采购":"12.3","识别干系人":"13.1","规划干系人参与":"13.2","管理干系人参与":"13.3","监督干系人参与":"13.4"};
+var PROCESS_REF_PATTERN=new RegExp("(?:\\d{1,2}\\.\\d+\\s*)?(指导与管理项目工作|制定项目管理计划|实施整体变更控制|估算活动持续时间|实施定性风险分析|实施定量风险分析|结束项目或阶段|规划干系人参与|管理干系人参与|监督干系人参与|制定项目章程|管理项目知识|监控项目工作|规划范围管理|规划进度管理|排列活动顺序|制定进度计划|规划成本管理|规划质量管理|规划资源管理|估算活动资源|规划沟通管理|规划风险管理|规划风险应对|实施风险应对|规划采购管理|创建WBS|识别干系人|收集需求|定义范围|确认范围|控制范围|定义活动|控制进度|估算成本|制定预算|控制成本|管理质量|控制质量|获取资源|建设团队|管理团队|控制资源|管理沟通|监督沟通|识别风险|监督风险|实施采购|控制采购)","g");
+function numberedProcessText(text){return String(text).replace(PROCESS_REF_PATTERN,function(match,name,offset,source){
+ var before=source.slice(0,offset),after=source.slice(offset+match.length);
+ var phrase=(name==='识别风险'&&/(?:已|系统)$/.test(before))
+  ||(name==='管理团队'&&after.indexOf('变更')===0)
+  ||(name==='控制范围'&&after.indexOf('之外')===0)
+  ||(name==='控制进度'&&/衡量和$/.test(before))
+  ||(name==='识别干系人'&&/^(?:偏好|来自)/.test(after))
+  ||(name==='监督风险'&&after.indexOf('应对计划')===0)
+  ||(name==='估算成本'&&/的$/.test(before));
+ return phrase?name:PROCESS_CODE_MAP[name]+" "+name;
+});}
+
+
+var processTrigger=null,studyTriggers={};
+function activeDialog(){return document.querySelector('#mo.on')||document.querySelector('.study-modal.on');}
+function syncModalScroll(){document.body.style.overflow=activeDialog()?'hidden':'';}
+function focusDialog(id){
+ var panel=document.getElementById(id),back=panel.querySelector('#studyBack:not([hidden])'),target=back||panel.querySelector('.m-close');
+ if(target)target.focus({preventScroll:true});
+}
+function restoreFocus(target){if(target&&target.isConnected&&typeof target.focus==='function')target.focus({preventScroll:true});}
+
+var ci=-1;
+
+function escapeTerm(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function termKey(s){
+ var v=s.replace(/^[①-⑳·\s]+/g,'').replace(/（更新）$/,'').trim();
+ if(v.indexOf('子管理计划：')===0)return '子管理计划';
+ if(v.indexOf('基准：')===0)return '基准';
+ if(v.indexOf('其他组件：')===0)return '其他组件';
+ if(v.indexOf('干系人映射分析/表现（')===0)return '干系人映射分析/表现';
+ return TERM_ALIASES[v]||v;
+}
+function termDisclosure(label,key,root,path,descriptionOnly){
+ var item=TERM_KNOWLEDGE[key];
+ if(!item)return '<span>'+escapeTerm(label)+'</span>';
+ var trail=path||[];
+ var count=descriptionOnly?0:item.parts.length;
+ var hint=descriptionOnly?'说明':(/索引/.test(item.label)?'索引':(count?count+'项':'详解'));
+ if(count&&/类别|分类/.test(item.label)&&!/索引/.test(item.label))hint=count+'类';
+ else if(count&&/常见|可能|示例|可记录/.test(item.label))hint='要点'+count;
+ return '<details class="term-detail" data-key="'+escapeTerm(key)+'" data-root="'+(root?'1':'0')+'" data-description-only="'+(descriptionOnly?'1':'0')+'" data-trail="'+escapeTerm(JSON.stringify(trail))+'"><summary><span class="term-title">'+escapeTerm(numberedProcessText(label))+'</span><span class="term-hint" aria-hidden="true">'+hint+'</span></summary><div class="term-body"></div></details>';
+}
+function renderFormalTerm(segment,root,trail,explicitChildren){
+ var label=segment.trim().replace(/^·\s*/,''),key=termKey(label),children=explicitChildren||[];
+ var category=label.match(/^(子管理计划|基准|其他组件)：(.+)$/);
+ if(category){label=category[1];children=category[2].split('、');}
+ var detail=termDisclosure(label,key,root,trail,children.length>0).replace('<details ','<details data-formal="1" ');
+ var nested=children.length?'<ul class="term-visible-children">'+children.map(function(part){return '<li>'+renderFormalTerm(part,false,(trail||[]).concat(key))+'</li>';}).join('')+'</ul>':'';
+ return '<div class="term-group" data-owner="'+escapeTerm(key)+'">'+detail+nested+'</div>';
+}
+function renderTermList(entries,column){
+ return '<ul>'+entries.map(function(entry){
+  var segments=entry.split(/<br\s*\/?>/i),parent=segments.shift();
+  return '<li class="term-entry">'+renderFormalTerm(parent,true,[],segments)+'</li>';
+ }).join('')+'</ul>';
+}
+function populateTerm(detail){
+ if(detail.dataset.loaded)return;
+ var key=detail.dataset.key,item=TERM_KNOWLEDGE[key];
+ if(!item)return;
+ var trail=JSON.parse(detail.dataset.trail||'[]').concat(key);
+ var body='<p>'+escapeTerm(numberedProcessText(item.desc))+'</p>';
+ if(item.parts.length&&detail.dataset.descriptionOnly!=='1'){
+   body+='<div class="term-section">'+escapeTerm(item.label)+'</div><ul class="term-children">'+item.parts.map(function(part){
+     var childKey=termKey(part);
+     var expandable=TERM_KNOWLEDGE[childKey]&&trail.indexOf(childKey)===-1&&trail.length<6;
+     return '<li>'+(expandable?termDisclosure(part,childKey,false,trail):'<span class="term-plain">'+escapeTerm(numberedProcessText(part))+'</span>')+'</li>';
+   }).join('')+'</ul>';
+ }
+ detail.querySelector('.term-body').innerHTML=body;
+ detail.dataset.loaded='1';
+ if(detail.closest('.study-modal'))linkStudyProcesses(detail.querySelector('.term-body'));
+}
+function toggleColumn(column){
+ var cell=document.querySelector('#it td[data-column="'+column+'"]');
+ if(!cell)return;
+ var formal=Array.from(cell.querySelectorAll('details[data-formal="1"]'));
+ var expanded=formal.some(function(d){return d.open;});
+ if(expanded){cell.querySelectorAll('details').forEach(function(d){d.open=false;});}
+ else{formal.forEach(function(d){populateTerm(d);d.open=true;});}
+ updateDetailCount();
+}
+function updateColumnButtons(){
+ var labels={input:'输入',tools:'工具',output:'输出'};
+ document.querySelectorAll('[data-toggle-column]').forEach(function(button){
+  var column=button.dataset.toggleColumn;
+  var expanded=!!document.querySelector('#it td[data-column="'+column+'"] details[data-formal="1"][open]');
+  button.textContent=(expanded?'收起':'展开')+labels[column];
+  button.setAttribute('aria-expanded',String(expanded));
+ });
+}
+function updateDetailCount(){
+ var count=document.getElementById('detailCount');
+ if(count)count.textContent='已展开 '+Array.from(document.querySelectorAll('#it details[open]')).filter(function(d){return d.getClientRects().length;}).length+' 项';
+ updateColumnButtons();
+}
+document.addEventListener('toggle',function(e){
+ var d=e.target;
+ if(d.tagName==='DETAILS'&&d.classList.contains('term-detail')){
+   if(d.open)populateTerm(d);
+   updateDetailCount();
+ }
+},true);
+document.addEventListener('click',function(e){
+ var summary=e.target.closest&&e.target.closest('summary');
+ if(!summary)return;
+ var d=summary.parentElement;
+ if(d.classList.contains('term-detail')&&!d.open)populateTerm(d);
+});
+
+function pgC(p){return{startup:"#117a65",planning:"#21618c",execution:"#9a7d0a",monitoring:"#922b21",closing:"#6c3483"}[p]}
+function pgL(p){return{startup:"启动",planning:"规划",execution:"执行",monitoring:"监控",closing:"收尾"}[p]}
+
+function op(i,keepStudyReturn){
+  if(!Number.isInteger(i)||!D[i])return;
+  if(!document.getElementById("mo").classList.contains("on")&&!keepStudyReturn)processTrigger=document.activeElement;
+  if(!keepStudyReturn)studyReturn=null;
+  updateStudyBack();
+  ci=i;var p=D[i];
+  document.getElementById("mt").innerHTML=PROCESS_CODES[i]+" "+p.n+'<span class="m-badge" style="background:'+pgC(p.p)+'">'+pgL(p.p)+'过程组</span>';
+  var fmt=function(s){
+    return s.split(/<br\s*\/?>/i).map(function(seg){
+      var t=seg.replace(/^\s+/,'');
+      return (t.charAt(0)==='·') ? '<span class="sub">'+t+'</span>' : t;
+    }).join('');
+  };
+  var ul=function(a){return '<ul>'+a.map(function(x){return'<li>'+fmt(x)+'</li>'}).join('')+'</ul>';};
+  var h='<thead><tr><th>过程</th><th>定义</th><th>作用</th><th>输入</th><th>工具与技术</th><th>输出</th></tr></thead>'+
+    '<tbody><tr>'+
+    '<td>'+(PROCESS_CODES[i]+' '+p.n+(p.note||''))+'</td>'+
+    '<td>'+numberedProcessText(p.d)+'</td>'+
+    '<td>'+((p.r||'').trim()?ul(numberedProcessText(p.r).split(/<br\s*\/?>(?!\s*·)/i)):'<span class="todo">原文未提供 · 待补充</span>')+'</td>'+
+    '<td data-column="input">'+renderTermList(p.i,'input')+'</td>'+
+    '<td data-column="tools">'+renderTermList(p.t,'tools')+'</td>'+
+    '<td data-column="output">'+renderTermList(p.o,'output')+'</td>'+
+    '</tr></tbody>';
+  document.getElementById("it").innerHTML=h;
+  document.querySelector("#mo .m-body").scrollTop=0;
+  document.querySelector("#mo .m-body").scrollLeft=0;
+  updateDetailCount();
+  document.getElementById("mo").className="modal-overlay on";
+  document.getElementById("mc").textContent=(i+1)+" / "+D.length;
+  syncModalScroll();focusDialog("mo");
+}
+function cl(){if(studyReturn){returnToStudy();return;}document.getElementById("mo").className="modal-overlay";syncModalScroll();restoreFocus(processTrigger);}
+function nv(d){ci+=d;if(ci<0)ci=D.length-1;if(ci>=D.length)ci=0;op(ci,true);}
+
+// 案例必背弹窗 / ITTO规律总结弹窗
+var studyPositions={};
+function studyOpen(id){
+ var panel=document.getElementById(id),wrap=panel.querySelector('.gl-wrap'),nav=panel.querySelector('.study-nav');
+ if(!panel.classList.contains('on')&&!document.activeElement.closest('.modal-overlay'))studyTriggers[id]=document.activeElement;
+ ['gl','glr'].forEach(function(other){if(other!==id)studyClose(other,true);});
+ if(document.getElementById('mo').classList.contains('on')){document.getElementById('mo').classList.remove('on');studyReturn=null;updateStudyBack();}
+ panel.classList.add('on');
+ var position=studyPositions[id];
+ if(position){wrap.scrollTop=position.top;wrap.scrollLeft=position.left;nav.scrollLeft=position.navLeft;}
+ syncModalScroll();focusDialog(id);
+}
+function studyClose(id,skipFocus){
+ var panel=document.getElementById(id);
+ if(panel.classList.contains('on')){
+  var wrap=panel.querySelector('.gl-wrap'),nav=panel.querySelector('.study-nav');
+  studyPositions[id]={top:wrap.scrollTop,left:wrap.scrollLeft,navLeft:nav.scrollLeft};
+ }
+ panel.classList.remove('on');
+ syncModalScroll();if(!skipFocus&&!activeDialog())restoreFocus(studyTriggers[id]);
+}
+function glOpen(){studyOpen('gl');}
+function glClose(){studyClose('gl');}
+function glrOpen(){studyOpen('glr');}
+function glrClose(){studyClose('glr');}
+
+// 深色模式切换
+function tgTheme(){
+  var d=document.body.classList.toggle("dark");
+  document.getElementById("themeBtn").innerHTML=d?"\u2600\uFE0F 浅色":"\uD83C\uDF12 深色";
+  try{localStorage.setItem("itto-theme",d?"dark":"light");}catch(e){}
+}
+(function(){
+  try{
+    if(localStorage.getItem("itto-theme")==="dark"){
+      document.body.classList.add("dark");
+      document.getElementById("themeBtn").innerHTML="\u2600\uFE0F 浅色";
+    }
+  }catch(e){}
+})();
+
+// 绑定点击事件
+document.querySelectorAll(".pt").forEach(function(el){
+  el.addEventListener("click",function(){op(parseInt(this.getAttribute("data-i")))});
+});
+
+// 键盘快捷键
+document.addEventListener("keydown",function(e){
+ if(e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
+ if(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable="true"]'))return;
+ var panel=activeDialog(),ittoOn=panel&&panel.id==='mo';
+ if(panel&&e.key==='Tab'){
+  var items=Array.from(panel.querySelectorAll('button,a[href],summary,[tabindex]:not([tabindex="-1"])')).filter(function(el){return !el.disabled&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden';});
+  if(items.length){var first=items[0],last=items[items.length-1];
+   if(!panel.contains(document.activeElement)){e.preventDefault();restoreFocus(e.shiftKey?last:first);}
+   else if(e.shiftKey&&document.activeElement===first){e.preventDefault();restoreFocus(last);}
+   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();restoreFocus(first);}
+  }return;
+ }
+ if(panel&&e.key==='Escape'){e.preventDefault();if(ittoOn)cl();else studyClose(panel.id);return;}
+ if(ittoOn&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();nv(e.key==='ArrowLeft'?-1:1);return;}
+ if(!panel){if(e.key==='l'||e.key==='L')glOpen();else if(e.key==='r'||e.key==='R')glrOpen();else if(e.key==='d'||e.key==='D')tgTheme();}
+});
+
+// 点击遮罩关闭
+document.getElementById("mo").addEventListener("click",function(e){
+  if(e.target===this)cl();
+});
+document.getElementById("gl").addEventListener("click",function(e){
+  if(e.target===this)glClose();
+});
+document.getElementById("glr").addEventListener("click",function(e){
+  if(e.target===this)glrClose();
+});
+
+document.querySelectorAll('.modal-overlay').forEach(function(panel){
+ var title=panel.querySelector('.m-title');if(!title.id)title.id=panel.id+'Title';
+ panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-labelledby',title.id);
+ panel.querySelector('.m-close').setAttribute('aria-label',panel.id==='mo'?'关闭过程详情':'关闭'+(panel.id==='gl'?'案例必背':'规律总结'));
+});
+document.querySelectorAll('[data-concepts]').forEach(function(holder){
+ holder.innerHTML=holder.dataset.concepts.split('|').map(function(key){return termDisclosure(key,key,false,[]);}).join('');
+});
+
+function renderChangeRequestSources(){
+ var holder=document.getElementById('changeRequestSources');
+ if(!holder)return;
+ function indexes(field,name){
+  return D.map(function(p,i){return p[field].some(function(entry){return entry.split(/<br\s*\/?>/i)[0].replace(/^[①-⑳\s]+/g,'')===name;})?i:-1;}).filter(function(i){return i>=0;});
+ }
+ function links(items){return items.map(function(i){return '<button type="button" class="study-process" onclick="openStudyProcess('+i+')">'+PROCESS_CODES[i]+' '+D[i].n+'</button>';}).join('、')||'无';}
+ var sources=indexes('o','变更请求'),approved=indexes('o','批准的变更请求'),receivers=indexes('i','批准的变更请求');
+ var groups=[['startup','启动过程组'],['planning','规划过程组'],['execution','执行过程组'],['monitoring','监控过程组'],['closing','收尾过程组']];
+ var rows=groups.map(function(group){
+  var items=sources.filter(function(i){return D[i].p===group[0];});
+  return '<tr data-cr-group="'+group[0]+'"><td>'+group[1]+'</td><td>'+items.length+'</td><td>'+links(items)+'</td></tr>';
+ }).join('');
+ var executionExceptions=D.map(function(p,i){return p.p==='execution'&&sources.indexOf(i)===-1?i:-1;}).filter(function(i){return i>=0;});
+ holder.innerHTML='<h5>输出变更请求（'+sources.length+'个过程）</h5><div class="study-table-wrap"><table data-cr-sources><thead><tr><th>过程组</th><th>数量</th><th>过程</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<h5>相关过程</h5><div class="study-table-wrap"><table data-cr-related><thead><tr><th>事项</th><th>过程</th></tr></thead><tbody>'+
+  '<tr><td>执行组中不输出变更请求（'+executionExceptions.length+'个）</td><td>'+links(executionExceptions)+'</td></tr>'+
+  '<tr><td>输出批准的变更请求（'+approved.length+'个）</td><td>'+links(approved)+'</td></tr>'+
+  '<tr><td>批准的变更请求作为输入（'+receivers.length+'个）</td><td>'+links(receivers)+'</td></tr>'+
+  '</tbody></table></div>';
+}
+
+renderChangeRequestSources();
+['gl','glr'].forEach(function(id){linkStudyProcesses(document.getElementById(id));});
+</script>
+</body>
+</html>
